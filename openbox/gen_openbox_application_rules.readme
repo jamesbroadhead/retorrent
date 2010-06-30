@@ -1,0 +1,18 @@
+Script: gen_openbox_application_rules
+
+Function:
+Generate the XML for per-Application settings for openbox. Pulls WM_CLASS info from xprop.
+
+Prerequisites:
+which 
+xprop
+
+Usage: 
+Run, then click on the application window that you want to add to the openbox config file. The xml will be printed to stdout. 
+
+Bugs:
+Perhaps many, but none are likely to be critical. It works fine for me so far. (please report them!) 
+
+Future Work: (feel free to submit patches)
+- Interactive questions about the settings
+- Write directly to .config/openbox/rc.conf
