@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 # TODO : More testing. 
+# TODO : Combine into obconf (?)
 # TODO (Maybe) : Interactive 'which desktop' question
 # TODO (Less likely) : Interactive 'which options' questions
 import os
