@@ -6,3 +6,8 @@ Please submit Bug Reports if you use these and encounter any. Patches are always
 
 Coding Guidelines:
 	Generally laissez-faire, but I require 4-space-width TAB characters to be used for indentation
+
+Copyright and Licensing:
+	Unless otherwise noted, all code under this repository is:
+	Copyright 2009,2010 James Broadhead and Licenced under the GPL v3, as available on gnu.org.
+	If you require any of these tools for some purpose, and require them re-licensed, I am open to suggestions and offers. 
