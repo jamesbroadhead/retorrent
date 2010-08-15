@@ -1,0 +1,12 @@
+--- /usr/portage/app-misc/byobu/byobu-2.65-r1.ebuild	2010-03-27 09:18:14.000000000 +0000
++++ /usr/local/portage/app-misc/byobu/byobu-2.82.ebuild	2010-07-28 01:37:35.000000000 +0100
+@@ -7,8 +7,7 @@
+ PYTHON_DEPEND="2"
+ 
+ inherit eutils python
+-
+-MY_UBUNTU_RELEASE=lucid
++MY_UBUNTU_RELEASE=maverick
+ MY_UBUNTU_PLVL=1
+ MY_UBUNTU_P="${PV}-0ubuntu${MY_UBUNTU_PLVL}"
+ 

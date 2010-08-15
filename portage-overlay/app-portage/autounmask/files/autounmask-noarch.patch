@@ -1,0 +1,59 @@
+--- autounmask	2010-08-15 19:25:59.000000000 +0100
++++ autounmask-noarch	2010-08-15 19:22:13.000000000 +0100
+@@ -40,7 +40,6 @@
+ my ($p,$x,$r);
+ my @l			= ();
+ my $packageToUnmask	= '';
+-my $arch		= $pxs->getArch();
+ my @repos		= ();
+ my $isOk		= 0;
+ my %cmdOptions		= ();
+@@ -217,7 +216,7 @@
+ 			$p=$1;
+ 			
+ 			if ($p) {
+-				addToKeywords($p,'~'.$arch);
++				addToKeywords($p);
+ 				addToUnmask($p);
+ 				last if ($cmdOptions{'noversions'});
+ 			}
+@@ -227,7 +226,7 @@
+ 			$p=$1;
+ 			
+ 			if ($p) {
+-				addToKeywords($p,'~'.$arch);
++				addToKeywords($p);
+ 				addToUnmask($p);
+ 				last if ($cmdOptions{'noversions'});
+ 			}
+@@ -237,7 +236,7 @@
+ 			$p=$1;
+ 
+ 			if ($p) {
+-				addToKeywords($p,'~'.$arch);
++				addToKeywords($p);
+ 				last if ($cmdOptions{'noversions'});
+ 			}
+ 		}
+@@ -294,7 +293,7 @@
+ # - Subs >
+ sub addToKeywords {
+ 	my $p	= shift;
+-	my $k	= shift;
++#	my $k	= shift;
+ 	if ($cmdOptions{'noversions'}) {
+ 		$p=$pxs->getEbuildName($p);
+ 	}
+@@ -302,8 +301,10 @@
+ 		$p='='.$p;
+ 	}
+ 	open(FH,'>>'.$keywordsFile) or die('Cannot write to file: '.$keywordsFile);
+-	print FH $p." ".$k."\n";
+-	$pxs->print_ok("Added '".$p." ".$k."' to ".$keywordsFile."\n");
++	
++	print FH $p."\n";
++	
++	$pxs->print_ok("Added '".$p."' to ".$keywordsFile."\n");
+ 	close(FH);
+ 	return 1;
+ }
