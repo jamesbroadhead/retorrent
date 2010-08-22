@@ -2,76 +2,109 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
+# TODO LATER:
+# Create ebuilds for unpatched interpreters and package separately
+# 	games-engines/frotz interpreter is already in portage 
+# 	games-engines/frobtads is in portage, not sure if it can replace
+#			included tads2/tads3 interpreter. 
+
 EAPI=2
 
-inherit eutils games
+inherit eutils games versionator
 
-MY_PV="2008-12-25"
+# TODO: Better versioning, but currently need to keep 8-digit, \
+#		so it's >games-engines/gargoyle-20060917-r1, in portage
+MY_PV=${PV:0:4}-${PV:4:2}-${PV:6:2}
 MY_P=${PN}-${MY_PV}
+
 DESCRIPTION="An interactive fiction (IF) player supporting all major formats"
 HOMEPAGE="http://ccxvii.net/gargoyle/"
 SRC_URI="http://garglk.googlecode.com/files/${MY_P}-sources.zip"
 
-LICENSE="BSD"
+LICENSE="BSD gargoyle hugo luximono GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="sdl"
+IUSE="-debug -fmod sdl"
 
-RDEPEND=">=media-libs/freetype-2.1.9-r1
-	>=x11-libs/gtk+-2.10.6
-	>=dev-libs/glib-2.12.4-r1
-	>=media-libs/jpeg-6b-r5
-	>=media-libs/libpng-1.2.8
-	>=sys-libs/zlib-1.2.3
-	sdl? ( >=media-libs/sdl-mixer-1.2.7 >=media-libs/smpeg-0.4.4 >=media-libs/libvorbis-1.2.0 )"
+RDEPEND="dev-libs/glib:2
+	media-libs/freetype:2
+	media-libs/jpeg
+	media-libs/libpng
+	sys-libs/zlib
+	x11-libs/gtk+:2
+	fmod? ( media-libs/fmod )
+	sdl? (
+		media-libs/libvorbis
+		media-libs/sdl-mixer
+		media-libs/smpeg
+	)"
 
 DEPEND="${RDEPEND}
-	dev-util/ftjam
-	app-arch/unzip"
+	app-arch/unzip
+	dev-util/ftjam"
 
 src_prepare() {
-	epatch "${FILESDIR}/${P}-glk.h-patch"
-	epatch "${FILESDIR}/${P}-getline-patch"
+	# TODO: File upstream bug to remove hardcoded path
+	sed -i -e 's|/etc|${GAMES_SYSCONFDIR}|' garglk/config.c || die
 
-	# Fix file locations:
-	sed -e "s|/usr/share/gargoyle/bin|${GAMES_PREFIX}/libexec/gargoyle|g" -i garglk/launcher.sh || die
-	sed -e "s|/etc|${GAMES_SYSCONFDIR}|" -i garglk/config.c || die
+	# TODO: Clean this up 
+	if use debug ; then
+		JAMARGS="-sBUILD=DEBUG"
+		OPTIMold="OPTIM = -g ;"
+		OPTIMnew="OPTIM = -g "
+	else 
+		JAMARGS=""	
+		OPTIMold="OPTIM = -O2 ;"
+		OPTIMnew="OPTIM = "
+	fi
+	
+	# Enable custom cflags
+	OPTIMnew="$OPTIMnew $CFLAGS ;"
+	sed -i -e s/"$OPTIMold"/"$OPTIMnew"/ Jamrules || die
 
-	# Convert Windows newlines in ini file:
+	# FMOD is disabled by default
+	if use fmod ; then
+		JAMARGS="$JAMARGS -sUSEFMOD=yes"	
+	fi
+	# SDL is enabled by default
+	if ! use sdl; then
+		JAMARGS="$JAMARGS -sUSESDL=no"	
+	fi
+	
 	edos2unix garglk/garglk.ini
 
-	if ! use sdl; then
-		sed -i -e 's/USESDL = yes ;/# USESDL = yes ;/' Jamrules || die
-	fi
+	INTERPRETERS=(advsys agility alan2 alan3 frotz geas git glulxe hugo 
+			jacl level9 magnetic nitfol scare tadsr)
 
-	# Allow custom CFLAGS to be used instead of just -O2:
-	sed -i -e "s/-O2/${CFLAGS}/" Jamrules || die
+	for interpreter in ${INTERPRETERS[@]} ; do
+		echo Parsing $interpreter	
+		sed -i -e s/"${interpreter}"/"gargoyle-${interpreter}"/ \
+			garglk/launcher.sh	|| die
+	done
+		
 }
 
 src_compile() {
-	jam || die
-	jam install || die
+	jam $JAMARGS || die
 }
 
 src_install() {
-	dodoc License.txt licenses/* || die
+	jam install || die
 
 	insinto "${GAMES_SYSCONFDIR}"
 	newins garglk/garglk.ini garglk.ini || die
 
-	cd build/dist
+	cd build/dist || die
 	dogameslib libgarglk.so || die
-	dogamesbin gargoyle || die
 
-	insinto "${GAMES_PREFIX}/libexec/gargoyle"
+	insinto "${GAMES_PREFIX}/libexec/${PN}"
 	insopts -m0755
 
-	local terp
-	for terp in advsys agility alan2 alan3 frotz geas git glulxe hugo \
-				jacl level9 magnetic nitfol scare tadsr
-	do
-		doins "${terp}" || die
-		dosym "${GAMES_PREFIX}/libexec/gargoyle/${terp}" "${GAMES_BINDIR}/gargoyle-${terp}" || die
+	for interpreter in ${INTERPRETERS[@]} ; do
+		doins ${interpreter} || die
+		dosym "${GAMES_PREFIX}/libexec/${PN}/${interpreter}" \
+			"${GAMES_BINDIR}/${PN}-${interpreter}" || die
 	done
 
+	dogamesbin gargoyle || die
 }
