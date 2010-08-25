@@ -1,6 +1,8 @@
-# Copyright 1999-2009 Gentoo Foundation
+# Copyright 1999-2010 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-crypt/truecrypt/truecrypt-6.3a.ebuild,v 1.2 2009/12/27 08:54:08 josejx Exp $
+# $Header: $
+
+# from bug #329075 
 
 EAPI="2"
 
@@ -10,7 +12,7 @@ DESCRIPTION="Free open-source disk encryption software"
 HOMEPAGE="http://www.truecrypt.org/"
 SRC_URI="${P}.tar.gz"
 
-LICENSE="truecrypt-2.8"
+LICENSE="truecrypt-3.0"
 SLOT="0"
 KEYWORDS="~amd64 ~ppc ~x86"
 IUSE="X"
@@ -33,7 +35,7 @@ pkg_nofetch() {
 }
 
 pkg_setup() {
-	local CONFIG_CHECK="~BLK_DEV_DM ~DM_CRYPT ~FUSE_FS ~CRYPTO"
+	local CONFIG_CHECK="~BLK_DEV_DM ~DM_CRYPT ~FUSE_FS ~CRYPTO ~CRYPTO_XTS"
 	linux-info_pkg_setup
 
 	local WX_GTK_VER="2.8"
@@ -87,21 +89,13 @@ src_test() {
 src_install() {
 	dobin Main/truecrypt
 	dodoc Readme.txt "Release/Setup Files/TrueCrypt User Guide.pdf"
-	insinto "/$(get_libdir)/rcscripts/addons"
-	newins "${FILESDIR}/${PN}-stop.sh" "${PN}-stop.sh"
+	exeinto "/$(get_libdir)/rcscripts/addons"
+	newexe "${FILESDIR}/${PN}-stop.sh" "${PN}-stop.sh"
 }
 
 pkg_postinst() {
-	warn_license
-}
-pkg_preinst() {
-	warn_license
-}
-
-warn_license() {
 	ewarn "TrueCrypt has very restrictive license."
 	ewarn "Please read the ${LICENSE} license in ${PORTDIR}/licenses"
 	ewarn "directory before using TrueCrypt. Please be explicitly aware of"
 	ewarn "the limitations on redistribution of binaries or modified source."
-	ebeep 5
 }
