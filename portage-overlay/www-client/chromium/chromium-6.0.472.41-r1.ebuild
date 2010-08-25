@@ -65,10 +65,6 @@ src_prepare() {
 	# Add Gentoo plugin paths.
 	epatch "${FILESDIR}"/${PN}-plugins-path-r0.patch
 
-	# Fix a renderer crash, bug #331661. This is a backport
-	# of the upstream patch.
-	epatch "${FILESDIR}"/${PN}-yuv-crash-r0.patch
-
 	# Fix mousescroll bug
 	epatch "${FILESDIR}"/${PN}-mousescroll.patch	
 
