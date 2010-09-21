@@ -44,5 +44,5 @@ src_configure() {
 src_install() {
 	emake DESTDIR="${D}" install || die
 
-	dodoc AUTHORS INSTALL README || die
+	dodoc AUTHORS README || die
 }
