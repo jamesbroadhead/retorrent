@@ -1,0 +1,27 @@
+# example for a full Qt metadata.xml file
+
+<pkgmetadata>
+<herd>qt</herd>
+#maintainer tags should be filled by the Gentoo Developer
+<maintainer>
+     <email>hwoarang@gentoo.org</email>
+     <name>Markos Chandras</email>
+     <description>Proxy maintainer. CC him on bugs</description>
+</maintainer>
+#proxy maintainer information (your personal details)
+<maintainer>
+     <email>foo@bar.org</email>
+     <name> John Larsen</name>
+     <description>Maintainer. Assign bugs to him</description>
+</maintainer>
+<upstream>
+     <maintainer>
+          <name>Mark Huge</name>
+          <email>mark@huge.org</email>
+     </maintainer>
+          <changelog>http://huge.org/ChangeLog</changelog>
+          <doc>http://huge.org/help</doc>
+          <bugs-to>http://tracker.huge.org</bugs-to>
+          <remote-id type="sourceforge">foobar</remote-id>
+</upstream>
+</pkgmetadata>
