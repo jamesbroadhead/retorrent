@@ -26,6 +26,8 @@ RDEPEND="
 DEPEND="${RDEPEND}"
 
 src_configure() {
+	epatch "${FILESDIR}"/kid3-id3form-understandability.patch
+	
 	# -DWITH_TUNEPIMP is using deprecated RDF WebService
 	# -DWITH_KDE=OFF doesn't compile, last checked 1.4
 
