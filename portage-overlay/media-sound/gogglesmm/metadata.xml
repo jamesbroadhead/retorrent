@@ -2,10 +2,11 @@
 <!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
 	<herd>sound</herd>
-
+	<longdescription>Lightweight FOX music collection manager and player</longdescription> 
+	
 	<maintainer>
 		<email>jamesbroadhead@gmail.com</email>
-		<name>James Broadhead</email>
+		<name>James Broadhead</name>
 		<description>Proxy maintainer. CC him on bugs</description>
 	</maintainer>
 
@@ -14,8 +15,17 @@
 		<name> John Larsen</name>
 		<description>Maintainer. Assign bugs to him</description>
 	</maintainer>
+	
+	<upstream>
+		<maintainer>
+			<email>gogglesmm@googlegroups.com</email>
+			<name>Sander Jansen</name>
+		</maintainer>
+		<changelog>http://code.google.com/p/gogglesmm/wiki/ChangeLog</changelog>
+		<doc>http://code.google.com/p/gogglesmm/w/list</doc>
+		<bugs-to>http://code.google.com/p/gogglesmm/issues/list</bugs-to>
+	</upstream>
 
-	<longdescription>Lightweight FOX music collection manager and player</longdescription> 
 	<use>
 		<flag name='asf'>
 			Provide support for Microsoft's Advanced Systems Format media container

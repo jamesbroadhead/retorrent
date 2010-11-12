@@ -1,94 +1,49 @@
---- id3form.cpp	2010-11-09 20:30:09.000000000 +0000
-+++ id3formv2.cpp	2010-11-09 20:28:58.000000000 +0000
-@@ -273,14 +273,14 @@
- 	fileLayout->setMargin(margin);
- 	fileLayout->setSpacing(spacing);
- 
+--- /main/checkouts/kid3/kid3/id3form.cpp	2010-11-12 16:17:37.000000000 +0000
++++ /main/checkouts/kid3/kid3/id3formv2.cpp	2010-11-09 20:28:58.000000000 +0000
+@@ -276 +276 @@
 -	m_nameLabel = new QLabel(i18n("Name:"), m_fileWidget);
 +	m_nameLabel = new QLabel(i18n("Filename:"), m_fileWidget);
- 	fileLayout->addWidget(m_nameLabel, 0, 0);
- 
- 	m_nameLineEdit = new QLineEdit(m_fileWidget);
- 	fileLayout->addWidget(m_nameLineEdit, 0, 1, 1, 4);
- 	m_fileLabel->setBuddy(m_nameLineEdit);
- 
+@@ -283 +283 @@
 -	QLabel* formatLabel = new QLabel(i18n("Format:") + QChar(0x2191),
 +	QLabel* formatLabel = new QLabel(i18n("Set Filename from Tags:"),
- 	                                 m_fileWidget);
- 	fileLayout->addWidget(formatLabel, 1, 0);
- 
-@@ -291,14 +291,12 @@
- 	m_formatComboBox->setToolTip(FrameFormatReplacer::getToolTip());
- 	fileLayout->addWidget(m_formatComboBox, 1, 1);
- 
+@@ -294,3 +294 @@
 -	QLabel* fromTagLabel = new QLabel(i18n("From:"), m_fileWidget);
 -	fileLayout->addWidget(fromTagLabel, 1, 2);
 -	m_fnV1Button = new QPushButton(i18n("Tag 1"), m_fileWidget);
 +	m_fnV1Button = new QPushButton(i18n("from Tag 1"), m_fileWidget);
- 	fileLayout->addWidget(m_fnV1Button, 1, 3);
+@@ -298 +296 @@
 -	QPushButton* fnV2Button = new QPushButton(i18n("Tag 2"), m_fileWidget);
 +	QPushButton* fnV2Button = new QPushButton(i18n("from Tag 2"), m_fileWidget);
- 	fileLayout->addWidget(fnV2Button, 1, 4);
- 
+@@ -301 +299 @@
 -	QLabel* formatFromFilenameLabel = new QLabel(i18n("Format:") + QChar(0x2193),
 +	QLabel* formatFromFilenameLabel = new QLabel(i18n("Set Tags from Filename:"), 
- 	                                             m_fileWidget);
- 	fileLayout->addWidget(formatFromFilenameLabel, 2, 0);
- 
-@@ -309,13 +307,11 @@
- 	m_formatFromFilenameComboBox->setToolTip(FrameFormatReplacer::getToolTip());
- 	fileLayout->addWidget(m_formatFromFilenameComboBox, 2, 1);
- 
+@@ -312,2 +309,0 @@
 -	QLabel* toTagLabel = new QLabel(i18n("To:"), m_fileWidget);
 -	fileLayout->addWidget(toTagLabel, 2, 2);
- 	m_toTagV1Button =
+@@ -315 +311 @@
 -		new QPushButton(i18n("Tag 1"), m_fileWidget);
 +		new QPushButton(i18n("to Tag 1"), m_fileWidget);
- 	fileLayout->addWidget(m_toTagV1Button, 2, 3);
- 	QPushButton* toTagV2Button =
+@@ -318 +314 @@
 -		new QPushButton(i18n("Tag 2"), m_fileWidget);
 +		new QPushButton(i18n("to Tag 2"), m_fileWidget);
- 	fileLayout->addWidget(toTagV2Button, 2, 4);
- 
- 	m_tag1Button = new QToolButton(m_rightHalfVBox);
-@@ -448,7 +444,7 @@
- 	fileLayout->addMultiCellWidget(m_nameLineEdit, 0, 0, 1, 4);
- 	m_fileLabel->setBuddy(m_nameLineEdit);
- 
+@@ -451 +447 @@
 -	QLabel* formatLabel = new QLabel(i18n("Format:") + QChar(0x2191),
 +	QLabel* formatLabel = new QLabel(i18n("Set Filename from Tags:"),
- 	                                 m_fileWidget);
- 	fileLayout->addWidget(formatLabel, 1, 0);
- 
-@@ -459,12 +455,10 @@
- 	QToolTip::add(m_formatComboBox, FrameFormatReplacer::getToolTip());
- 	fileLayout->addWidget(m_formatComboBox, 1, 1);
- 
+@@ -462,2 +457,0 @@
 -	QLabel* fromTagLabel = new QLabel(i18n("From:"), m_fileWidget);
 -	fileLayout->addWidget(fromTagLabel, 1, 2);
- 	m_fnV1Button = new QPushButton(i18n("Tag 1"), m_fileWidget);
+@@ -465 +459 @@
 -	fileLayout->addWidget(m_fnV1Button, 1, 3);
 +	fileLayout->addWidget(m_fnV1Button, 1, 2);
- 	QPushButton* fnV2Button = new QPushButton(i18n("Tag 2"), m_fileWidget);
+@@ -467 +461 @@
 -	fileLayout->addWidget(fnV2Button, 1, 4);
 +	fileLayout->addWidget(fnV2Button, 1, 3);
- 
- 	QLabel* formatFromFilenameLabel = new QLabel(i18n("Format:") + QChar(0x2193),
- 	                                             m_fileWidget);
-@@ -477,14 +471,12 @@
- 	QToolTip::add(m_formatFromFilenameComboBox, FrameFormatReplacer::getToolTip());
- 	fileLayout->addWidget(m_formatFromFilenameComboBox, 2, 1);
- 
+@@ -480,2 +473,0 @@
 -	QLabel* toTagLabel = new QLabel(i18n("To:"), m_fileWidget);
 -	fileLayout->addWidget(toTagLabel, 2, 2);
- 	m_toTagV1Button =
- 		new QPushButton(i18n("Tag 1"), m_fileWidget);
+@@ -484 +476 @@
 -	fileLayout->addWidget(m_toTagV1Button, 2, 3);
 +	fileLayout->addWidget(m_toTagV1Button, 2, 2);
- 	QPushButton* toTagV2Button =
- 		new QPushButton(i18n("Tag 2"), m_fileWidget);
+@@ -487 +479 @@
 -	fileLayout->addWidget(toTagV2Button, 2, 4);
 +	fileLayout->addWidget(toTagV2Button, 2, 3);
- 
- 	m_tag1Button = new QToolButton(m_rightHalfVBox);
- 	m_tag1Button->setIconSet(*s_collapsePixmap);
