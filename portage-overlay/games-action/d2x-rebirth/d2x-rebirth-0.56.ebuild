@@ -16,9 +16,8 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE="debug ipv6 linguas_de music opengl"
 
-DEPEND="app-arch/unzip
-	dev-games/physfs[hog,mvl,zip]
-	media-libs/libsdl[audio,opendl?,video]
+DEPEND="dev-games/physfs[hog,mvl,zip]
+	media-libs/libsdl[audio,opengl?,video]
 	media-libs/sdl-mixer
 	opengl? ( virtual/opengl virtual/glu )"
 RDEPEND="${DEPEND}
@@ -27,6 +26,12 @@ RDEPEND="${DEPEND}
 
 S=${WORKDIR}/${PN}_v${PV}-src
 
+src_prepare() {
+	# Patch to fix compile warnings / errors -- probably not needed 0.57+
+	# http://dxx-rebirth.bzr.sourceforge.net/bzr/dxx-rebirth/d2x-rebirth/revision/923	
+	epatch "${FILESDIR}"/${P}-printf-fix.patch || die
+}
+
 src_compile() {
 	scons ${MAKEOPTS} \
 		verbosebuild=1 \
@@ -34,7 +39,7 @@ src_compile() {
 		sdlmixer=1 \
 		$(use_scons debug) \
 		$(use_scons !opengl sdl_only) \
-		$(use_scons ipv6)
+		$(use_scons ipv6) \
 		|| die
 }
 
@@ -44,16 +49,16 @@ src_install() {
 
 	# These zip files do not need to be extracted
 	insinto "${GAMES_DATADIR}/d2x"
-	use linguas_de && doins "${DISTDIR}"/d2xr-briefings-ger.zip
-	use music && doins "${DISTDIR}"/d2xr-sc55-music.zip
+	use linguas_de && doins "${DISTDIR}"/d2xr-briefings-ger.zip || die
+	use music && doins "${DISTDIR}"/d2xr-sc55-music.zip || die
 	doicon ${PN}.xpm
 
 	if use opengl ; then
-		newgamesbin d2x-rebirth-gl d2x-rebirth
+		newgamesbin d2x-rebirth-gl d2x-rebirth || die
 	else
-		newgamesbin d2x-rebirth-sdl d2x-rebirth
+		newgamesbin d2x-rebirth-sdl d2x-rebirth || die
 	fi
-	make_desktop_entry d2x-rebirth "Descent 2 Rebirth" ${PN}
+	make_desktop_entry d2x-rebirth "Descent 2 Rebirth" ${PN} || die
 	prepgamesdirs
 }
 
