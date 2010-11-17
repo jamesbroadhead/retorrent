@@ -23,11 +23,10 @@ RDEPEND="opengl? ( virtual/opengl virtual/glu )
 	dev-games/physfs[hog,zip]
 	media-libs/libsdl[audio,opengl?,video]
 	media-libs/sdl-mixer
-	cdinstall? ( games-action/descent1-data )
-	!cdinstall? ( games-action/descent1-demodata )"
-
-DEPEND="${RDEPEND}
-	app-arch/unzip"
+	cdinstall? ( games-action/descent1-data )"
+# D1X-Rebirth currently crashes on quit with the demo data.
+# http://dxx-rebirth.com/frm/showthread.php?tid=782
+#	!cdinstall? ( games-action/descent1-demodata )"
 
 S=${WORKDIR}/${PN}_v${PV}-src
 
@@ -48,32 +47,43 @@ src_compile() {
 
 src_install() {
 	edos2unix INSTALL.txt README.txt
-	dodoc INSTALL.txt README.txt
+	dodoc INSTALL.txt README.txt || die
 
 	insinto "${GAMES_DATADIR}/d1x"
 
 	# these zip files don't need to be extracted
-	use applecd && 	doins "${DISTDIR}"/d1xr-briefings-ger.zip
-	use linguas_de && doins "${DISTDIR}"/d1xr-briefings-ger.zip
-	use hires && doins "${DISTDIR}"/d1xr-hires.zip
-	use music && doins "${DISTDIR}"/d1xr-sc55-music.zip
+	if use applecd ; then
+		doins "${DISTDIR}"/d1xr-mac-sounds.zip || die
+	fi 
+	
+	if use linguas_de ; then
+		doins "${DISTDIR}"/d1xr-briefings-ger.zip || die
+	fi		
+	
+	if use hires ; then
+		doins "${DISTDIR}"/d1xr-hires.zip || die
+	fi
+	
+	if use music ; then
+		doins "${DISTDIR}"/d1xr-sc55-music.zip || die
+	fi
 
-	doicon "${WORKDIR}/${PN}.xpm"
+	doicon "${S}/${PN}.xpm" || die
 
 	if use opengl ; then
-		newgamesbin d${DV}x-rebirth-gl d${DV}x-rebirth
+		newgamesbin d1x-rebirth-gl d1x-rebirth || die
 	else
-		newgamesbin d${DV}x-rebirth-sdl d${DV}x-rebirth
+		newgamesbin d1x-rebirth-sdl d1x-rebirth || die
 	fi
-	make_desktop_entry d${DV}x-rebirth "Descent ${DV} Rebirth"
-	prepgamesdirs
+	make_desktop_entry d1x-rebirth "Descent 1 Rebirth" || die
+	prepgamesdirs || die
 }
 
 pkg_postinst() {
 	games_pkg_postinst
 	if ! use cdinstall ; then
 		echo
-		elog "Demo installed. To play the full game, you need to copy data"
+		elog "To play the full game, you need to copy data"
 		elog "files from an original Descent installation to:"
 		elog "${GAMES_DATADIR}/d1x. Mount the CD and merge:"
 		elog "games-action/descent1-data or read "
