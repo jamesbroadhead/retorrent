@@ -21,12 +21,12 @@ DEPEND="!games-action/descent1-demodata"
 S=${WORKDIR}
 
 src_unpack() {
-	echo	
+	echo
 	einfo "If you bought the game via digital download, put the files "
 	einfo "in a directory called descent/ and set CD_ROOT to its parent"
-	einfo "eg. /home/foo/descent/descent.hog " 
+	einfo "eg. /home/foo/descent/descent.hog "
 	einfo " >> CD_ROOT=/home/foo emerge descent1-data"
-	echo	
+	echo
 	cdrom_get_cds "descent/descent.hog"
 	CDROM_DIR="${CDROM_ROOT}/descent"
 

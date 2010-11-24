@@ -54,16 +54,16 @@ src_install() {
 	# these zip files don't need to be extracted
 	if use applecd ; then
 		doins "${DISTDIR}"/d1xr-mac-sounds.zip || die
-	fi 
-	
+	fi
+
 	if use linguas_de ; then
 		doins "${DISTDIR}"/d1xr-briefings-ger.zip || die
-	fi		
-	
+	fi
+
 	if use hires ; then
 		doins "${DISTDIR}"/d1xr-hires.zip || die
 	fi
-	
+
 	if use music ; then
 		doins "${DISTDIR}"/d1xr-sc55-music.zip || die
 	fi
