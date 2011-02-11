@@ -14,7 +14,7 @@ SRC_URI="mirror://sourceforge/dxx-rebirth/${PN}_v${PV}-src.tar.gz
 LICENSE="D1X GPL-2 as-is"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="debug ipv6 linguas_de music opengl"
+IUSE="cdinstall debug ipv6 linguas_de music opengl"
 
 DEPEND="dev-games/physfs[hog,mvl,zip]
 	media-libs/libsdl[audio,opengl?,video]
