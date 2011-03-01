@@ -33,8 +33,5 @@
 		<flag name='gcrypt'>
 			Use gcrypt for md5 calculation instead of the internal implementation	
 		</flag>
-		<flag name='old-miniplayer'>
-			Build the old mini-player instead of the new one
-		</flag>
 	</use>
 </pkgmetadata>

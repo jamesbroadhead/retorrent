@@ -11,7 +11,7 @@ SRC_URI="http://${PN}.googlecode.com/files/${P}.tar.bz2"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="asf dbus gcrypt mp4 old-miniplayer"
+IUSE="asf dbus gcrypt mp4"
 
 RDEPEND="dev-db/sqlite:3
 	>=media-libs/taglib-1.6.3[asf?,mp4?]
@@ -33,10 +33,8 @@ src_configure() {
 		extraconf="--with-md5=internal"
 	fi
 
-	# using old-miniplayer as USE flag, as the 'new remote' is not remote
 	econf $extraconf \
-		$(use_with dbus) \
-		$(use_with !old-miniplayer new-remote)
+		$(use_with dbus)
 }
 
 src_install() {
