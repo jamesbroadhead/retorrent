@@ -1,6 +1,9 @@
 # ChangeLog for media-sound/kid3
 # Copyright 1999-2010 Gentoo Foundation; Distributed under the GPL v2
 # $Header: /var/cvsroot/gentoo-x86/media-sound/kid3/ChangeLog,v 1.52 2010/07/21 13:03:05 fauli Exp $
+  
+  13 Mar 2011; James Broadhead <jamesbroadhead@gmail.com> kid3-1.6.ebuild:
+  -DWITH_KDE=OFF now works, extended comment about Tunepimp w. link upstream, renamed vorbis USEflag to ogg in line with the flag description (ogg for container, vorbis for codec), cmake flags are case sensitive, fixed. Bug #357207
 
   21 Jul 2010; Christian Faulhammer <fauli@gentoo.org> kid3-1.4.ebuild:
   stable x86, bug 325935
