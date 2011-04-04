@@ -1,0 +1,82 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+ifneq ($(filter hardy lenny,$(shell lsb_release -cs)),)
+PACKAGE_MAKEFILES = kid3-kde3.mk kid3-qt3.mk
+else
+PACKAGE_MAKEFILES = kid3-kde4.mk kid3-qt4.mk
+endif
+
+DEBVERSION:=$(shell head -n 1 debian/changelog \
+                    | sed -e 's/^[^(]*(\([^)]*\)).*/\1/')
+UPVERSION:=$(shell echo $(DEBVERSION) | sed -e 's/^.*://' -e 's/-[0-9.]*$$//' -e 's/.dfsg$$//')
+
+FILENAME := kid3_$(UPVERSION).orig.tar.gz
+UPFILENAME := kid3-$(UPVERSION).tar.gz
+URL = http://heanet.dl.sourceforge.net/kid3/$(UPFILENAME)
+
+ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -g
+endif
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+	INSTALL_PROGRAM += -s
+endif
+		
+build: build-stamp
+	
+build-stamp:
+	dh_testdir
+
+	for p in $(PACKAGE_MAKEFILES); do $(MAKE) -f debian/$$p build; done
+
+	touch build-stamp
+
+clean: 
+	dh_testdir
+	dh_testroot
+
+	for p in $(PACKAGE_MAKEFILES); do $(MAKE) -f debian/$$p clean; done
+
+	-rm -f *-stamp
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	for p in $(PACKAGE_MAKEFILES); do $(MAKE) -f debian/$$p install; done
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installdocs -A AUTHORS NEWS README
+	dh_installmenu
+	dh_installman
+#	dh_installinfo
+	dh_installchangelogs ChangeLog
+	dh_icons
+	dh_desktop
+	dh_link
+	dh_strip
+	dh_compress --exclude=.docbook
+	dh_fixperms
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install
+
+get-orig-source:
+	@@dh_testdir
+	@@[ -d ../tarballs/. ]||mkdir -p ../tarballs
+	@@echo Downloading $(UPFILENAME) from $(URL) ...
+	@@wget -N -nv -T10 -t3 -O ../tarballs/$(FILENAME) $(URL)

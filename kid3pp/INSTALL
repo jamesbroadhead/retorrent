@@ -1,0 +1,89 @@
+* TO INSTALL
+** Requirements
+
+Qt, optional KDE, id3lib, TagLib, libogg, libvorbis, libvorbisfile, libFLAC++,
+libFLAC, libtunepimp, mp4v2.
+
+** Linux
+
+*** Compile for KDE 4
+
+cmake .
+make
+make install
+
+If KDE 4 is installed in its own tree (e.g. on Kubuntu before 8.10),
+set the prefix with the -D option, e.g.
+cmake -DCMAKE_INSTALL_PREFIX=/usr/lib/kde4/ .
+
+*** Compile for KDE 3
+
+# if configure does not exist: make -f Makefile.cvs
+
+./configure
+# for SuSE use option --prefix=/opt/kde3
+# for Debian use option --prefix=/usr
+make
+make install
+
+The install directory can be assigned to DESTDIR
+
+*** Compile for Qt 4 (no KDE)
+
+cd kid3-qt
+
+# if configure does not exist: autoconf
+
+./configure --with-qmake=qmake-qt4
+make
+make install
+
+The install directory can be assigned to INSTALL_ROOT
+
+*** Compile for Qt 3
+
+cd kid3-qt
+./configure --with-qmake=qmake-qt3
+make
+make install
+
+*** Create Debian Packages
+
+Make sure that you have installed all packages listed in deb/control,
+section Build-Depends.
+
+./build-deb.sh
+
+*** Create RPM Package
+
+Copy kid3.spec into the SPEC directory
+and the tar.gz archive into the SOURCES directory.
+
+rpmbuild -ba kid3.spec
+
+
+** Windows
+
+ - Install Qt/Windows Open Source Edition, MinGW and MSYS
+ - Compile and install the libraries with MinGW and MSYS: id3lib, libvorbis,
+   libogg, FLAC, TagLib using the script buildlibs.sh
+ - Install xsltproc and an XSL stylesheet to transform Docbook to HTML
+   (http://sourceforge.net/projects/docbook)
+ - Point environment variables to the installed programs:
+   * %MSYSDIR%\bin\perl
+   * %XSLTPROCDIR%\xsltproc
+   * %DOCBOOKDIR%\html\docbook.xsl
+ - start win32/buildkid3.bat to build, then createpkg.bat to create a
+   ZIP-file
+
+
+** Mac OS X
+
+ - Install Qt libraries for Mac and XCode
+ - Compile and install the libraries id3lib, libvorbis,
+   libogg, FLAC, TagLib using the script buildlibs.sh
+ - Install xsltproc and an XSL stylesheet to transform Docbook to HTML
+   (http://sourceforge.net/projects/docbook) in
+   $HOME/docbook-xsl-1.72.0/html/docbook.xsl
+ - start macosx/buildkid3.sh to build, then createpkg.sh to create a
+   dmg image
