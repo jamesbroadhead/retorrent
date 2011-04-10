@@ -45,13 +45,19 @@ src_compile() {
 
 src_install() {
 	edos2unix INSTALL.txt README.txt
-	dodoc INSTALL.txt README.txt
+	dodoc INSTALL.txt README.txt || die
 
 	# These zip files do not need to be extracted
 	insinto "${GAMES_DATADIR}/d2x"
-	use linguas_de && doins "${DISTDIR}"/d2xr-briefings-ger.zip || die
-	use music && doins "${DISTDIR}"/d2xr-sc55-music.zip || die
-	doicon ${PN}.xpm
+
+	if use linguas_de ; then
+		doins "${DISTDIR}"/d2xr-briefings-ger.zip || die
+	fi
+	if use music ; then
+		doins "${DISTDIR}"/d2xr-sc55-music.zip || die
+	fi
+
+	doicon ${PN}.xpm || die
 
 	if use opengl ; then
 		newgamesbin d2x-rebirth-gl d2x-rebirth || die
