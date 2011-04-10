@@ -1,4 +1,4 @@
-# Copyright 1999-2010 Gentoo Foundation
+# Copyright 1999-2011 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
@@ -27,7 +27,7 @@ RDEPEND="${DEPEND}
 S=${WORKDIR}/${PN}_v${PV}-src
 
 src_prepare() {
-	# Patch to fix compile warnings / errors -- probably not needed 0.57+
+	# Patch in upstream vcs, won't be needed once 0.57 is released
 	# http://dxx-rebirth.bzr.sourceforge.net/bzr/dxx-rebirth/d2x-rebirth/revision/923	
 	epatch "${FILESDIR}"/${P}-printf-fix.patch || die
 }
@@ -72,8 +72,13 @@ pkg_postinst() {
 	games_pkg_postinst
 	if ! use cdinstall ; then
 		elog "The Descent 2 Demo data has been installed."
-		elog "To play the full game enable USE=cdinstall or manually copy "
+		elog "To play the full game enable USE=\"cdinstall\" or manually copy "
 		elog "the files to ${GAMES_DATADIR}/d2x."
 		elog "Read /usr/share/doc/${PF}/INSTALL.txt for details."
+	fi
+
+	if use music ; then
+		einfo "Please note, the music is disabled by default."
+		einfo "You can switch it on using the in-game menus"
 	fi
 }

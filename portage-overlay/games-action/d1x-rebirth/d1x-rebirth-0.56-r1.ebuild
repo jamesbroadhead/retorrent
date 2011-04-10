@@ -1,4 +1,4 @@
-# Copyright 1999-2010 Gentoo Foundation
+# Copyright 1999-2011 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: /var/cvsroot/gentoo-x86/games-action/d1x-rebirth/d1x-rebirth-0.56.ebuild,v 1.1 2010/10/14 04:17:02 mr_bones_ Exp $
 
@@ -26,6 +26,7 @@ RDEPEND="opengl? ( virtual/opengl virtual/glu )
 	cdinstall? ( games-action/descent1-data )"
 # D1X-Rebirth currently crashes on quit with the demo data.
 # http://dxx-rebirth.com/frm/showthread.php?tid=782
+# Remember to remove the warning in postinst too.
 #	!cdinstall? ( games-action/descent1-demodata )"
 
 S=${WORKDIR}/${PN}_v${PV}-src
@@ -82,12 +83,19 @@ src_install() {
 pkg_postinst() {
 	games_pkg_postinst
 	if ! use cdinstall ; then
-		echo
-		elog "To play the full game, you need to copy data"
-		elog "files from an original Descent installation to:"
-		elog "${GAMES_DATADIR}/d1x. Mount the CD and merge:"
-		elog "games-action/descent1-data or read "
+		elog
+		elog "d1x-rebirth doesn't currently work with descent-demodata,"
+		elog "see http://dxx-rebirth.com/frm/showthread.php?tid=782 for details"
+		elog
+		elog "To play the full game, you need to copy data files from an "
+		elog "original Descent installation to: ${GAMES_DATADIR}/d1x. "
+		elog "Mount the CD and merge: games-action/descent1-data or read "
 		elog "/usr/share/doc/${PF}/INSTALL.txt for more info."
-		echo
+		elog
+	fi
+
+	if use music ; then
+		einfo "Please note, the music is disabled by default."
+		einfo "You can switch it on using the in-game menus"
 	fi
 }
