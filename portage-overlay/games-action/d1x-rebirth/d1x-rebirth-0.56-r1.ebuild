@@ -23,16 +23,17 @@ RDEPEND="opengl? ( virtual/opengl virtual/glu )
 	dev-games/physfs[hog,zip]
 	media-libs/libsdl[audio,opengl?,video]
 	media-libs/sdl-mixer
-	cdinstall? ( games-action/descent1-data )"
-# D1X-Rebirth currently crashes on quit with the demo data.
-# http://dxx-rebirth.com/frm/showthread.php?tid=782
-# Remember to remove the warning in postinst too.
-#	!cdinstall? ( games-action/descent1-demodata )"
+	cdinstall? ( games-action/descent1-data )
+	!cdinstall? ( games-action/descent1-demodata )"
 
 S=${WORKDIR}/${PN}_v${PV}-src
 
 src_prepare() {
 	sed -i -e "/lflags = /s/$/ + env['LINKFLAGS']/" SConstruct || die
+
+	# Patch from upstream. Will be included in 0.57
+	# http://dxx-rebirth.com/frm/showthread.php?tid=782
+	epatch "${FILESDIR}/d1x-rebirth-demodata.patch"
 }
 
 src_compile() {
@@ -83,9 +84,6 @@ src_install() {
 pkg_postinst() {
 	games_pkg_postinst
 	if ! use cdinstall ; then
-		elog
-		elog "d1x-rebirth doesn't currently work with descent-demodata,"
-		elog "see http://dxx-rebirth.com/frm/showthread.php?tid=782 for details"
 		elog
 		elog "To play the full game, you need to copy data files from an "
 		elog "original Descent installation to: ${GAMES_DATADIR}/d1x. "
