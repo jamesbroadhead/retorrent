@@ -1,0 +1,16 @@
+--- revdep-rebuild	2011-04-24 20:43:58.761000032 +0200
++++ revdep-rebuild-cachedir	2011-04-24 20:28:20.689000031 +0200
+@@ -549,9 +549,10 @@
+ 	local new_env
+ 	local old_env
+ 	local uid=$(python -c 'import os; import pwd; print pwd.getpwuid(os.getuid())[0]')
+-	# Find a place to put temporary files
+-	if [[ "$uid" == "root" ]]; then
+-		local tmp_target="/var/cache/${APP_NAME}"
++	# Find a place to put temporary files 
++	local proposed_target="/var/cache/${APP_NAME}"
++	if [[ "$uid" == "root" ]] && [[ -d $proposed_target ]] ; then
++		local tmp_target=$proposed_target
+ 	else
+ 		local tmp_target="$(mktemp -d -t revdep-rebuild.XXXXXXXXXX)"
+ 	fi

@@ -1,0 +1,12 @@
+--- revdep-rebuild	2011-04-24 20:43:58.761000032 +0200
++++ revdep-rebuild-returnstatus	2011-04-24 20:43:30.306000032 +0200
+@@ -1133,7 +1133,8 @@
+ ##
+ # Finish up
+ cleanup() {
+-	if (( $(<"$STATUS_FILE") != 0 )); then
++	EMERGE_STATUS=$(<"$STATUS_FILE")	
++	if (( $EMERGE_STATUS != 0 )); then
+ 		ewarn
+ 		ewarn "$APP_NAME failed to emerge all packages."
+ 		ewarn 'you have the following choices:'
