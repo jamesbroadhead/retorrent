@@ -1,4 +1,4 @@
-# Copyright 1999-2010 Gentoo Foundation
+# Copyright 1999-2011 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
@@ -14,7 +14,7 @@ KEYWORDS="~amd64 ~x86"
 IUSE="asf dbus gcrypt mp4"
 
 RDEPEND="dev-db/sqlite:3
-	>=media-libs/taglib-1.6.3[asf?,mp4?]
+	media-libs/taglib[asf?,mp4?]
 	media-libs/xine-lib
 	net-misc/curl
 	x11-libs/fox[png]
