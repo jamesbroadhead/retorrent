@@ -1,5 +1,5 @@
---- revdep-rebuild	2011-04-24 20:43:58.761000032 +0200
-+++ revdep-rebuild-cachedir	2011-04-24 20:28:20.689000031 +0200
+--- src/revdep-rebuild/revdep-rebuild	2011-04-24 20:43:58.761000032 +0200
++++ src/revdep-rebuild/revdep-rebuild	2011-04-24 20:28:20.689000031 +0200
 @@ -549,9 +549,10 @@
  	local new_env
  	local old_env

@@ -1,5 +1,5 @@
---- revdep-rebuild	2011-04-24 20:43:58.761000032 +0200
-+++ revdep-rebuild-returnstatus	2011-04-24 20:43:30.306000032 +0200
+--- src/revdep-rebuild/revdep-rebuild	2011-04-24 20:43:58.761000032 +0200
++++ src/revdep-rebuild/revdep-rebuild	2011-04-24 20:43:30.306000032 +0200
 @@ -1133,7 +1133,8 @@
  ##
  # Finish up

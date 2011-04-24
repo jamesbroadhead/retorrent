@@ -34,9 +34,8 @@ src_prepare() {
 	# We only work with python2
 	python_convert_shebangs -r 2 .
 
-	local rr=${WORKDIR}/src/revdep-rebuild
-	epatch $rr ${FILESDIR}/revdep-returnstatus.patch
-	epatch $rr ${FILESDIR}/revdep-rebuild-cachedir-gone.patch
+	epatch ${FILESDIR}/revdep-rebuild-returnstatus.patch
+	epatch ${FILESDIR}/revdep-rebuild-cachedir-gone.patch
 }
 
 src_install() {
