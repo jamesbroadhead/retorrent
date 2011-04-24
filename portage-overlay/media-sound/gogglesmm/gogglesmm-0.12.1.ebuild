@@ -27,6 +27,8 @@ src_prepare() {
 }
 
 src_configure() {
+	local extraconf = ""
+
 	if use gcrypt ; then
 		extraconf="--with-md5=gcrypt"
 	else
