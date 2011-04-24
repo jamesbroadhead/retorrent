@@ -33,8 +33,7 @@ src_configure() {
 		extraconf="--with-md5=internal"
 	fi
 
-	econf $extraconf \
-		$(use_with dbus)
+	econf $extraconf $(use_with dbus)
 }
 
 src_install() {
