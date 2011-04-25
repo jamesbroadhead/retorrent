@@ -11,10 +11,10 @@ SRC_URI="http://${PN}.googlecode.com/files/${P}.tar.bz2"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="asf dbus gcrypt mp4"
+IUSE="dbus gcrypt"
 
 RDEPEND="dev-db/sqlite:3
-	media-libs/taglib[asf?,mp4?]
+	media-libs/taglib
 	media-libs/xine-lib
 	net-misc/curl
 	x11-libs/fox[png]
@@ -42,4 +42,9 @@ src_install() {
 	emake DESTDIR="${D}" install || die
 
 	dodoc AUTHORS README || die
+}
+
+pkg_postinst() {
+	elog "For asf or mp4 tag support, build "
+	elog "media-libs/taglib with USE=\"asf mp4\""
 }
