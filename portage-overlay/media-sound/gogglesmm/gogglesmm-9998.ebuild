@@ -4,13 +4,15 @@
 
 EAPI=2
 
+inherit mercurial
+
 DESCRIPTION="Lightweight FOX music collection manager and player"
 HOMEPAGE="http://gogglesmm.googlecode.com/"
-SRC_URI="http://${PN}.googlecode.com/files/${P}.tar.bz2"
+EHG_REPO_URI="http://${PN}.googlecode.com/hg"
 
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS=""
 IUSE="dbus gcrypt"
 
 RDEPEND="dev-db/sqlite:3
@@ -28,7 +30,6 @@ src_prepare() {
 
 src_configure() {
 	local extraconf=""
-
 	if use gcrypt ; then
 		extraconf="--with-md5=gcrypt"
 	else
