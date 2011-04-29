@@ -15,7 +15,7 @@ SRC_URI="mirror://sourceforge/kid3/${P}.tar.gz"
 LICENSE="GPL-2"
 SLOT="4"
 KEYWORDS="~amd64 ~ppc ~ppc64 ~x86 ~x86-fbsd"
-IUSE="flac mp3 mp4 +taglib vorbis"
+IUSE="flac mp3 mp4 musicbrainz +taglib vorbis"
 
 RDEPEND="
 	flac? (
