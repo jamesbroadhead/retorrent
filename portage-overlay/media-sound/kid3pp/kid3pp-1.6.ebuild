@@ -8,9 +8,11 @@ KDE_REQUIRED="always"
 KDE_HANDBOOK="optional"
 inherit kde4-base
 
+MY_P="kid3"
+
 DESCRIPTION="A simple tag editor for KDE"
 HOMEPAGE="http://kid3.sourceforge.net/"
-SRC_URI="mirror://sourceforge/kid3/${P}.tar.gz"
+SRC_URI="mirror://sourceforge/kid3/${MY_P}-${PV}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="4"
@@ -31,17 +33,12 @@ RDEPEND="
 DEPEND="${RDEPEND}"
 
 REQUIRED_USE="flac? ( vorbis )"
-
-src_prepare() {
-	epatch "${FILESDIR}"/kid3-1.6-id3form-usability.patch || die
-	kde4-base_src_prepare
-}
-
 src_configure() {
 	# -DWITH_TUNEPIMP works, but uses the MBz RDF WebService which is deprecated
 	# Details: http://musicbrainz.org/doc/Web_Service
 	# Upstream bug report:
 	# http://sourceforge.net/tracker/?func=detail&aid=3216188&group_id=70849&atid=529221
+	epatch "${FILESDIR}"/kid3-id3form-understandability.patch
 
 	local mycmakeargs=(
 		$(cmake-utils_use_with flac)

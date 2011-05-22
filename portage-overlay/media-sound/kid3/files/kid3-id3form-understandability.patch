@@ -1,5 +1,5 @@
---- /main/checkouts/kid3/kid3/id3form.cpp	2010-11-12 16:17:37.000000000 +0000
-+++ /main/checkouts/kid3/kid3/id3formv2.cpp	2010-11-09 20:28:58.000000000 +0000
+--- kid3/id3form.cpp	2010-11-12 16:17:37.000000000 +0000
++++ kid3/id3form.cpp	2010-11-09 20:28:58.000000000 +0000
 @@ -276 +276 @@
 -	m_nameLabel = new QLabel(i18n("Name:"), m_fileWidget);
 +	m_nameLabel = new QLabel(i18n("Filename:"), m_fileWidget);
