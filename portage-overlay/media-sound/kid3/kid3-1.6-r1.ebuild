@@ -34,6 +34,7 @@ REQUIRED_USE="flac? ( vorbis )"
 
 src_prepare() {
 	epatch "${FILESDIR}"/kid3-1.6-id3form-usability.patch || die
+	kde4-base_src_prepare
 }
 
 src_configure() {
