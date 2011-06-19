@@ -1,3 +1,7 @@
 Retorrent is a media management and re-seeding tool. 
 
 It renames media files from their original filenames to ones that are systematic and easy to organise, into a format compatible with the default filename parsers which come with the XBMC Media Centre. 
+
+The initial retorrent code comes from a time where I was still learning python, and so some elements of it do not work as well as they could. Contributions and/or advice are welcome. 
+
+Some of this code comes from publically accessible code, which may not be covered by the blanket GPL, as the rest of the code in this project is. These sections are commented and attributed, please refer to the attribution for licensing details. 

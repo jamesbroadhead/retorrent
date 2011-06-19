@@ -69,5 +69,3 @@ def booloptionator(text,option_list):
 		return False 
 	else:
 		return booloptionator(text,option_list)
-	
-
