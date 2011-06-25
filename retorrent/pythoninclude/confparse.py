@@ -4,7 +4,7 @@ import os
 
 from ConfigParser import ConfigParser
 
-def read_folderconfig():
+def parse_folderconfig():
 	
 	folderconfig_filename = 'retorrent_folders.conf'
 	folderconfig_paths = [\
@@ -36,11 +36,7 @@ def read_folderconfig():
 			print 'CONFIG_WARNING: "'+treat_as+'" is not a valid treat_as setting in category '+category+'. Taking "movies".'	
 			treat_as = 'movies'
 		
-		try:
-			should_rename = config.getboolean(category,'should_rename')
-		except ValueError:
-				
-			should_rename = True
+		should_rename = config.getboolean(category,'should_rename')
 				
 		item = 	{ 'category':category, \
 				'paths':paths,\
@@ -64,6 +60,50 @@ def read_folderconfig():
 
 	return output 
 
+def parse_fileext_details():
+	
+	defaultoptions =  { 'type':'movie',\
+						'ignore_if_in_filename':'sample' }
+	
+	filename = 'fileext_details.conf'
+	folderconfig_paths = [\
+			os.path.abspath(os.path.join('./',filename)),\
+			os.path.join(os.path.expanduser('~/.retorrent/'),filename)	
+	]
+	
+	config = ConfigParser(defaultoptions)
+	config.read(folderconfig_paths)	
+	
+	output = [] 
+	
+	filetypes_goodsizes = {'movie':5120,
+							'binaryfile':100,
+							'plaintext':4} 	
+		
+	for fileext in config.sections():
+		
+		filetype = 	config.get(fileext,'type').split('#')[0].strip('\'" ')
+		
+		if not filetype	in filetypes_goodsizes.keys():
+			print 'CONFIG_WARNING: "'+filetype+'" is not a valid type setting for filetype '+filetype+'. Taking "movie".'	
+			treat_as = 'movie'
+		
+		# separate by commas, strip quotes
+		ignorestrs = [ os.path.expanduser(item.strip('\'" ')) for item in \
+				config.get(fileext,'ignore_if_in_filename').split('#')[0].split(',') ]
+		
+		
+		goodsize = filetypes_goodsizes[filetype]
+		
+		item = 	{ 'fileext':fileext, 
+			'filetype':filetype,
+			'ignore_if_in_filename':ignorestrs,
+			'goodsize' : goodsize
+		}
+		
+		output.append(item)
+
+	return output 
 
 
 if __name__ == '__main__':

@@ -5,7 +5,7 @@ import string
 
 from debugprinter import debugprinter
 from episoder import episoder
-from list_controller import add_to_list, read_list, get_fileext_list, filetype
+from list_controller import add_to_list, read_list
 
 import os_utils
 class filenamer:
@@ -14,20 +14,20 @@ class filenamer:
 	hexdigits = "0123456789abcdefABCDEF"
 	
 
-	def __init__(self, remove_list_filepath, divider_list_filepath , fileext_list_filepath, the_debugprinter=debugprinter(False)):
+	def __init__(self, remove_list_filepath, divider_list_filepath , filetypes_of_interest, the_debugprinter=debugprinter(False)):
 		
 		self.remove_list_filepath = remove_list_filepath
 		self.remove_list = read_list(remove_list_filepath)
 		
 		self.divider_list_filepath = divider_list_filepath
-		self.fileext_list = get_fileext_list(fileext_list_filepath) 
+		self.fileext_list = [ f['fileext'] for f in filetypes_of_interest ] 
 
 		self.the_episoder = episoder(the_debugprinter)
 		self.debugprinter = the_debugprinter
 		
 		self.is_movie = False
 
-		self.debugprint("filenamer.init(," + remove_list_filepath + divider_list_filepath + fileext_list_filepath + ")" )
+		self.debugprint("filenamer.init(," + remove_list_filepath + divider_list_filepath + ")" )
 	
 	def debugprint(self, str, listol=[]):
 		self.debugprinter.debugprint(str,listol)
@@ -104,7 +104,7 @@ class filenamer:
 
 		# Detect and Convert episode numbers. 
 		# NEW! Movies have cd01,cd02-so they go through episoder
-		filename_split,epno_index = self.the_episoder.add_series_episode_details(filename_split)
+		filename_split,epno_index = self.the_episoder.add_series_episode_details(filename_split,is_foldername)
 		
 		self.debugprint('filenamer.convert_filename, after episoder.add_series_episode_details: ' + '[' + ', '.join(filename_split) + ']')
 		
@@ -332,10 +332,7 @@ class filenamer:
 	
 	# does this list contain '.mkv' or 'mkv' ?
 	def is_fileext(self,item):
-		if item in self.fileext_list:
-			return True
-		else:
-			return False
+		return item in self.fileext_list
 	
 	def find_fileext(self,filename):
 		f = filename.split('.')

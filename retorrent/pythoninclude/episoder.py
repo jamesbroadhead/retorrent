@@ -15,7 +15,7 @@ class episoder:
 	alphabet = "abcdefghijklmnopqrstuvwxyz"
 	eng_numbers = ['one','two','three','four','five','six','seven','eight','nine','ten']
 	
-	identifiers = { 'start' : ['e', 'd','p', \
+	identifiers = { 'start' : ['s', 'e', 'd','p', \
 								'ep', 'cd', 'pt' , \
 								'part', 'side',	\
 								'episode' ],
@@ -46,9 +46,9 @@ class episoder:
 	# TODO: need to sort out dirs that have 01-04 or similar
 	# TODO: new episode numbering "episode 1", [01x01]
 	# TODO: Rewrite this to incorporate is_raw_episode_details	
-	def add_series_episode_details(self, split_fn):
+	def add_series_episode_details(self, split_fn, is_foldername=False):
 		for index,item in enumerate(split_fn):
-			split_fn, is_epno = self.convert_if_episode_number(split_fn, index)
+			split_fn, is_epno = self.convert_if_episode_number(split_fn, index,is_foldername)
 			
 			# Only one episode number per file? 
 			if is_epno:
@@ -57,7 +57,7 @@ class episoder:
 		return split_fn,-1
 	
 
-	def convert_if_episode_number(self, split_fn, index):
+	def convert_if_episode_number(self, split_fn, index, is_foldername=False):
 		self.debugprint('episoder.convert_if_episode_number(index=' + str(index),[['split_fn',split_fn]])
 		item = split_fn[index]	
 		nextitem = self.set_nextitem_if_exists(split_fn, index)	
@@ -66,29 +66,44 @@ class episoder:
 		# eg. part, episode	
 		for start_ident in self.identifiers['start']+self.identifiers['start_special']:
 			subitem = item[0:len(start_ident)]
+			remainder = item[len(subitem):]
 			
-			if subitem == start_ident:
-				if len(item) > len(start_ident):
-					if start_ident in self.identifiers['start']:
-						split_fn[index] = self.gen_full_epno_string( \
-								item[len(subitem):])
-					else: # special case	
-						epno = nice_epno_from_raw(item[len(subitem):])
-						split_fn[index] = subitem + epno
-					
-					return split_fn, True
+			# TODO : for s01e10, this now passes 01e10 to is_raw_epno. disaster!
+			if subitem == start_ident and len(item) > len(start_ident) and self.is_raw_epno(remainder):
+				if start_ident in self.identifiers['start']:
+					# check the next item before committing
+					if self.is_raw_serno(item) and self.is_raw_epno(nextitem):
+						split_fn[index] = self.gen_full_epno_string(nextitem,remainder)
+					else:
+						split_fn[index] = self.gen_full_epno_string(remainder)
 
-				elif len(item) == len(subitem) and self.is_raw_epno(nextitem):
-					if start_ident in self.identifiers['start']:
-						split_fn[index] = self.gen_full_epno_string(nextitem)
-					else: # special case
-						split_fn[index] = start_ident + nice_epno_from_raw(nextitem)
-					
+				else: # special case	
+					epno = nice_epno_from_raw(remainder)
+					split_fn[index] = subitem + epno
+				
+				return split_fn, True
+			
+			
+			# // eg. s04.e05
+			elif subitem == start_ident and self.is_raw_serno(remainder) and self.is_raw_epno(nextitem):
+				if start_ident in self.identifiers['start']:
+					split_fn[index] = self.gen_full_epno_string(nextitem,remainder)
 					split_fn[index+1] = ''	
 					return split_fn, True
-				else:
-					# fall through
-					pass
+			
+			
+			elif subitem == start_ident and len(item) == len(subitem) and self.is_raw_epno(nextitem):
+				if start_ident in self.identifiers['start']:
+					split_fn[index] = self.gen_full_epno_string(nextitem)
+				else: # special case
+					split_fn[index] = start_ident + nice_epno_from_raw(nextitem)
+				
+				split_fn[index+1] = ''	
+				return split_fn, True
+			
+			else:
+				# fall through
+				pass
 
 		if item.isdigit() and item not in self.numbers_to_ignore:
 			# eg. 1  or 2
@@ -139,13 +154,7 @@ class episoder:
 			split_fn[index] = item
 			return split_fn,True
 		
-		# s01e02 , s1e1, s1x3 ...
-		elif len(item) > 0 and item[0] == 's':
-			item, nsn = self.convert_number_divider_number(item[1:])	
-			if nsn:
-				split_fn[index] = item
-				return split_fn,True
-		
+	
 		## SPECIAL CASES
 
 		# catch "pilot"	
@@ -179,7 +188,7 @@ class episoder:
 	# TODO: How many digits in series / epno length?
 	def gen_full_epno_string(self,epno,series="", nextitem=''):
 		self.debugprint('episoder.gen_full_epno_string(epno=' + str(epno) + ', series=' + str(series) + ', nextitem=' +  nextitem + ')')		
-		
+	
 		epno = self.nice_epno_from_raw(epno)
 	
 		if len(nextitem) > 0 and self.is_raw_epno(nextitem):
@@ -296,15 +305,15 @@ class episoder:
 		self.isset_single_letter_is_epno = True
 		
 		if answer:	
-			self.debugprint(letter + 'IS an episode number')	
+			self.debugprint(letter + ' IS an episode number')	
 		else:
-			self.debugprint(letter + 'is not an episode number')	
+			self.debugprint(letter + ' is not an episode number')	
 
 			# A single letter may also trip the roman numeral code. 
 			# Add this letter to an roman.ignore list
 			if roman.could_be_roman(letter):
 				self.romans_to_ignore += [letter]
-				self.debugprint('Assuming ' +letter + 'is not a roman numeral')	
+				self.debugprint('If so, will ignore ' +letter + ' as a roman numeral')	
 
 
 
@@ -314,7 +323,18 @@ class episoder:
 			return nextitem
 		return '' 
 	
+
+	def is_raw_serno(self,serno):
+		if len(serno) > 0 and serno.lower().startswith('s'):
+			return self.is_raw_epno(serno[1:])
+		elif len(serno) > 0 and serno.lower().startswith('e'):
+			return False
+		
+		return self.is_raw_epno(serno)
+			
+
 	# This receives a number string (eg. ep01 --> 01)	
+	# It also now accepts e01 etc.
 	def is_raw_epno(self,epno):
 		if self.is_eng_number(epno) 			\
 				or self.is_in_alphabet(epno)	\
@@ -324,7 +344,8 @@ class episoder:
 		else:
 			if epno.lower().endswith('v2'):
 				return self.is_raw_epno(epno[0:-2])
-			
+			elif len(epno) > 0 and epno.lower()[0] == 'e':
+				return self.is_raw_epno(epno[1:])
 			return False
 	
 	def nice_epno_from_raw(self,epno):
@@ -340,6 +361,8 @@ class episoder:
 		else:
 			if epno.lower().endswith('v2'):
 				return self.nice_epno_from_raw(epno[0:-2])
+			elif len(epno) > 0 and epno.lower()[0] == 'e':
+				return self.nice_epno_from_raw(epno[1:])
 			else:	
 				print '!!! Can\'t handle an epno like this: ', epno
 		

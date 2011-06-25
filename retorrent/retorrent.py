@@ -31,8 +31,6 @@ FILEEXT_TO_KEEP_FILENAME="fileext_obj.list"
 # These are symbols which divide up a filename
 DIVIDER_LIST_FILENAME="divider_symbols.list"
 
-# If a filename has any of these, exclude that file
-SPECIFIC_EXCLUDES=["sample"] 
 
 # =============================================================================
 # If you make other changes, let me know. I know it's a bit of a mess
@@ -47,7 +45,7 @@ from optparse import OptionParser
 from subprocess import Popen, PIPE
 from zlib import compress
 
-from confparse import read_folderconfig 
+from confparse import parse_folderconfig,parse_fileext_details
 from debugprinter import debugprinter
 from filenamer import filenamer
 from include_types import *
@@ -62,7 +60,6 @@ SEEDDIR = os.path.expanduser(SEEDDIR)
 SEEDTORRENTDIR = os.path.expanduser(SEEDTORRENTDIR)
 
 REMOVE_LIST_FILE=os.path.expanduser(os.path.join(RETORRENT_INCLUDE,REMOVE_LIST_FILENAME))
-FILEEXT_TO_KEEP_FILE=os.path.expanduser(os.path.join(RETORRENT_INCLUDE,FILEEXT_TO_KEEP_FILENAME))
 DIVIDER_LIST_FILE=os.path.expanduser(os.path.join(RETORRENT_INCLUDE,DIVIDER_LIST_FILENAME))
 
 # ==================================================
@@ -131,7 +128,9 @@ def parse_args():
 class retorrenter:
 	def __init__(self,debug):
 		
-		self.folderopts = read_folderconfig()	
+		self.folderopts = parse_folderconfig()	
+		self.filetypes_of_interest = parse_fileext_details()
+		
 		self.null_output = {'commands':[], 'symlinks':[], 'torrentfile':''}
 		self.debug = debug
 		self.debugprinter = debugprinter(self.debug)
@@ -148,8 +147,10 @@ class retorrenter:
 		self.dest_series_folder=''
 		# The series or movie-name folder 
 		self.dest_dirpath = ''
+		
+		
 		self.filenamer = filenamer(REMOVE_LIST_FILE, DIVIDER_LIST_FILE, \
-					FILEEXT_TO_KEEP_FILE, \
+					self.filetypes_of_interest, \
 					the_debugprinter=self.debugprinter) 
 	
 	def set_num_interesting_files(self,num_interesting_files):
@@ -334,6 +335,8 @@ class retorrenter:
 			elif answer == "foldernames":
 				dest_paths = dest_paths_from_folder
 			elif num_interesting_files == 1: 
+				## TODO: Re-attach file ext if ignored	
+				
 				print 'You ignored our suggestion; taking: "' + answer + '"' 
 				dest_paths = [ os.path.join(self.dest_folder,\
 						self.dest_dirpath,answer) ]
@@ -624,30 +627,32 @@ class retorrenter:
 	def is_of_interest(self,file_path, filename):
 		self.debugprint('retorrenter.is_of_interest(' + file_path + ',' + filename + ')')
 		
-		filetypes_of_interest = read_list(FILEEXT_TO_KEEP_FILE)
-		specific_excludes = SPECIFIC_EXCLUDES
 		
 		(path,extension) = os.path.splitext(file_path)
 		# trim the . from the extension for matching
 		extension = extension[1:].lower()	
 		
-		for foi in filetypes_of_interest:
-			if extension == foi.extension:
+		for foi in self.filetypes_of_interest:
+			if extension == foi['fileext']:
 				# if the filename has something which excludes it, skip it
 				# eg. 'sample'	
-				for exclude in specific_excludes:
+				for exclude in foi['ignore_if_in_filename']:
+					if exclude == '':
+						continue
 					if not filename.lower().find(exclude.lower()) == -1:
 						# this file has a phrase which excludes it
+						self.debugprint(filename + ' contains a phrase which excludes it')	
 						return False 
 				filestat = os.stat(file_path)
 				# this will actually get the size of all the blocks, not the space used.
 				# Close enough ... :P
 				disk_filesize_kB = filestat.st_blocks*filestat.st_blksize/(8*1024)
 				
-				if disk_filesize_kB > foi.goodsize:
+				if disk_filesize_kB > foi['goodsize']:
 					return True
 				else:
 					self.debugprint('Size:' + str(disk_filesize_kB) +  'kB <' + str(foi.goodsize) +'kB for:' + file_path)
+		self.debugprint(filename + ' didn\'t trigger any interest ...')
 		return False
 	
 	def is_movie(self):
