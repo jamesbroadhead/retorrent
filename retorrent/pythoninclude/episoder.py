@@ -23,10 +23,6 @@ class episoder:
 	}
 	numbers_to_ignore = [ '720' ]
 
-	identifiers_keys = identifiers.keys()
-	identifiers_keys.sort(reverse=True)
-	special_cases_keys = special_cases.keys()
-	special_cases_keys.sort(reverse=True)
 
 	digits_in_epno = 0
 
@@ -77,7 +73,7 @@ class episoder:
 						split_fn[index] = self.gen_full_epno_string( \
 								item[len(subitem):])
 					else: # special case	
-						epno = nice_epno_from_raw(item[len(subitem):]
+						epno = nice_epno_from_raw(item[len(subitem):])
 						split_fn[index] = subitem + epno
 					
 					return split_fn, True
@@ -137,13 +133,14 @@ class episoder:
 				return split_fn, False
 		
 		# 1x1 1x02 or  or 1x001 1e3
+		
 		item, nsn = self.convert_number_divider_number(item)	
-		elif nsn:
+		if nsn:
 			split_fn[index] = item
 			return split_fn,True
 		
 		# s01e02 , s1e1, s1x3 ...
-		elif item[0] == 's':
+		elif len(item) > 0 and item[0] == 's':
 			item, nsn = self.convert_number_divider_number(item[1:])	
 			if nsn:
 				split_fn[index] = item

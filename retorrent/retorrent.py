@@ -22,7 +22,7 @@ SEEDDIR="~/seed"
 SEEDTORRENTDIR="~/seed/torrentfiles"
 
 # Retorrent needs a few 'helper' files. They are in this dir.
-RETORRENT_INCLUDE="~/doc/scripts/torrentbox-scripts/retorrent_include"
+RETORRENT_INCLUDE="~/.retorrent"
 # Elements of a filename that should be removed.
 # (Anything that isn't a checksum that's in braces({[ is removed automatically)
 REMOVE_LIST_FILENAME="removelist.list"
