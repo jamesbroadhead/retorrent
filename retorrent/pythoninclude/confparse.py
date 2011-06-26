@@ -1,16 +1,18 @@
 #!/usr/bin/python
 
 import os
-
 from ConfigParser import ConfigParser
+
+config_paths = [\
+	os.path.abspath('./'),\
+	os.path.abspath(os.path.expanduser('~/.retorrent/'))
+]
+
+stripsymbols ='\'" '
 
 def parse_folderconfig():
 	
-	folderconfig_filename = 'retorrent_folders.conf'
-	folderconfig_paths = [\
-			os.path.abspath(os.path.join('./',folderconfig_filename)),\
-			os.path.join(os.path.expanduser('~/.retorrent/'),folderconfig_filename)	
-	]
+	filename = 'retorrent_folders.conf'
 
 	defaultoptions = { 	'paths':			'',		\
 						'treat_as':			'tv',	\
@@ -20,17 +22,17 @@ def parse_folderconfig():
 	treat_as_options = [ 'movies', 'tv', 'files' ]
 
 	config = ConfigParser(defaultoptions)
-	config.read(folderconfig_paths)	
+	config.read([ os.path.join(p,filename) for p in config_paths])	
 	
 	output = [] 
 	
 	for category in config.sections():
 		
 		# separate by commas, strip quotes
-		paths = [ os.path.expanduser(item.strip('\'" ')) for item in \
+		paths = [ os.path.expanduser(item.strip(stripsymbols)) for item in \
 				config.get(category,'paths').split(',') ]
 		
-		treat_as = 	config.get(category,'treat_as').strip('\'"')
+		treat_as = 	config.get(category,'treat_as').strip(stripsymbols)
 		
 		if not treat_as	in treat_as_options:
 			print 'CONFIG_WARNING: "'+treat_as+'" is not a valid treat_as setting in category '+category+'. Taking "movies".'	
@@ -66,14 +68,10 @@ def parse_fileext_details():
 						'ignore_if_in_filename':'sample' }
 	
 	filename = 'fileext_details.conf'
-	folderconfig_paths = [\
-			os.path.abspath(os.path.join('./',filename)),\
-			os.path.join(os.path.expanduser('~/.retorrent/'),filename)	
-	]
 	
 	config = ConfigParser(defaultoptions)
-	config.read(folderconfig_paths)	
-	
+	config.read([ os.path.join(p,filename) for p in config_paths])	
+
 	output = [] 
 	
 	filetypes_goodsizes = {'movie':5120,
@@ -82,14 +80,14 @@ def parse_fileext_details():
 		
 	for fileext in config.sections():
 		
-		filetype = 	config.get(fileext,'type').split('#')[0].strip('\'" ')
+		filetype = 	config.get(fileext,'type').split('#')[0].strip(stripsymbols)
 		
 		if not filetype	in filetypes_goodsizes.keys():
 			print 'CONFIG_WARNING: "'+filetype+'" is not a valid type setting for filetype '+filetype+'. Taking "movie".'	
 			treat_as = 'movie'
 		
 		# separate by commas, strip quotes
-		ignorestrs = [ os.path.expanduser(item.strip('\'" ')) for item in \
+		ignorestrs = [ os.path.expanduser(item.strip(stripsymbols)) for item in \
 				config.get(fileext,'ignore_if_in_filename').split('#')[0].split(',') ]
 		
 		
@@ -105,6 +103,27 @@ def parse_fileext_details():
 
 	return output 
 
+
+def parse_divider_symbols():
+	
+	filename = 'divider_symbols.conf'
+	defaultoptions =  { 'symbols' : ' +-_@,' }
+	symbols = []	
+	config = ConfigParser(defaultoptions)
+	config.read([ os.path.join(p,filename) for p in config_paths])	
+
+	for sect in config.sections():
+		if sect == 'symbols':
+			symb_string = config.get(sect,'symbols')
+			# NOT stripsymbols	
+			symbols = [ char for char in symb_string.strip("'") ]
+		else:
+			print 'CONFIG_WARNING: '+filename+' contains the unknown section ['+sect+']'
+	
+	if symbols == []:
+		symbols = [' ', '+', '-', '_', '@', ',']
+	
+	return symbols
 
 if __name__ == '__main__':
 	a = read_folderconfig()

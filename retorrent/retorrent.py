@@ -26,10 +26,6 @@ RETORRENT_INCLUDE="~/.retorrent"
 # Elements of a filename that should be removed.
 # (Anything that isn't a checksum that's in braces({[ is removed automatically)
 REMOVE_LIST_FILENAME="removelist.list"
-# File extensions that are kept (movies, subtitles, checksums)
-FILEEXT_TO_KEEP_FILENAME="fileext_obj.list"
-# These are symbols which divide up a filename
-DIVIDER_LIST_FILENAME="divider_symbols.list"
 
 
 # =============================================================================
@@ -45,7 +41,7 @@ from optparse import OptionParser
 from subprocess import Popen, PIPE
 from zlib import compress
 
-from confparse import parse_folderconfig,parse_fileext_details
+from confparse import *
 from debugprinter import debugprinter
 from filenamer import filenamer
 from include_types import *
@@ -60,7 +56,6 @@ SEEDDIR = os.path.expanduser(SEEDDIR)
 SEEDTORRENTDIR = os.path.expanduser(SEEDTORRENTDIR)
 
 REMOVE_LIST_FILE=os.path.expanduser(os.path.join(RETORRENT_INCLUDE,REMOVE_LIST_FILENAME))
-DIVIDER_LIST_FILE=os.path.expanduser(os.path.join(RETORRENT_INCLUDE,DIVIDER_LIST_FILENAME))
 
 # ==================================================
 
@@ -130,7 +125,8 @@ class retorrenter:
 		
 		self.folderopts = parse_folderconfig()	
 		self.filetypes_of_interest = parse_fileext_details()
-		
+		self.divider_symbols = parse_divider_symbols()
+
 		self.null_output = {'commands':[], 'symlinks':[], 'torrentfile':''}
 		self.debug = debug
 		self.debugprinter = debugprinter(self.debug)
@@ -149,7 +145,7 @@ class retorrenter:
 		self.dest_dirpath = ''
 		
 		
-		self.filenamer = filenamer(REMOVE_LIST_FILE, DIVIDER_LIST_FILE, \
+		self.filenamer = filenamer(REMOVE_LIST_FILE, self.divider_symbols, \
 					self.filetypes_of_interest, \
 					the_debugprinter=self.debugprinter) 
 	

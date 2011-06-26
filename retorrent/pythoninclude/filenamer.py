@@ -14,12 +14,12 @@ class filenamer:
 	hexdigits = "0123456789abcdefABCDEF"
 	
 
-	def __init__(self, remove_list_filepath, divider_list_filepath , filetypes_of_interest, the_debugprinter=debugprinter(False)):
+	def __init__(self, remove_list_filepath, divider_list , filetypes_of_interest, the_debugprinter=debugprinter(False)):
 		
 		self.remove_list_filepath = remove_list_filepath
 		self.remove_list = read_list(remove_list_filepath)
 		
-		self.divider_list_filepath = divider_list_filepath
+		self.divider_list = divider_list
 		self.fileext_list = [ f['fileext'] for f in filetypes_of_interest ] 
 
 		self.the_episoder = episoder(the_debugprinter)
@@ -27,17 +27,17 @@ class filenamer:
 		
 		self.is_movie = False
 
-		self.debugprint("filenamer.init(," + remove_list_filepath + divider_list_filepath + ")" )
-	
 	def debugprint(self, str, listol=[]):
 		self.debugprinter.debugprint(str,listol)
 	
+	# TODO : re-write!
 	def add_to_removelist(self,item):
 		if len(item) > 0:
 			print "Adding ", item ," to the remove list"
 			self.add_extra_removeitem(item)
 			add_to_list(item,self.remove_list_filepath)
-
+	
+	# TODO : re-write!
 	def add_extra_removeitem(self,removelist_extra):
 		if not removelist_extra in self.remove_list:
 			self.remove_list += [removelist_extra]
@@ -64,7 +64,7 @@ class filenamer:
 			return ''
 		self.debugprint('filenamer.convert_filename(' + filename + ', is_foldername==' + str(is_foldername) + ')')
 
-		filename = self.remove_divider_symbols(filename,self.divider_list_filepath)
+		filename = self.remove_divider_symbols(filename)
 		
 		self.debugprint('filenamer.convert_filename, after self.remove_divider_symbols : ' + filename )
 
@@ -180,14 +180,6 @@ class filenamer:
 
 		return filename_split
 
-	def remove_divider_symbols(self, filename, divider_list_file):
-		divider_symbols = read_list(divider_list_file)
-		
-		for symbol in divider_symbols:
-			if symbol in filename:
-				filename = filename.replace(symbol,".")
-		return filename
-
 	def remove_camelcase(self, filename):
 		if len(filename) == 0:
 			return filename 
@@ -246,10 +238,9 @@ class filenamer:
 		return [ item for item in filename_split if not item == '' ]	
 		
 
-	def remove_divider_symbols(self, filename, divider_list_file):
-		divider_symbols = read_list(divider_list_file)
+	def remove_divider_symbols(self, filename):
 		
-		for symbol in divider_symbols:
+		for symbol in self.divider_list:
 			if symbol in filename:
 				filename = filename.replace(symbol,".")
 		return filename
