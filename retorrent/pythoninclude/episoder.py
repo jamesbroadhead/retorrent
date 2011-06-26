@@ -69,20 +69,28 @@ class episoder:
 			remainder = item[len(subitem):]
 			
 			# TODO : for s01e10, this now passes 01e10 to is_raw_epno. disaster!
-			if subitem == start_ident and len(item) > len(start_ident) and self.is_raw_epno(remainder):
-				if start_ident in self.identifiers['start']:
-					# check the next item before committing
-					if self.is_raw_serno(item) and self.is_raw_epno(nextitem):
-						split_fn[index] = self.gen_full_epno_string(nextitem,remainder)
-					else:
-						split_fn[index] = self.gen_full_epno_string(remainder)
-
-				else: # special case	
-					epno = nice_epno_from_raw(remainder)
-					split_fn[index] = subitem + epno
-				
-				return split_fn, True
-			
+			if subitem == start_ident:
+				if len(item) > len(start_ident): 
+					if self.is_raw_epno(remainder):
+						if start_ident in self.identifiers['start']:
+							# check the next item before committing
+							if self.is_raw_serno(item) and self.is_raw_epno(nextitem):
+								split_fn[index] = self.gen_full_epno_string(nextitem,remainder)
+							else:
+								split_fn[index] = self.gen_full_epno_string(remainder)
+						else: # special case	
+							epno = nice_epno_from_raw(remainder)
+							split_fn[index] = subitem + epno
+						
+						return split_fn, True
+					elif remainder.isalnum() and 'e' in remainder:
+						maybe_serno = remainder.split('e')[0]
+						maybe_epno = remainder.split('e')[1]
+						if self.is_raw_serno(maybe_serno) and \
+								self.is_raw_epno(maybe_epno):
+							split_fn[index] = self.gen_full_epno_string(maybe_epno,maybe_serno)
+							return split_fn,True	
+							
 			
 			# // eg. s04.e05
 			elif subitem == start_ident and self.is_raw_serno(remainder) and self.is_raw_epno(nextitem):
