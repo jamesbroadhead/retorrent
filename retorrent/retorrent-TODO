@@ -1,0 +1,7 @@
+When matching tfiles, don't check "is a year" 
+When asking about years, don't accept years in the future.
+Keeping years should be an option. 
+
+Accept all unicode characters :-/
+
+Pick up S01 as a series number + remove for dirs.

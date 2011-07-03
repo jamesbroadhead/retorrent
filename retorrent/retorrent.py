@@ -108,7 +108,13 @@ def parse_args():
 class retorrenter:
 	def __init__(self,debug):
 		
-		(torrentfilesdir,seeddir,seedtorrentfilesdir) = parse_retorrentconf()
+		torrentfilesdir,seeddir,seedtorrentfilesdir =  \
+				parse_retorrentconf()
+		
+		self.torrentfilesdir = torrentfilesdir
+		self.seeddir = seeddir
+		self.seedtorrentfilesdir = seedtorrentfilesdir
+
 		self.folderopts = parse_folderconfig()	
 		self.filetypes_of_interest = parse_fileext_details()
 		self.divider_symbols = parse_divider_symbols()
@@ -358,11 +364,11 @@ class retorrenter:
 			torrentfile = self.find_torrentfile(the_path)
 			
 			if not orig_foldername == "":
-				commands += [ "mv -nv " + '"'+the_path+'"' + " " + '"'+SEEDDIR+'"' ]
+				commands += [ "mv -nv " + '"'+the_path+'"' + " " + '"'+self.seeddir+'"' ]
 			
 			if not torrentfile == '':
 				# move torrentfile to seeddir
-				commands += [ "mv -nv " + '"' + TORRENTFILESDIR + "/" + torrentfile+'"' + " " + '"'+SEEDTORRENTDIR+'"' ]
+				commands += [ "mv -nv " + '"' + self.torrentfilesdir + "/" + torrentfile+'"' + " " + '"'+self.seedtorrentfilesdir+'"' ]
 			
 			# gen filenames + foldername for symlinked files
 			seeddir_paths = gen_seeddir_paths(orig_foldername,orig_intermeds,orig_filenames)
@@ -648,7 +654,7 @@ class retorrenter:
 		split_path = the_path.rsplit('/')	
 		arg_name = split_path[-1]
 		
-		the_torrentfiles =  os.listdir(TORRENTFILESDIR) 
+		the_torrentfiles =  os.listdir(self.torrentfilesdir) 
 		
 		tfiles = []
 		for tfile in the_torrentfiles:
@@ -669,7 +675,7 @@ def compare_scores(A,B):
 
 def gen_seeddir_paths(orig_foldername,orig_intermeds,orig_filenames):
 		
-	return [ SEEDDIR + "/" + orig_foldername + "/" + intermeds + '/' + filename for intermeds,filename in zip(orig_intermeds,orig_filenames) ] 
+	return [ self.seeddir + "/" + orig_foldername + "/" + intermeds + '/' + filename for intermeds,filename in zip(orig_intermeds,orig_filenames) ] 
 
 
 def print_optionstructions():
