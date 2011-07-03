@@ -10,17 +10,6 @@
 #	Better would be: Detect overlap in filenamer + pick another / ask. 
 #	or 				 Detect overlap at question time + ask
 
-# ==============================================================================
-# Before using this, set the following;
-# ==============================================================================
-# Dir containing the .torrent files for your download session
-# TODO: Un-hardcode
-TORRENTFILESDIR="/mnt/winold/main/torrents/torrentfiles"
-# Dir containing the symlinks
-SEEDDIR="~/seed"
-# Dir containing the seed torrentfiles
-SEEDTORRENTDIR="~/seed/torrentfiles"
-
 # Retorrent needs a few 'helper' files. They are in this dir.
 RETORRENT_INCLUDE="~/.retorrent"
 # Elements of a filename that should be removed.
@@ -50,10 +39,6 @@ from optionator import *
 from os_utils import *
 
 # ==================================================
-
-TORRENTFILESDIR = os.path.expanduser(TORRENTFILESDIR)
-SEEDDIR = os.path.expanduser(SEEDDIR)
-SEEDTORRENTDIR = os.path.expanduser(SEEDTORRENTDIR)
 
 REMOVE_LIST_FILE=os.path.expanduser(os.path.join(RETORRENT_INCLUDE,REMOVE_LIST_FILENAME))
 
@@ -123,6 +108,7 @@ def parse_args():
 class retorrenter:
 	def __init__(self,debug):
 		
+		(torrentfilesdir,seeddir,seedtorrentfilesdir) = parse_retorrentconf()
 		self.folderopts = parse_folderconfig()	
 		self.filetypes_of_interest = parse_fileext_details()
 		self.divider_symbols = parse_divider_symbols()

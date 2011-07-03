@@ -10,6 +10,26 @@ config_paths = [\
 
 stripsymbols ='\'" '
 
+def parse_retorrentconf():
+	filename = 'retorrent.conf'
+
+	defaultoptions = { 	'torrentfilesdir':	'~/torrents',		\
+						'seeddir':			'~/seed',	\
+						'seedtorrentfilesdir':	'~/seed/torrentfiles'
+	}
+	
+	config = ConfigParser(defaultoptions)
+	config.read([ os.path.join(p,filename) for p in config_paths])	
+	
+	output= ( 	config.get('retorrent','torrentfilesdir'),
+				config.get('retorrent','seeddir'),
+				config.get('retorrent','seedtorrentfilesdir'))
+	
+	output = ( os.path.abspath for i in output )
+	
+	return output
+
+
 def parse_folderconfig():
 	
 	filename = 'retorrent_folders.conf'
