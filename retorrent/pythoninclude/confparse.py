@@ -21,11 +21,12 @@ def parse_retorrentconf():
 	config = ConfigParser(defaultoptions)
 	config.read([ os.path.join(p,filename) for p in config_paths])	
 	
-	output= ( 	config.get('retorrent','torrentfilesdir') )
-				# config.get('retorrent','seeddir'),
-				#config.get('retorrent','seedtorrentfilesdir'))
+	output= ( 	config.get('retorrent','torrentfilesdir'), 
+				config.get('retorrent','seeddir'),
+				config.get('retorrent','seedtorrentfilesdir'))
 	
-	output = [ os.path.abspath for i in output ]
+	output = [ os.path.abspath(os.path.expanduser(
+			i.strip(stripsymbols))) for i in output ]
 	
 	return output
 

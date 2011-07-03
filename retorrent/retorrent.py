@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # Author: James Broadhead jamesbroadhead@gmail.com
-# License: This is pre-release, friends-only. Don't distribute / use without asking. 
-# Version r293
+
 # Bugs? Send me a zip with empty files with the same filenames as the directory tree that failed 
 
 # TODO: Deal with .mkv%09 and .avi.1
@@ -371,7 +370,7 @@ class retorrenter:
 				commands += [ "mv -nv " + '"' + self.torrentfilesdir + "/" + torrentfile+'"' + " " + '"'+self.seedtorrentfilesdir+'"' ]
 			
 			# gen filenames + foldername for symlinked files
-			seeddir_paths = gen_seeddir_paths(orig_foldername,orig_intermeds,orig_filenames)
+			seeddir_paths = self.gen_seeddir_paths(orig_foldername,orig_intermeds,orig_filenames)
 			
 			commands += [ "ln -s " + '"'+dest+'"' + " " + '"'+seedpath+'"' for dest,seedpath in zip(dest_paths,seeddir_paths) ]
 		else:
@@ -669,13 +668,14 @@ class retorrenter:
 		chosen_torrentfile = optionator('For: '+arg_name,[ t['filename'] for t in tfiles] )
 
 		return chosen_torrentfile
+	
+	def gen_seeddir_paths(self,orig_foldername,orig_intermeds,orig_filenames):
+			
+		return [ self.seeddir + "/" + orig_foldername + "/" + intermeds + '/' + filename for intermeds,filename in zip(orig_intermeds,orig_filenames) ] 
+
 
 def compare_scores(A,B):
 	return cmp(B['score'],A['score'])
-
-def gen_seeddir_paths(orig_foldername,orig_intermeds,orig_filenames):
-		
-	return [ self.seeddir + "/" + orig_foldername + "/" + intermeds + '/' + filename for intermeds,filename in zip(orig_intermeds,orig_filenames) ] 
 
 
 def print_optionstructions():
