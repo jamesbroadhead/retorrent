@@ -638,7 +638,7 @@ class retorrenter:
 				if disk_filesize_kB > foi['goodsize']:
 					return True
 				else:
-					self.debugprint('Size:' + str(disk_filesize_kB) +  'kB <' + str(foi.goodsize) +'kB for:' + file_path)
+					self.debugprint('Size:' + str(disk_filesize_kB) +  'kB <' + str(foi['goodsize']) +'kB for:' + file_path)
 		self.debugprint(filename + ' didn\'t trigger any interest ...')
 		return False
 	
