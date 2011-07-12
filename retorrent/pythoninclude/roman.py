@@ -11,6 +11,22 @@ numerals_asc.reverse()
 nums_and_bigrams = ('M',  'CM', 'D', 'CD','C', 'XC','L','XL','X','IX','V','IV','I')
 ints_and_bigrams = (1000, 900,  500, 400, 100,  90, 50,  40, 10,  9,   5,  4,   1)
 
+
+n_and_b = {'M':1000,\
+			'CM':900,\
+			'D'	: 500,\
+			'CD': 400,\
+			'C' : 100,\
+			'XC': 90,\
+			'L' : 50,\
+			'XL': 40,\
+			'X' : 10,\
+			'IX': 9,\
+			'V' : 5,\
+			'IV': 4,\
+			'I' : 1}
+
+
 roman_fives = ['D','L','V']
 
 # We're only accepting 20th Century rules for Roman Numerals. 
@@ -18,15 +34,16 @@ roman_fives = ['D','L','V']
 def could_be_roman(number,debug=False):
 	number = number.upper()
 	
-	for index,item in enumerate(number):
-		if not item in numerals_asc:
+	for kindex,k in enumerate(number):
+		if not k in numerals_asc:
 			if debug: print 'Invalid Character!'	
 			return False
-		
-	for kindex,k in enumerate(number):
+
 		prev_largest = k
-			
+		
+		# must catch LL etc.
 		if kindex > 0 and roman_to_int(k) > roman_to_int(number[kindex-1]):
+
 			# we have ix or similar	
 			# xix is ok, iix is not
 			if is_roman_bigram(number[kindex-1:kindex+1]):
@@ -42,11 +59,18 @@ def could_be_roman(number,debug=False):
 
 	return True
 
+# in this context, a valid bigram is any legal pair
 def is_roman_bigram(bigram,debug=False):
 	# either is iv, xx but not vv
-	if bigram.upper() in nums_and_bigrams or \
-			( len(bigram) == 2 and bigram[0] == bigram[1] and not is_roman_five(bigram[0])):
-		return True
+	if bigram.upper() in nums_and_bigrams:
+		return True 
+	elif len(bigram) == 2:
+		if bigram[0] == bigram[1] and not is_roman_five(bigram[0]):
+			return True
+		# e.g. xi , lv
+		elif n_and_b[bigram[0]] > n_and_b[bigram[1]]:
+			return True
+
 	return False
 
 def is_roman_five(character):
@@ -111,7 +135,9 @@ if __name__ == '__main__':
 				('xii',True),\
 				('iix',False),\
 				('divx',False),\
-				('xvid',False)]:
+				('xvid',False),\
+				('llv',False)
+		]:
 		if not could_be_roman(i[0],debug_cbr) == i[1]:
 			print i[0] + '\t ==> ' + 'ERROR'
 		else:
