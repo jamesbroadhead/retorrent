@@ -2,15 +2,13 @@
 # http://code.activestate.com/recipes/81611-roman-numerals/
 # Significantly patched by James Broadhead
 
+# TODO: Replace all the below definitions with the dict 
 numerals = ['M', 'D', 'C', 'L', 'X', 'V', 'I']
 values = [1000,500,100,50,10,5,1]
-
 numerals_asc = numerals[:]
 numerals_asc.reverse()
-
 nums_and_bigrams = ('M',  'CM', 'D', 'CD','C', 'XC','L','XL','X','IX','V','IV','I')
 ints_and_bigrams = (1000, 900,  500, 400, 100,  90, 50,  40, 10,  9,   5,  4,   1)
-
 
 n_and_b = {'M':1000,\
 			'CM':900,\
@@ -26,7 +24,7 @@ n_and_b = {'M':1000,\
 			'IV': 4,\
 			'I' : 1}
 
-
+# TODO: replace with generated results
 roman_fives = ['D','L','V']
 
 # We're only accepting 20th Century rules for Roman Numerals. 
@@ -42,7 +40,7 @@ def could_be_roman(number,debug=False):
 		prev_largest = k
 		
 		# must catch LL etc.
-		if kindex > 0 and roman_to_int(k) > roman_to_int(number[kindex-1]):
+		if kindex > 0 and roman_to_int(k) >= roman_to_int(number[kindex-1]):
 
 			# we have ix or similar	
 			# xix is ok, iix is not
