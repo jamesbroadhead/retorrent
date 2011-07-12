@@ -124,7 +124,20 @@ class episoder:
 					return split_fn, True	
 			# eg. 45
 			elif len(item) == 2:
-				split_fn[index] = self.gen_full_epno_string(item)	
+				if self.is_raw_epno(nextitem):	
+					# catch XX.XX.XX (a date!)
+					if len(split_fn) > index+2 and split_fn[index+2].isdigit():
+						print 'assuming ',item,'.',nextitem,',',split_fn[index+2],' is a date!'
+						## this is awfuL
+						split_fn[index] = ''
+						split_fn[index+1] = ''
+						split_fn[index+2] = ''
+						return split_fn, False
+					split_fn[index] = self.gen_full_epno_string(nextitem,series=item)
+					split_fn[index+1] = ''	
+					return split_fn, True
+				else:	
+					split_fn[index] = self.gen_full_epno_string(item)	
 				return split_fn, True	
 			
 			# eg. 302 
