@@ -475,13 +475,14 @@ class episoder:
 		elif not self.interactive:
 			return False
 		else:
+		#	self.debugprint('Known years are ',','.join([str(i) for i in self.known_years]))
 			thisyear = datetime.datetime.now().year
 			if item.isdigit() and len(item) == 4 and int(item) <= thisyear:
 				is_year = booloptionator('Does ' + item + ' represent a year?', \
 						['True', 'False'])
 				
 				if is_year: 
-					self.known_years += [ item ]
+					self.known_years += [ int(item) ]
 					return True
 		return False
 

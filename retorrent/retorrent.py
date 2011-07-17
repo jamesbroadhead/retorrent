@@ -338,12 +338,11 @@ class retorrenter:
 			dest_paths = [ os.path.join(self.dest_dirpath,filename) for filename in orig_filenames ]
 		
 		##### LET'S BUILD SOME COMMANDS!
-		immediate_commands = []
 		commands = []
 		torrentfile = ""
 			
 		# make the dir immediately, for the case show*avi	
-		immediate_commands += [ "mkdir "+ "-p " + '"' + self.dest_dirpath + '"' ]
+		mkdir_p(self.dest_dirpath)	
 		
 		for dest in dest_paths:
 			if os.path.exists(dest):
@@ -393,9 +392,6 @@ class retorrenter:
 					commands += [ 'ls -aR ' + the_path + '/']
 					commands += [ "rm -Irv " + the_path ]
 		
-		for command in immediate_commands:
-			os.system(command)
-
 		self.reset_env()	
 		return { 'commands': commands, 'symlinks': seeddir_paths, 'torrentfile': torrentfile}
 		

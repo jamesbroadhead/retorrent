@@ -37,7 +37,8 @@ def parse_folderconfig():
 
 	defaultoptions = { 	'paths':			'',		\
 						'treat_as':			'tv',	\
-						'should_rename':	'True'
+						'should_rename':	'True', \
+						'home':				''
 	}
 	
 	treat_as_options = [ 'movies', 'tv', 'files' ]
@@ -60,11 +61,16 @@ def parse_folderconfig():
 			treat_as = 'movies'
 		
 		should_rename = config.getboolean(category,'should_rename')
-				
+		
+		category_home = config.get(category,'home')
+		if category_home == '':
+			category_home = os.path.expanduser('~/video/' + category)
+
 		item = 	{ 'category':category, \
 				'paths':paths,\
 				'treat_as':treat_as,\
-				'should_rename':should_rename
+				'should_rename':should_rename, \
+				'home': category_home
 		}
 
 		# some nice sorting :-/
