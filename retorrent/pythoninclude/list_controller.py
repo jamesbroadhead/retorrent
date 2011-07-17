@@ -31,7 +31,7 @@ def parse_args():
 	
 	return parser.parse_args()
 
-def edit_removelist(filename,fileext_filename):
+def edit_removelist(filename):
 	the_list = read_list(filename)
 	the_list.sort()
 	the_item = optionator("Enter index to remove an item, or type something new to add", the_list )
@@ -40,12 +40,11 @@ def edit_removelist(filename,fileext_filename):
 		print "Removing ", the_item	
 		remove_from_list(the_item, filename)
 	else:
-		# check if it's a file extension	
-		if the_item in get_fileext_list(fileext_filename):
-			print 'Can\'t add file extensions to the remove list'
-		else:
-			print "Adding ", the_item
-			add_to_list(the_item, filename)
+		if len(the_item) == 1 or the_item == '1ch': 
+			print 'refusing!'
+			return
+		print "Adding ", the_item
+		add_to_list(the_item, filename)
 	
 	the_list = read_list(filename)
 
@@ -90,51 +89,14 @@ def read_list(filename):
 	return the_list
 
 
-def get_fileext_list(filename):
-	contents = read_list(filename)
-	ext_list = [ i.extension for i in contents ]
-	
-	return ext_list
-
-def edit_filetypelist(filename):
-	contents = read_list(filename)
-	ext_list = [ i.extension for i in contents ]
-	
-	index,item = boptionator("Enter index to remove an item, or type something new to add", ext_list )
-
-	if index > 0:
-		print "Removing ", item	
-		del contents[index]
-		write_list(contents,filename)
-	else:
-		print "Adding ", item
-		
-		type = optionator("What type of data is it?(or closest by filesize)", ['movie','music','text'])
-		if type == 'movie':
-			goodsize = 5120
-		elif type == 'music':
-			goodsize = 100
-		else:
-			goodsize = 0
-		
-		new_ext = filetype(item,goodsize)
-		
-		add_to_list(new_ext, filename)
-	
-
 def main():
 	
 	(options, args) = parse_args()
 	
-	removelist=os.path.expanduser("~/doc/scripts/torrentbox-scripts/retorrent_include/removelist.list")
-	fileext_obj_list = os.path.expanduser('~/doc/scripts/torrentbox-scripts/retorrent_include/fileext_obj.list')
-
-
+	removelist=os.path.expanduser("~/.retorrent/removelist.list")
 
 	if options.removelist:
-		edit_removelist(removelist,fileext_obj_list)
-	elif options.filetypes:
-		edit_filetypelist(fileext_obj_list)
+		edit_removelist(removelist)
 	else:	
 		print 'Must supply an option'	
 

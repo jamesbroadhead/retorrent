@@ -137,6 +137,7 @@ class filenamer:
 		# GET EPNO from filename
 		# run convert_filename on filename as a filename. Then pull epno
 		filename = self.convert_filename(filename,is_foldername=False)
+		self.debugprint('converted the filename to: ',filename)	
 		epno = self.the_episoder.get_good_epno(filename)
 		fileext = self.find_fileext(filename)	
 		

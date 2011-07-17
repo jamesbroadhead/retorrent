@@ -48,7 +48,9 @@ class episoder:
 	# TODO: Rewrite this to incorporate is_raw_episode_details	
 	def add_series_episode_details(self, split_fn, is_foldername=False):
 		for index,item in enumerate(split_fn):
-			split_fn, is_epno = self.convert_if_episode_number(split_fn, index,is_foldername)
+			# agressive pre-parsing	
+			if not item in self.numbers_to_ignore:	
+				split_fn, is_epno = self.convert_if_episode_number(split_fn, index,is_foldername)
 			
 			# Only one episode number per file? 
 			if is_epno:
@@ -120,6 +122,14 @@ class episoder:
 				if self.is_raw_epno(nextitem):
 					split_fn = self.replace_doubleitem(split_fn, index, self.gen_full_epno_string(nextitem,item))
 				else: 
+					self.debugprint('in single digit number')	
+					# catch 5.1blah
+					if int(item) == 5 and nextitem[0].isdigit() and int(nextitem[0]) == 1:
+						self.numbers_to_ignore += [5]	
+						split_fn[index] = ''	
+						return split_fn,False
+					print split_fn
+					
 					split_fn[index] = self.gen_full_epno_string(item)	
 					return split_fn, True	
 			# eg. 45
