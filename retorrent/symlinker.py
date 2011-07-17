@@ -10,7 +10,8 @@ def main():
 		category_home = folderopt['home']	
 		mkdir_p(category_home)
 		print 'Considering : ', category_home
-
+	
+		removed = []
 		# remove broken symlinks 
 		for elem in os.listdir(category_home):
 			elem_path = os.path.join(category_home,elem)	
@@ -20,6 +21,7 @@ def main():
 			else:
 				if os.path.lexists(elem_path) and not os.path.exists(elem_path):
 					print 'Broken symlink! Removing.', elem
+					removed += [elem]	
 					os.remove(elem_path)
 
 		# make new ones
@@ -37,7 +39,8 @@ def main():
 				
 				if not os.path.exists(symlink_path):
 					os.symlink(content_path,symlink_path)
-
+					if content in removed:
+						print 'Replaced a broken symlink',content
 				elif not os.path.realpath(symlink_path) ==\
 						os.path.realpath(content_path):
 					print 'Duplicate content found! ',content,' in \n(==>)',os.path.dirname(os.path.realpath(symlink_path)),' and also \n     ', content_dir 
