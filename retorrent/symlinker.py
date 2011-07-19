@@ -23,6 +23,10 @@ def main():
 					print 'Broken symlink! Removing.', elem
 					removed += [elem]	
 					os.remove(elem_path)
+		
+		if category_home in folderopt['paths']:
+			print 'The content home is in the list of content paths. Cannot continue.'
+			continue
 
 		# make new ones
 		for content_dir in folderopt['paths']:
