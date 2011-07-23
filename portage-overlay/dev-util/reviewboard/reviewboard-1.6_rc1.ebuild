@@ -25,7 +25,7 @@ KEYWORDS="~amd64 ~x86"
 IUSE=""
 
 RDEPEND=">=dev-python/django-evolution-0.64
-	>=dev-python/Djblets-0.68
+	>=dev-python/Djblets-0.6.8
 	dev-python/flup
 	dev-python/imaging
 	dev-python/paramiko
