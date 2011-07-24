@@ -36,6 +36,10 @@ src_configure() {
 	fi
 
 	econf ${extraconf} $(use_with dbus)
+
+	# Disabling parallel build until bug fixed.
+	# http://code.google.com/p/gogglesmm/issues/detail?id=247
+	MAKEOPTS="${MAKEOPTS} -j1"
 }
 
 src_install() {
@@ -46,5 +50,5 @@ src_install() {
 
 pkg_postinst() {
 	elog "For asf or mp4 tag support, build "
-	elog "media-libs/taglib with USE=\"asf mp4\""
+	elog "    media-libs/taglib with USE=\"asf mp4\""
 }
