@@ -36,14 +36,12 @@ src_configure() {
 	fi
 
 	econf ${extraconf} $(use_with dbus)
-
-	# Disabling parallel build until bug fixed.
-	# http://code.google.com/p/gogglesmm/issues/detail?id=247
-	MAKEOPTS="${MAKEOPTS} -j1"
 }
 
 src_install() {
-	emake DESTDIR="${D}" install || die
+	# Disabling parallel build until bug fixed.
+	# http://code.google.com/p/gogglesmm/issues/detail?id=247
+	emake -j1 DESTDIR="${D}" install || die
 
 	dodoc AUTHORS README || die
 }
