@@ -4,31 +4,28 @@
 
 EAPI=2
 
-inherit eutils
+inherit mercurial
 
 DESCRIPTION="Lightweight FOX music collection manager and player"
 HOMEPAGE="http://gogglesmm.googlecode.com/"
-SRC_URI="http://${PN}.googlecode.com/files/${P}.tar.bz2"
+EHG_REPO_URI="http://${PN}.googlecode.com/hg"
 
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS=""
 IUSE="dbus gcrypt"
 
 RDEPEND="dev-db/sqlite:3
 	media-libs/taglib
 	media-libs/xine-lib
 	net-misc/curl
-	x11-libs/fox[png]
+	x11-libs/fox:1.7[png]
 	dbus? ( sys-apps/dbus )
 	gcrypt? ( dev-libs/libgcrypt )"
 DEPEND="${RDEPEND}"
 
 src_prepare() {
 	sed -i -e 's:icons/hicolor/48x48/apps:pixmaps:' Makefile || die
-
-	# Upstream patch to fix parallel builds. Won't be needed >=0.12.3
-	epatch "${FILESDIR}"/gogglesmm-parallel-make.patch || die
 }
 
 src_configure() {
@@ -41,6 +38,10 @@ src_configure() {
 	fi
 
 	econf ${extraconf} $(use_with dbus)
+
+	# Disabling parallel build until bug fixed.
+	# http://code.google.com/p/gogglesmm/issues/detail?id=247
+	MAKEOPTS="${MAKEOPTS} -j1"
 }
 
 src_install() {
@@ -50,6 +51,6 @@ src_install() {
 }
 
 pkg_postinst() {
-	einfo "For asf and/or mp4 tag support, build "
-	einfo "    media-libs/taglib with USE=\"asf mp4\""
+	elog "For asf or mp4 tag support, build "
+	elog "    media-libs/taglib with USE=\"asf mp4\""
 }
