@@ -38,10 +38,6 @@ src_configure() {
 	fi
 
 	econf ${extraconf} $(use_with dbus)
-
-	# Disabling parallel build until bug fixed.
-	# http://code.google.com/p/gogglesmm/issues/detail?id=247
-	MAKEOPTS="${MAKEOPTS} -j1"
 }
 
 src_install() {
