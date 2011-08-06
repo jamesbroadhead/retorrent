@@ -1,0 +1,48 @@
+# ChangeLog for dev-games/renpy-modules
+# Copyright 1999-2011 Gentoo Foundation; Distributed under the GPL v2
+# $Header: $
+
+  25 May 2011; Nao Nakashima (nao) <nao.nakashima@gmail.com>
+  -renpy-modules-6.12.0.ebuild, +renpy-modules-6.12.1.ebuild:
+  Version bump
+
+  30 Apr 2011; Justin Lecher <jlec@gentoo.org> renpy-modules-6.12.0.ebuild:
+  Moved export out of global scope
+
+  08 Feb 2011; Nao Nakashima (nao) <nao.nakashima@gmail.com>
+  -renpy-modules-6.11.2.ebuild, +renpy-modules-6.12.0.ebuild:
+  Version bump
+
+  03 Nov 2010; Nao Nakashima (nao) <nao.nakashima@gmail.com>
+  -renpy-modules-6.11.1.ebuild, +renpy-modules-6.11.2.ebuild:
+  Version bump
+
+  27 Oct 2010; Nao Nakashima (nao) <nao.nakashima@gmail.com>
+  renpy-modules-6.11.1.ebuild:
+  Enable building for multiple python ABIs.
+
+  24 Sep 2010; Nao Nakashima (nao) <nao.nakashima@gmail.com>
+  -renpy-modules-6.11.0.ebuild, +renpy-modules-6.11.1.ebuild:
+  Version bump
+
+  16 Sep 2010; Nao Nakashima (nao) <nao.nakashima@gmail.com>
+  renpy-modules-6.11.0.ebuild:
+  Added missing dependency: glew
+
+  24 Aug 2010; Nao Nakashima (nao) <nao.nakashima@gmail.com>
+  -renpy-modules-6.10.2-r1.ebuild, +renpy-modules-6.11.0.ebuild:
+  Version bump
+
+  16 May 2010; James Broadhead (hangfire) <jamesbroadhead@gmail.com>
+  -renpy-modules-6.10.2.ebuild, +renpy-modules-6.10.2-r1.ebuild:
+  Added ~amd64 keyword
+
+  28 Feb 2010; Nao Nakashima (nao) <nao.nakashima@gmail.com>
+  renpy-modules-6.10.2.ebuild:
+  Removed slash after ${ROOT}
+
+  27 Feb 2010; Nao Nakashima (nao) <nao.nakashima@gmail.com>
+  +renpy-modules-6.10.2.ebuild, +metadata.xml:
+  New ebuild for bug 301324. This ebuild is a result of splitting
+  dev-games/renpy into two parts.
+
