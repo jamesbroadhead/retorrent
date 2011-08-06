@@ -4,7 +4,7 @@
 
 EAPI=2
 
-inherit mercurial
+inherit autotools-utils mercurial
 
 DESCRIPTION="Lightweight FOX music collection manager and player"
 HOMEPAGE="http://gogglesmm.googlecode.com/"
@@ -23,6 +23,8 @@ RDEPEND="dev-db/sqlite:3
 	dbus? ( sys-apps/dbus )
 	gcrypt? ( dev-libs/libgcrypt )"
 DEPEND="${RDEPEND}"
+
+DOC=(AUTHORS README)
 
 src_prepare() {
 	sed -i -e 's:icons/hicolor/48x48/apps:pixmaps:' Makefile || die
@@ -47,6 +49,6 @@ src_install() {
 }
 
 pkg_postinst() {
-	elog "For asf or mp4 tag support, build "
-	elog "    media-libs/taglib with USE=\"asf mp4\""
+	elog "For asf and/or mp4 tag support, build "
+	elog "    media-libs/taglib with USE='asf mp4'"
 }
