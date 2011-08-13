@@ -29,7 +29,6 @@ DOCS=(AUTHORS README)
 PATCHES=( "${FILESDIR}/${PN}-parallel-make.patch" )
 
 AUTOTOOLS_IN_SOURCE_BUILD=0
-#AUTOTOOLS_BUILD_DIR="${WORKDIR}/${P}"
 
 src_prepare() {
 	sed -i -e 's:icons/hicolor/48x48/apps:pixmaps:' Makefile || die
