@@ -26,6 +26,7 @@ RDEPEND="x11-libs/libXrandr
 DEPEND="${RDEPEND}
 	x11-proto/xextproto
 	x11-libs/libXt
+	!x11-libs/fox:1.6	
 	!x11-libs/fox-wrapper"
 
 FOXCONF="$(use_enable bzip2 bz2lib) \
@@ -36,6 +37,11 @@ FOXCONF="$(use_enable bzip2 bz2lib) \
 	$(use_with truetype xft) \
 	$(use_enable zlib)"
 
-src_prepare() {
-	sed -i -e s/ControlPanel\$\(EXEEXT\)/ControlPanel-1.7\$\(EXEEXT\)/ Makefile
+src_install() {
+	fox_src_install
+	CP="${D}/usr/bin/ControlPanel"
+	if [[ -f $CP ]] ; then
+		mv $CP "${D}/usr/bin/fox-ControlPanel-${FOX_PV}" || \
+			die "Failed to install ControlPanel"
+	fi
 }
