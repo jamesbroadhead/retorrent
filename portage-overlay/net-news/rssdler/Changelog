@@ -3,7 +3,9 @@
 # $Header: $
 
 *rssdler-0.4.2 (06 Aug 2011)
-
+  
+  2011-09-06 18:30 +0100; James Broadhead <jamesbroadhead@gmail.com> portage-overlay/net-news/rssdler/Changelog portage-overlay/net-news/rssdler/Manifest portage-overlay/net-news/rssdler/metadata.xml portage-overlay/net-news/rssdler/rssdler-0.4.2.ebuild:
+  rssdler.ebuild: Merge with xmw overlay.
 
 *rssdler-0.4.2 (06 Aug 2011)
   
