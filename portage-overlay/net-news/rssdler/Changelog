@@ -1,0 +1,16 @@
+# ChangeLog for www-client/rssdler
+# Copyright 1999-2011 Gentoo Foundation; Distributed under the GPL v2
+# $Header: $
+
+*rssdler-0.4.2 (06 Aug 2011)
+
+
+*rssdler-0.4.2 (06 Aug 2011)
+  
+  2011-09-06 15:50 +0100; James Broadhead <jamesbroadhead@gmail.com> portage-overlay/net-news/rssdler/Manifest portage-overlay/net-news/rssdler/files/rssdler.man portage-overlay/net-news/rssdler/rssdler-0.4.2.ebuild:
+  Fixed + Addded man page
+
+*rssdler-0.4.2 (28 Feb 2011)
+
+  28 Feb 2011; James Broadhead <jamesbroadhead@gmail.com> rssdler-0.4.2.ebuild
+  Initial import from bgo.
