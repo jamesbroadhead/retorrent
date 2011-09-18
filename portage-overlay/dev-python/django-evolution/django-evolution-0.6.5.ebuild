@@ -6,11 +6,11 @@ EAPI=2
 
 SUPPORT_PYTHON_ABIS=1
 
-inherit distutils python subversion
+inherit distutils python
 
 DESCRIPTION="Track changes in database models over time, and update the db to reflect them"
 HOMEPAGE="http://code.google.com/p/django-evolution/"
-ESVN_REPO_URI="http://django-evolution.googlecode.com/svn/trunk/"
+SRC_URI="http://pypi.python.org/packages/source/d/django_evolution/django_evolution-${PV}.tar.gz"
 
 LICENSE="BSD"
 SLOT="0"
