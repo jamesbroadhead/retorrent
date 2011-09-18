@@ -22,7 +22,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-RDEPEND=">=dev-python/django-evolution-0.64
+RDEPEND=">=dev-python/django-evolution-0.6.4
 	>=dev-python/Djblets-0.6.11
 	dev-python/flup
 	dev-python/imaging
