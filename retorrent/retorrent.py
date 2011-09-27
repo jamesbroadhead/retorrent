@@ -107,14 +107,14 @@ def parse_args():
 class retorrenter:
 	def __init__(self,debug):
 		
-		torrentfilesdir,seeddir,seedtorrentfilesdir =  \
-				parse_retorrentconf()
+		retorrentconf, folderopts = parse_retorrentconf()
 		
-		self.torrentfilesdir = torrentfilesdir
-		self.seeddir = seeddir
-		self.seedtorrentfilesdir = seedtorrentfilesdir
+		self.torrentfilesdir = retorrentconf[0]
+		self.seeddir = retorrentconf[1]
+		self.seedtorrentfilesdir = retorrentconf[2]
 
-		self.folderopts = parse_folderconfig()	
+		self.folderopts = folderopts
+
 		self.filetypes_of_interest = parse_fileext_details()
 		self.divider_symbols = parse_divider_symbols()
 
