@@ -1,25 +1,6 @@
 #!/usr/bin/python
 # Author: James Broadhead jamesbroadhead@gmail.com
 
-# Bugs? Send me a zip with empty files with the same filenames as the directory tree that failed 
-
-# TODO: Deal with .mkv%09 and .avi.1
-# TODO: Handle filename overlap  
-#	Current behaviour: Use mv --no-clobber. 
-#	Better would be: Detect overlap in filenamer + pick another / ask. 
-#	or 				 Detect overlap at question time + ask
-
-# Retorrent needs a few 'helper' files. They are in this dir.
-RETORRENT_INCLUDE="~/.retorrent"
-# Elements of a filename that should be removed.
-# (Anything that isn't a checksum that's in braces({[ is removed automatically)
-REMOVE_LIST_FILENAME="removelist.list"
-
-
-# =============================================================================
-# If you make other changes, let me know. I know it's a bit of a mess
-# =============================================================================
-
 import os
 import sys
 import string
@@ -29,19 +10,14 @@ from optparse import OptionParser
 from subprocess import Popen, PIPE
 from zlib import compress
 
-from confparse import *
+import confparse
+
 from debugprinter import debugprinter
 from filenamer import filenamer
 from include_types import *
-from list_controller import read_list, filetype
+from list_controller import read_list
 from optionator import *
 from os_utils import *
-
-# ==================================================
-
-REMOVE_LIST_FILE=os.path.expanduser(os.path.join(RETORRENT_INCLUDE,REMOVE_LIST_FILENAME))
-
-# ==================================================
 
 def main():
 	
@@ -107,7 +83,7 @@ def parse_args():
 class retorrenter:
 	def __init__(self,debug):
 		
-		retorrentconf, folderopts = parse_retorrentconf()
+		retorrentconf, folderopts = confparse.parse_retorrentconf()
 		
 		self.torrentfilesdir = retorrentconf[0]
 		self.seeddir = retorrentconf[1]
@@ -115,8 +91,10 @@ class retorrenter:
 
 		self.folderopts = folderopts
 
-		self.filetypes_of_interest = parse_fileext_details()
-		self.divider_symbols = parse_divider_symbols()
+		self.filetypes_of_interest = confparse.parse_fileext_details()
+		self.divider_symbols = confparse.parse_divider_symbols()
+
+		self.removelist_path = confparse.locate_removelist()	
 
 		self.null_output = {'commands':[], 'symlinks':[], 'torrentfile':''}
 		self.debug = debug
@@ -135,8 +113,7 @@ class retorrenter:
 		# The series or movie-name folder 
 		self.dest_dirpath = ''
 		
-		
-		self.filenamer = filenamer(REMOVE_LIST_FILE, self.divider_symbols, \
+		self.filenamer = filenamer(self.removelist_path, self.divider_symbols, \
 					self.filetypes_of_interest, \
 					the_debugprinter=self.debugprinter) 
 	

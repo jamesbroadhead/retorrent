@@ -19,3 +19,17 @@ Check for references to list_controller
 	= Used in both filenamer and retorrent. 
 	=> remove one of those references. Which makes more sense?
 
+=== 
+TODO: Deal with .mkv%09 and .avi.1
+
+===
+# TODO: Handle filename overlap  
+#   Current behaviour: Use mv --no-clobber. 
+#   Better would be: Detect overlap in filenamer + pick another / ask. 
+#   or               Detect overlap at question time + ask
+=== 
+
+Remove writes from all remove list edits. What was I thinking? 
+
+
+
