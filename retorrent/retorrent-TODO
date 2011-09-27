@@ -5,3 +5,12 @@ Keeping years should be an option.
 Accept all unicode characters :-/
 
 Pick up S01 as a series number + remove for dirs.
+
+===
+On first-run, create and populate ~/.retorrent
+=== 
+Print handy info retorrent -h
+===
+man .retorrent/*
+=== 
+Interactive creation of .retorrent/*
