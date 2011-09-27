@@ -14,3 +14,8 @@ Print handy info retorrent -h
 man .retorrent/*
 === 
 Interactive creation of .retorrent/*
+=== 
+Check for references to list_controller
+	= Used in both filenamer and retorrent. 
+	=> remove one of those references. Which makes more sense?
+
