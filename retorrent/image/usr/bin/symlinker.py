@@ -3,7 +3,7 @@ from confparse import *
 from os_utils import *
 
 def main():
-	folderopts = parse_folderconfig()	
+	foo,folderopts = parse_retorrentconf()	
 
 	for folderopt in folderopts:
 				
