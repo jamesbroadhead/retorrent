@@ -159,8 +159,16 @@ class retorrenter:
 		self.debugprint("Dirpath after autoset: " + self.dest_dirpath)
 
 		if self.dest_category == "": 
-			self.manually_set_dest_category(argument,orig_paths)
-			if self.dest_category == "":
+			try:	
+				self.manually_set_dest_category(argument,orig_paths)
+			except:
+				# we are skipping this file.
+				print "skipping!"
+				self.reset_env()	
+				return self.null_output
+			# TODO: Remove this. 
+			# All circumstances where s.d_c=='' should be caught instead.
+			if self.dest_category == '':
 				# we are skipping this file.
 				print "skipping!"
 				self.reset_env()	
@@ -461,15 +469,19 @@ class retorrenter:
 				
 				return
 		
-		print 'Error -- category was unrecognised!'
-		self.manually_set_dest_category(argument,orig_paths)
+		if dest_category_name == '<cancel>':
+			raise
+		else: 
+			print 'Error -- category was unrecognised!'
+			self.manually_set_dest_category(argument,orig_paths)
 	
 	def autoset_dest_folder_from_dest_category(self,orig_paths):
 		if self.dest_category:	
 			for path in self.dest_category['paths']:
 				self.debugprint('Possible path: ' + path)
 				if not os.path.exists(path):
-					print 'Warning: Config contains a path that doesn\'t exist: ' + path
+					print 'Warning: Config contains a path that doesn\'t exist: ' + path, 'Creating ...'
+					mkdir_p(path)
 				elif enough_space(orig_paths,path):
 					self.debugprint('Setting dest_folder to: '+path)	
 					self.dest_folder = path
