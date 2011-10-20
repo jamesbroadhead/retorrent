@@ -11,23 +11,22 @@ SLOT="1.7"
 KEYWORDS="~alpha ~amd64 ~hppa ~ia64 ~ppc ~ppc64 ~sparc ~x86"
 IUSE="bzip2 jpeg opengl png tiff truetype zlib"
 
-# newis autoconf needed for working mmap check
+# newish autoconf needed for working mmap check
 RDEPEND="x11-libs/libXrandr
 	x11-libs/libXcursor
 	>=sys-devel/autoconf-2.67
-	bzip2? ( >=app-arch/bzip2-1.0.2 )
+	bzip2? ( app-arch/bzip2 )
 	jpeg? ( virtual/jpeg )
 	opengl? ( virtual/opengl )
-	png? ( >=media-libs/libpng-1.2.5 )
-	tiff? ( >=media-libs/tiff-3.5.7 )
+	png? ( media-libs/libpng )
+	tiff? ( media-libs/tiff )
 	truetype? ( media-libs/freetype:2
 		x11-libs/libXft )
-	zlib? ( >=sys-libs/zlib-1.1.4 )"
+	zlib? ( sys-libs/zlib )"
 DEPEND="${RDEPEND}
+	media-libs/mesa	
 	x11-proto/xextproto
-	x11-libs/libXt
-	!x11-libs/fox:1.6	
-	!x11-libs/fox-wrapper"
+	x11-libs/libXt"
 
 FOXCONF="$(use_enable bzip2 bz2lib) \
 	$(use_enable jpeg) \

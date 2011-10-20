@@ -18,6 +18,7 @@ IUSE="dbus gcrypt"
 RDEPEND="dev-db/sqlite:3
 	media-libs/taglib
 	media-libs/xine-lib
+	media-sound/gap	
 	net-misc/curl
 	x11-libs/fox:1.7[png]
 	dbus? ( sys-apps/dbus )
