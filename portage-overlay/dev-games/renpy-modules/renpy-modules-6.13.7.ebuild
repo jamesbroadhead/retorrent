@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI="2"
+EAPI="4"
 
 PYTHON_DEPEND="2:2.5"
 SUPPORT_PYTHON_ABIS="1"
@@ -34,6 +34,10 @@ DEPEND="
 RDEPEND="${DEPEND}"
 
 S="${WORKDIR}/${MY_P}/module"
+
+src_prepare() {
+	epatch "${FILESDIR}/${PN}-libpng15.patch"
+}
 
 src_compile() {
 	export RENPY_DEPS_INSTALL="${ROOT}usr"
