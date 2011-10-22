@@ -8,7 +8,7 @@ def main():
 	for folderopt in folderopts:
 				
 		category_home = folderopt['home']	
-		mkdir_p(category_home)
+		mkdir_p(os.path.expanduser(category_home))
 		print 'Considering : ', category_home
 	
 		removed = []
@@ -33,7 +33,7 @@ def main():
 			#print 'Looking at... ',content_dir	
 			if not os.path.exists(content_dir):
 				print 'A content dir is missing! Creating ... ',content_dir
-				mkdir_p(content_dir)
+				mkdir_p(os.path.expanduser(content_dir))
 
 			for content in os.listdir(content_dir):
 				#print 'Movie: ',content	
