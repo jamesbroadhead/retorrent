@@ -119,11 +119,20 @@ fox_src_prepare() {
 
 	# use the installed headers and library for apps
 	for d in ${FOX_APPS} ; do
+
 		sed -i \
 			-e "s:-I\$(top_srcdir)/include -I\$(top_builddir)/include:-I\$(includedir)/fox-${FOXVER}:" \
-			-e 's:$(top_builddir)/src/libFOX:-lFOX:' \
 			-e 's:\.la::' \
 			${d}/Makefile.am || die "sed ${d}/Makefile.am error"
+
+		if [[ "${FOXVER}" < "1.7" ]] ;  then
+			sed -i -e 's:$(top_builddir)/src/libFOX/libFOX:-lFOX:' \
+			${d}/Makefile.am
+		else
+			sed -i -e 's:$(top_builddir)/lib/libFOX:-lFOX:' \
+			${d}/Makefile.am
+
+		fi
 	done
 
 	eautoreconf
@@ -203,11 +212,11 @@ fox_pkg_postinst() {
 	if [ -z "${FOX_COMPONENT}" ] ; then
 		echo
 		einfo "The applications bundled with the FOX Toolkit are now available as"
-		einfo "app-editors/adie, dev-util/reswrap sci-calculators/calculator,"
-		einfo "x11-misc/pathfinder and x11-misc/shutterbug"
-
+		einfo "app-editors/adie, dev-util/reswrap, sci-calculators/calculator,"
+		einfo "x11-misc/pathfinder and x11-misc/shutterbug."
+		echo
 		# Version specific. Remove once all fox-1.6* are gone.
-		if [ ${FOXVER} -lt 1.7 ] ; then
+		if [[ "${FOXVER}" < "1.7" ]] ; then
 			einfo "The fox-config script has been installed as fox-${FOXVER}-config."
 			einfo "The fox-wrapper package is used to direct calls to fox-config"
 			einfo "to the correct versioned script, based on the WANT_FOX variable."

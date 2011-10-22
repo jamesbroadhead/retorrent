@@ -4,7 +4,7 @@
 
 EAPI="3"
 
-inherit fox2
+inherit fox
 
 LICENSE="LGPL-2.1"
 SLOT="1.7"
@@ -43,4 +43,11 @@ src_install() {
 		mv $CP "${D}/usr/bin/fox-ControlPanel-${FOX_PV}" || \
 			die "Failed to install ControlPanel"
 	fi
+}
+
+pkg_postinst() {
+	fox_pkg_postinst
+
+	einfo "ControlPanel has been installed to 'fox-ControlPanel-${FOX_PV}' to avoid conflicts"
+	einfo "with other packages."
 }

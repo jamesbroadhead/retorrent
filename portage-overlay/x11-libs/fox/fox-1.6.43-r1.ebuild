@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-inherit eutils fox2
+inherit eutils fox
 
 LICENSE="LGPL-2.1"
 SLOT="1.6"
