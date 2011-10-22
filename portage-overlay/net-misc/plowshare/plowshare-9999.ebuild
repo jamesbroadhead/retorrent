@@ -73,7 +73,7 @@ src_test() {
 }
 
 src_install() {
-	DESTDIR="${D}" PREFIX="/usr" emake install || "emake install failed"
+	DESTDIR="${D}" PREFIX="/usr" emake install || die "emake install failed"
 
 	dodoc CHANGELOG README || die "dodoc failed"
 
