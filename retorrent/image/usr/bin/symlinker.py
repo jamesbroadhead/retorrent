@@ -40,19 +40,46 @@ def main():
 				
 				content_path = os.path.abspath(os.path.join(content_dir,content))
 				symlink_path = os.path.abspath(os.path.join(category_home,content))
-				
 				if not os.path.exists(symlink_path):
 					os.symlink(content_path,symlink_path)
 					if content in removed:
 						print 'Replaced a broken symlink',content
-				elif not os.path.realpath(symlink_path) ==\
+				elif os.path.islink(symlink_path) and \
+					not os.path.realpath(symlink_path) == \
 						os.path.realpath(content_path):
-					print 'Duplicate content found! ',content,' in \n(==>)',os.path.dirname(os.path.realpath(symlink_path)),' and also \n     ', content_dir 
-							
+					
+					oldlink_realpath = os.path.realpath(symlink_path)
+					
+					# remove oldlink
+					os.remove(symlink_path)	
+					
+					# mkdir foo
+					mkdir_p(symlink_path)
+					
+					link_contents(oldlink_realpath,symlink_path)
+					link_contents(content_path,symlink_path)
+				
 				else:
 					# the symlink exists + points at this content :D
 					pass
 
+	
+def link_contents(content_path,linkdir_path):
+	content_realpath = os.path.realpath(content_path)	
+	for fn in os.listdir(content_realpath):
+		f_realpath = os.path.join(content_realpath,fn)
+		f_sympath = os.path.join(linkdir_path,fn)
+
+		if not os.path.exists(f_sympath):
+			os.symlink(f_realpath,f_sympath)
+		elif os.path.exists(f_sympath) and \
+				not sym_sametarget(f_sympath,f_realpath):
+			print 'Duplicate content found for ',f_sympath,' in'
+			print '==>', os.path,realpath(f_sympath)
+			print '   ', os.path.realpath(f_realpath)
+		else:
+			# symlink exists, but points to same location.
+			pass
 
 if __name__ == '__main__':
 	main()
