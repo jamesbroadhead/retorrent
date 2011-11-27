@@ -16,8 +16,10 @@ def main():
 		for elem in os.listdir(category_home):
 			elem_path = os.path.join(category_home,elem)	
 			if not os.path.islink(elem_path):
-				print 'Raw file detected -- only symlinks should be in cat. home dirs. ', elem		
-				
+				for f in os.listdir(elem_path):
+					if not os.path.islink(os.path.join(elem_path,f)):
+						print 'Non-symlinked file detected in folder', elem_path
+						print '\t Non-symlinked folders should only contain symlinks'
 			else:
 				if os.path.lexists(elem_path) and not os.path.exists(elem_path):
 					print 'Broken symlink! Removing.', elem
