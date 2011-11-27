@@ -598,7 +598,6 @@ class retorrenter:
 	def is_of_interest(self,file_path, filename):
 		self.debugprint('retorrenter.is_of_interest(' + file_path + ',' + filename + ')')
 		
-		
 		(path,extension) = os.path.splitext(file_path)
 		# trim the . from the extension for matching
 		extension = extension[1:].lower()	
