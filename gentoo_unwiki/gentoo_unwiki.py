@@ -37,7 +37,9 @@ from mechwrapper import setup_browser, getpage
 from wikiwrapper import wikiparams_siteinfo 
 
 def main():
-	""" Performs setup, crawling and handles output """	
+	""" Will: Perform setup, crawling and handles output. 
+	Currently: Connects to both servers and checks that it can fetch pages
+	"""	
 	
 	info_catpage =  'http://www.gentoo-wiki.info/Category:Browse_categories'	
 	info_indexpage = 'http://www.gentoo-wiki.info/Index:Index'
@@ -67,10 +69,12 @@ def main():
 		print 'gentoo-wiki.com has disabled their API'
 		com_response_out = ''
 	except APIError:
-		# TODO - Thrown when: 
-		# If a multipart request is made and the poster module is not available
-		# When trying to change the result format using changeParam
-		# When the MediaWiki API returns an error
+		# TODO Wrap wikisite.APIRequest & handle APIError better. Need test site
+		# APIError: 
+		#  If a multipart request is made and the poster module is not available
+		#  When trying to change the result format using changeParam
+		#  When the MediaWiki API returns an error
+		
 		print 'gentoo-wiki.com\'s API returned an error'
 		com_response_out = ''
 
@@ -79,8 +83,6 @@ def main():
 
 	print 'gentoo-wiki.com output:'	
 	pprint.pprint(com_response_out)
-	
-	## TODO: Validate the above
 
 if __name__ == '__main__':
 	try:
