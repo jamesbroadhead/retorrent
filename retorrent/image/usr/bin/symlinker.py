@@ -34,9 +34,8 @@ def main():
 		for content_dir in folderopt['paths']:
 			#print 'Looking at... ',content_dir	
 			if not os.path.exists(content_dir):
-				print 'A content dir is missing! Creating ... ',content_dir
-				mkdir_p(os.path.expanduser(content_dir))
-
+				#print 'A content dir is missing! Please create:',content_dir
+				continue	
 			for content in os.listdir(content_dir):
 				#print 'Movie: ',content	
 				
@@ -51,16 +50,21 @@ def main():
 						os.path.realpath(content_path):
 					
 					oldlink_realpath = os.path.realpath(symlink_path)
-					
-					# remove oldlink
-					os.remove(symlink_path)	
-					
-					# mkdir foo
-					mkdir_p(symlink_path)
-					
-					link_contents(oldlink_realpath,symlink_path)
-					link_contents(content_path,symlink_path)
-				
+					if os.path.isdir(oldlink_realpath) and \
+							os.path.isdir(content_path):
+						
+						# remove oldlink
+						os.remove(symlink_path)	
+						
+						# mkdir foo
+						mkdir_p(symlink_path)
+						
+						link_contents(oldlink_realpath,symlink_path)
+						link_contents(content_path,symlink_path)
+					else:
+						print 'Duplicate files, can\'t combine :('
+						print '\t',oldlink_realpath
+						print '\t',content_path
 				else:
 					# the symlink exists + points at this content :D
 					pass
