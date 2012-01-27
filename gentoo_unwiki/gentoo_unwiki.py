@@ -27,62 +27,19 @@ With content from:
 	http://stockrt.github.com/p/emulating-a-browser-in-python-with-mechanize/
 """
 
-import pprint 
-
-import mechanize
-
-from wikitools import api, wiki, APIError, APIDisabled
-
-from mechwrapper import setup_browser, getpage
-from wikiwrapper import wikiparams_siteinfo 
+from gw_com_wrapper import gw_com
+from gw_info_wrapper import gw_info
 
 def main():
 	""" Will: Perform setup, crawling and handles output. 
 	Currently: Connects to both servers and checks that it can fetch pages
 	"""	
-	
-	info_catpage =  'http://www.gentoo-wiki.info/Category:Browse_categories'	
-	info_indexpage = 'http://www.gentoo-wiki.info/Index:Index'
+	com = gw_com()
+	info = gw_info()
 
-	com_catpage =   'http://en.gentoo-wiki.com/wiki/Category:Browse_Categories'	
-	com_indexpage = 'http://en.gentoo-wiki.com/wiki/Category:Index'
-	com_api =       'http://en.gentoo-wiki.com/w/api.php'	
+	com.test_connection()
+	info.test_connection()
 	
-	browser = setup_browser()
-	
-	# Test fetching from g-w.info
-	try:
-		info_response = getpage(browser, info_catpage)
-		info_response_out = info_response.read()
-	
-	except mechanize.RobotExclusionError:
-		print 'gentoo-wiki.info denied access with robots.txt'
-		info_response_out = ''
-	
-	# Test fetching from g-w.com
-	com_wikisite = wiki.Wiki(com_api)
-	
-	try:
-		wikireq = api.APIRequest(com_wikisite, wikiparams_siteinfo)
-		com_response_out = wikireq.query(querycontinue=False)
-	except APIDisabled:
-		print 'gentoo-wiki.com has disabled their API'
-		com_response_out = ''
-	except APIError:
-		# TODO Wrap wikisite.APIRequest & handle APIError better. Need test site
-		# APIError: 
-		#  If a multipart request is made and the poster module is not available
-		#  When trying to change the result format using changeParam
-		#  When the MediaWiki API returns an error
-		
-		print 'gentoo-wiki.com\'s API returned an error'
-		com_response_out = ''
-
-	print 'gentoo-wiki.info output:'	
-	pprint.pprint(info_response_out)
-
-	print 'gentoo-wiki.com output:'	
-	pprint.pprint(com_response_out)
 
 if __name__ == '__main__':
 	try:
