@@ -3,21 +3,21 @@
 import os
 import string
 
+import removelist
+import os_utils
+
 from debugprinter import debugprinter
 from episoder import episoder
-from list_controller import add_to_list, read_list
 
-import os_utils
 class filenamer:
 	openbraces = [ "[" , "{", "(" ] 
 	closebraces = [ "]", "}", ")" ] 
 	hexdigits = "0123456789abcdefABCDEF"
 	
 
-	def __init__(self, remove_list_filepath, divider_list , filetypes_of_interest, the_debugprinter=debugprinter(False)):
+	def __init__(self, divider_list , filetypes_of_interest, the_debugprinter=debugprinter(False)):
 		
-		self.remove_list_filepath = remove_list_filepath
-		self.remove_list = read_list(remove_list_filepath)
+		self.remove_list = removelist.read_list()
 		
 		self.divider_list = divider_list
 		self.fileext_list = [ f['fileext'] for f in filetypes_of_interest ] 
@@ -30,23 +30,9 @@ class filenamer:
 	def debugprint(self, str, listol=[]):
 		self.debugprinter.debugprint(str,listol)
 	
-	# TODO : re-write!
 	def add_to_removelist(self,item):
-		if len(item) > 0:
-			print "Adding ", item ," to the remove list"
-			self.add_extra_removeitem(item)
-			add_to_list(item,self.remove_list_filepath)
-	
-	# TODO : re-write!
-	def add_extra_removeitem(self,removelist_extra):
-		if not removelist_extra in self.remove_list:
-			self.remove_list += [removelist_extra]
-			print 'added: ', removelist_extra
-		else:
-			print 'didn\'t add:', removelist_extra
-		
-		return
-	
+		self.remove_list = removelist.add_and_sync(self.remove_list,item)
+
 	def set_num_interesting_files(self,num_interesting_files):
 		self.the_episoder.set_num_interesting_files(num_interesting_files)
 
@@ -208,8 +194,7 @@ class filenamer:
 		return filename
 	
 	def remove_dupe_dots(self,filename):
-		if filename[0] == ".":
-			filename = filename[1:]
+		filename = filename.strip('.')
 		
 		ddot_index = filename.find("..")
 		while not ddot_index == -1:
@@ -228,12 +213,19 @@ class filenamer:
 
 	# this will prob. catch subbers too, they should be removed first
 	def is_checksum(self, item):
-		if len(item) == 10 and item[0] in self.openbraces and item[-1] in self.closebraces:
+		
+		# 8-digit checksum + braces	
+		if not len(item) == 10:
+			return False
+
+		if item[0] in self.openbraces and \
+			item[-1] in self.closebraces:
+	
 			for i in item[1:9]:
 				if not i in self.hexdigits:
 					return False
-			return True
-		return False 
+		
+		return True
 
 	def remove_empty_elements(self, filename_split):
 		return [ item for item in filename_split if not item == '' ]	

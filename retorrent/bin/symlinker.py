@@ -1,14 +1,17 @@
 #!/usr/bin/python
-from confparse import *
-from os_utils import *
+
+import os
+
+from os_utils import os_utils 
+from retorrentlib import confparse
 
 def main():
-	foo,folderopts = parse_retorrentconf()	
+	foo,folderopts = confparse.parse_retorrentconf()	
 
 	for folderopt in folderopts:
 				
 		category_home = folderopt['home']	
-		mkdir_p(os.path.expanduser(category_home))
+		os_utils.mkdir_p(os.path.expanduser(category_home))
 		print 'Considering : ', category_home
 	
 		removed = []

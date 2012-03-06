@@ -2,7 +2,7 @@
 import os 
 import sys
 
-from seededlib import is_seeded
+from retorrentlib import seededlib 
 
 def main():
 	if len(sys.argv) < 2 :
@@ -11,7 +11,7 @@ def main():
 
 	args = sys.argv[1:]
 
-	seeded,unseeded = is_seeded(args)
+	seeded,unseeded = seededlib.is_seeded(args)
 	
 	print "Seeded:"
 	for i in seeded:

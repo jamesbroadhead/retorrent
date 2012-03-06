@@ -9,6 +9,7 @@ numerals_asc = numerals[:]
 numerals_asc.reverse()
 nums_and_bigrams = ('M',  'CM', 'D', 'CD','C', 'XC','L','XL','X','IX','V','IV','I')
 ints_and_bigrams = (1000, 900,  500, 400, 100,  90, 50,  40, 10,  9,   5,  4,   1)
+# END TODO rm
 
 n_and_b = {'M':1000,\
 			'CM':900,\

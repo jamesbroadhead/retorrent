@@ -6,7 +6,7 @@ import shutil
 from ConfigParser import ConfigParser
 from os.path import expanduser
 
-from os_utils import mkdir_p
+from os_utils import os_utils
 
 config_paths = [\
 	os.path.abspath('./'),\
@@ -92,7 +92,7 @@ def parse_retorrentconf():
 		if os.path.exists(skelfile):
 			if not os.path.exists(os.path.join(confdir,filename + '_skel')):
 				print 'Creating a skeleton $HOME/.retorrent/retorrent.conf, please configure it to your system'
-				mkdir_p(confdir)
+				os_utils.mkdir_p(confdir)
 				shutil.copyfile('/usr/share/retorrent/retorrent.conf_skel',os.path.expanduser('~/.retorrent/retorrent.conf_skel'))	
 			else:
 				print 'Please configure the retorrent.conf_skel in ${HOME}/.retorrent and rename it to '+filename
@@ -149,9 +149,12 @@ def parse_fileext_details():
 
 	return output 
 
+def read_fileexts():
+	filetypes = confparse.parse_fileext_details()
+	fileexts = [ f['fileext'] for f in filetypes ]
+	return fileexts
 
 def parse_divider_symbols():
-	
 	filename = 'divider_symbols.conf'
 	defaultoptions =  { 'symbols' : ' +-_@,' }
 	symbols = []	
@@ -171,7 +174,7 @@ def parse_divider_symbols():
 	
 	return symbols
 
-def locate_removelist():
+def find_removelist():
 	removelist_filename = 'removestrings.list'	
 
 	for path in config_paths:

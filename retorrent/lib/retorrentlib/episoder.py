@@ -4,7 +4,7 @@ import roman
 
 from debugprinter import debugprinter
 from optionator import *
-from textcontrols import *
+from os_utils import textcontrols 
 
 
 # TODO: Find all assumptions about two-digit episode numbers + mark with ASSUME
@@ -326,7 +326,7 @@ class episoder:
 			# TODO [later] We definitely need episode numbers. 
 			return False
 
-		question = 'Is ' + boldtext + letter + resetbold + ' an episode or part number?'
+		question = 'Is ' + textcontrols.boldtext + letter + textcontrols.resetbold + ' an episode or part number?'
 		# nice defaults
 		if letter == 'a' or letter == 'b':
 			options = [ 'True', 'False' ]

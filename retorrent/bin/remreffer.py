@@ -3,8 +3,6 @@ import os
 from subprocess import Popen
 from optparse import OptionParser
 
-
-
 def main():
 
 	p = OptionParser()
