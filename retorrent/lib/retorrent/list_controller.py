@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import os
 import sys
-import pickle
 
 stripsymbols = ' \n'
 
@@ -17,6 +16,7 @@ def add_to_list(the_item,filepath):
 		write_list(the_list, filepath)
 	return
 
+""" Pre-removal commenting
 def remove_from_list(the_item, filepath):
 	the_list = read_list(filepath)
 	
@@ -29,7 +29,8 @@ def remove_from_list(the_item, filepath):
 		write_list(the_list, filepath)
 	
 	return
-		
+"""	
+
 def write_list(the_list,filepath):
 	the_file = open(filepath, 'w')
 	the_list.sort()	
