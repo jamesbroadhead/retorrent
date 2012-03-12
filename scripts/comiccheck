@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# swap_type FROM TO (eg. swap_type cbr cbz)
+swap_type() {
+	FAILTXT=""
+	BIFS=${IFS}
+	IFS=""
+	
+	if [ ${1,,} == cbr ] ; then
+		TESTSTART="unrar l "
+		TESTEND="  | grep -i 'is not'"
+	elif [ ${1,,} == cbz ] ; then
+		TESTSTART="unzip -l "
+		TESTEND="  2>&1 | grep 'cannot find zipfile'"
+	else
+		echo "I don't know that type!"
+		return
+	fi
+
+	for i in *${1,,} *${1^^} ; do 
+		TEST="${TESTSTART} \"${i}\" ${TESTEND}"	
+		FAILTXT=$(eval ${TEST})
+		# if not zero length, echo, try as zip, mv to cbz
+		if ! [ -z "$FAILTXT" ] ; then 
+			echo "!${1,,}: ${i}" 
+			toname="${i/%$1/${2,,}}"
+			if ! [ -e "${toname}" ] ; then 
+				mv "$i" "${toname}"
+			else
+				echo "${i} is not a ${1,,}, but not overwriting ${toname}"
+			fi
+		fi
+
+		FAILTXT=""
+	done
+	
+	IFS=${BIFS}
+}
+
+swap_type cbr cbz
+swap_type cbz cbr
