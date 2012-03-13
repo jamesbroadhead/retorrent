@@ -37,7 +37,7 @@ class episoder:
 	interactive = False	
 	def __init__(self,debugprinter=debugprinter(False)):
 		self.debugprinter = debugprinter
-		self.known_years = range(1980,2015)
+		self.preserve_years = {}
 
 	def debugprint(self, str, listol=[]):
 		self.debugprinter.debugprint(str,listol)	
@@ -168,11 +168,13 @@ class episoder:
 			
 			# eg. 0104 == s01e04
 			elif len(item) == 4:
-				if not self.ask_is_year(item):	
+				is_year,item_mod = self.prune_possible_year(item)
+				if not is_year: 
 					split_fn[index] = self.gen_full_epno_string(item[2:], item[0:2])	
 					return split_fn, True
 				else:
-					# it is a year
+					# it is a year, remove if requested to
+					split_fn[index] = item_mod
 					return split_fn, False
 			else:
 				# it's a >5 digit number ... boring	
@@ -482,22 +484,30 @@ class episoder:
 		print "episoder.number_is_episodenumber: assuming 2-digit is epno"
 		return True
 	
-	def ask_is_year(self,item):
-		if item.isdigit() and int(item) in self.known_years:
-			return True
+	def prune_possible_year(self,item):
+		if item.isdigit() and int(item) in self.preserve_years:
+			if self.preserve_years[int(item)]:
+				return True,item
+			else:
+				return True,''
 		elif not self.interactive:
-			return False
+			return False,item
 		else:
-		#	self.debugprint('Known years are ',','.join([str(i) for i in self.known_years]))
 			thisyear = datetime.datetime.now().year
 			if item.isdigit() and len(item) == 4 and int(item) <= thisyear:
-				is_year = booloptionator('Does ' + item + ' represent a year?', \
-						['True', 'False'])
+				options = ['Yes - Preserve', 'Yes - Remove', 'No']
+				is_year = ioptionator('Does ' + item + ' represent a year?', options) 
+						
 				
-				if is_year: 
-					self.known_years += [ int(item) ]
-					return True
-		return False
+				if is_year == 0:
+					self.preserve_years[int(item)] = True
+					return True,item
+				elif is_year == 1:
+					self.preserve_years[int(item)] = False
+					return True,''
+				elif not is_year == 2:
+					print 'Taking ' + options[2]
+		return False,item
 
 	# This receives a full part of the foldername ( eg. ep01)	
 	def is_raw_episode_numbering_string(self,string):	

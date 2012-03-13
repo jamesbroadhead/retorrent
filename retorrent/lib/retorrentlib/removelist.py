@@ -1,5 +1,7 @@
 #!/usr/bin/python
+
 import os
+import string
 import sys
 
 import confparse
@@ -16,27 +18,28 @@ def read_list():
 	return rmlist
 
 
-def write_list(rmlist,filepath):
+def write_list(rmlist):
 	filepath = confparse.find_removelist()
 
-	rmlist = [ i.append('\n') for i in rmlist ]	
-	rmlist.sort()	
+	rmlist_out = [ i+'\n' for i in rmlist ]	
+	rmlist_out.sort()	
 	
 	with open(filepath,'w') as f:
-		f.writelines(rmlist)
+		f.writelines(rmlist_out)
 		os.fsync(f)
 
 # TODO: What else is illegal input?
+
 def add_and_sync(rmlist,item):
 
 	# make sure it's not a file extension
 	fileext_list = confparse.read_fileexts()
-	if item and not string.strip(item,' .') in fileext_list:
-		rmlist.append(item)
 	
 	rmlist = set(rmlist)
+	if item and not string.strip(item,' .') in fileext_list:
+		rmlist.add(item)
 	
-	write_list(the_list, filepath)
+	write_list(rmlist)
 	return rmlist
 
 

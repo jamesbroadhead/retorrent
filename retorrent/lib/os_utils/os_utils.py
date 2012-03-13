@@ -54,24 +54,15 @@ def enough_space(orig_paths,proposed_path):
 	filesize_B = sum([os.path.getsize(orig_path) for orig_path in orig_paths ])	
 	if not os.path.exists(proposed_path):
 		proposed_path = os.path.dirname(proposed_path.rstrip('/'))
-		print proposed_path
 	
 	if filesize_B < freespace(proposed_path):
 		return True
-	else:
-		proposed_device = device_number(proposed_path)
-		same_drive = [ proposed_device == device_number(path) for path in orig_paths ]
-		for i in same_drive:
-			if not i: return False
-		return True
+	return False
 
 @tracelogdecorator
 def same_volume(orig_paths,proposed_path):
 	prop_dev = device_number(proposed_path)	
-	print prop_dev	
 	for p in orig_paths:
-		print p
-		print device_number(p)
 		if not prop_dev == device_number(p):
 			return False
 	return True

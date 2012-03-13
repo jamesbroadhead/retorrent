@@ -82,11 +82,14 @@ class filenamer:
 		
 		self.debugprint('filenamer.convert_filename, after filenamer.remove_extra_details(removelist): ' + '[' + ', '.join(filename_split) + ']')
 		
-		# Don't want years tangling the episoder. 
-		# Doesn't work well either way, this is better than the opposite 
-		filename_split = self.remove_years(filename_split)
+		# pre-2012 Don't want years tangling the episoder. 
+		# pre-2012 Doesn't work well either way, this is better 					#				than the opposite 
+		# 2012-03 Episoder needs to know about years, as they may have 
+		#				been preserved by filenamer. Therefore, episoder 
+		#				handles all year info now.
+		#filename_split = self.remove_years(filename_split)
 			
-		self.debugprint('filenamer.convert_filename, after episoder.remove_years: ' + '[' + ', '.join(filename_split) + ']')
+		#self.debugprint('filenamer.convert_filename, after episoder.remove_years: ' + '[' + ', '.join(filename_split) + ']')
 
 		# Detect and Convert episode numbers. 
 		# NEW! Movies have cd01,cd02-so they go through episoder
@@ -159,14 +162,6 @@ class filenamer:
 
 		return ufilename
 	
-	def remove_years(self, filename_split):
-		
-		for item in filename_split:
-			if self.the_episoder.ask_is_year(item):
-				del filename_split[filename_split.index(item)]
-
-		return filename_split
-
 	def remove_camelcase(self, filename):
 		if len(filename) == 0:
 			return filename 
@@ -351,24 +346,3 @@ class filenamer:
 			del filename_split[i]
 
 		return filename_split
-
-	def isset_should_remove_years():
-		if should_remove_years == -1:
-			return False
-		else:
-			return True
-		
-	def get_should_remove_years():
-		if not isset_should_remove_set():
-			askfor_should_remove_years()
-		
-		if should_remove_years == 0:
-			return False
-		else:
-			return True
-	
-	def askfor_should_remove_years():
-		if booloptionator('Should we remove years from the filename?'):
-			should_remove_years = 1
-		else:
-			should_remove_years = 0

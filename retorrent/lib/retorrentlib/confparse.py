@@ -158,7 +158,7 @@ def parse_fileext_details(extra_configdir=''):
 	return output 
 
 def read_fileexts():
-	filetypes = confparse.parse_fileext_details()
+	filetypes = parse_fileext_details()
 	fileexts = [ f['fileext'] for f in filetypes ]
 	return fileexts
 
