@@ -43,8 +43,8 @@ class filenamer:
 	def convert_filename(self, filename,is_foldername,interactive=True):
 		self.the_episoder.interactive = interactive
 		
-		if interactive:
-			print 'Examining: ' + filename	
+		#if interactive:
+			#print 'Examining: ' + filename	
 		if filename == '':
 			self.debugprint('Not converting blank filename!',[])
 			return ''

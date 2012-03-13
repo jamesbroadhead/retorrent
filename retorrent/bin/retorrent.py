@@ -1,24 +1,37 @@
 #!/usr/bin/python
 # Author: James Broadhead jamesbroadhead@gmail.com
 
+import logging
 import os
 import sys
 import string
 
-from difflib import SequenceMatcher
-
-from retorrentlib import retorrenter
+from retorrentlib import retorrenter, confparse
 
 from optparse import OptionParser
 from subprocess import Popen, PIPE
 from zlib import compress
 
-
 def main():
 	
 	options, args = parse_args()
+
+	if options.debug:
+		logging.basicConfig(level=logging.INFO)
 	
-	r = retorrenter.retorrenter(options.debug)	
+	print options.configdir
+
+	config = { 'retorrentconf_folderopts': 
+			confparse.parse_retorrentconf(options.configdir),
+		'parse_fileext_details':	
+			confparse.parse_fileext_details(options.configdir),
+		'parse_divider_symbols':	
+			confparse.parse_divider_symbols(options.configdir),
+		'find_removelist':	
+			confparse.find_removelist(options.configdir)}
+
+	# TODO : proper logging, remove the options.debug arg
+	r = retorrenter.retorrenter(config,debug=options.debug)	
 	
 	seed_torrentfiles = []
 	
@@ -62,6 +75,11 @@ def check_symlinks(r,symlinks):
 
 def parse_args():
 	parser = OptionParser()
+	
+	parser.add_option('-c', '--config-dir',
+                    help='Specify alternate config dir',
+                    dest='configdir',
+                    default='')
 
 	parser.add_option('-d', '--debug',
                     help='Print debug messages (where implemented)',
@@ -72,10 +90,6 @@ def parse_args():
 	options, args = parser.parse_args()
 
 	return options, args
-
-def compare_scores(A,B):
-	return cmp(B['score'],A['score'])
-
 
 def print_optionstructions():
 	print

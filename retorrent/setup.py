@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+from distutils.core import setup 
 
 setup(name='retorrent',
 	version='0.1',
@@ -8,8 +8,12 @@ setup(name='retorrent',
 	author='jbo',
 	author_email='jamesbroadhead@gmail.com',
 	url='http://code.google.com/p/jamesbroadhead',
-	packages = {'retorrentlib', 'os_utils'},
+	packages = {'retorrentlib', 'os_utils', 'logdecorator'},
 	package_dir = {'': 'lib'},
+	data_files=[ ('usr/share/retorrent', 
+					['conf/divider_symbols.conf', 
+					 'conf/fileext_details.conf', 
+					 'conf/retorrent.conf_skel'])],
 	scripts=['bin/is_seeded.py',
 			 'bin/remreffer.py',
 			 'bin/retorrent.py',

@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 
+import logging
 import os
 
-import confparse
+from difflib import SequenceMatcher
 
 from debugprinter import debugprinter
 from filenamer import filenamer
+from logdecorators.tracelogdecorator import tracelogdecorator
 from optionator import optionator, eqoptionator 
 from os_utils import os_utils
 
 class retorrenter:
-	def __init__(self,debug):
+	def __init__(self,config,debug=False):
 		
-		retorrentconf, folderopts = confparse.parse_retorrentconf()
+		retorrentconf, folderopts = config['retorrentconf_folderopts']
 		
 		self.torrentfilesdir = retorrentconf[0]
 		self.seeddir = retorrentconf[1]
@@ -20,10 +22,9 @@ class retorrenter:
 
 		self.folderopts = folderopts
 
-		self.filetypes_of_interest = confparse.parse_fileext_details()
-		self.divider_symbols = confparse.parse_divider_symbols()
-
-		self.removelist_path = confparse.find_removelist()	
+		self.filetypes_of_interest = config['parse_fileext_details']
+		self.divider_symbols = config['parse_divider_symbols']
+		self.removelist_path = config['find_removelist']
 
 		self.null_output = {'commands':[], 'symlinks':[], 'torrentfile':''}
 		self.debug = debug
@@ -49,8 +50,6 @@ class retorrenter:
 	def set_num_interesting_files(self,num_interesting_files):
 		self.filenamer.set_num_interesting_files(num_interesting_files)
 
-		
-	
 	def handle_arg(self,argument):
 		
 		print "|\n|\n|\n|"
@@ -344,7 +343,7 @@ class retorrenter:
 						self.dest_category = category
 
 						self.dest_series_folder = poss_series_folder
-						if enough_space(orig_paths,possible_path):
+						if os_utils.enough_space(orig_paths,possible_path):
 							self.dest_folder = cat_folder
 							self.dest_dirpath = possible_path 
 						else:
@@ -365,13 +364,14 @@ class retorrenter:
 				self.debugprint('Checking:' + possible_path)	
 				self.debugprint('Equivalent candidate: ' + possible_path)	
 				
-				if os.path.exists(possible_path) and enough_space(orig_paths,possible_path):
+				if os.path.exists(possible_path) and \
+						os_utils.enough_space(orig_paths,possible_path):
 					self.dest_folder = cat_folder
 					self.dest_dirpath = possible_path
 					return
 
 			for cat_folder in self.dest_category['paths']:
-				if enough_space(orig_paths,possible_path):
+				if os_utils.enough_space(orig_paths,possible_path):
 					self.dest_folder = cat_folder
 					self.dest_dirpath = possible_path
 					return
@@ -404,14 +404,14 @@ class retorrenter:
 			print 'Error -- category was unrecognised!'
 			self.manually_set_dest_category(argument,orig_paths)
 	
+	@tracelogdecorator
 	def autoset_dest_folder_from_dest_category(self,orig_paths):
 		if self.dest_category:	
 			for path in self.dest_category['paths']:
 				self.debugprint('Possible path: ' + path)
 				if not os.path.exists(path):
-					print 'Warning: Config contains a path that doesn\'t exist: ' + path, 'Creating ...'
-					mkdir_p(path)
-				elif enough_space(orig_paths,path):
+					print 'Warning: Config contains a path that doesn\'t exist: ' + path, 'Skipping...'
+				elif os_utils.enough_space(orig_paths,path):
 					self.debugprint('Setting dest_folder to: '+path)	
 					self.dest_folder = path
 					return
@@ -520,13 +520,13 @@ class retorrenter:
 				intermeds_to_keep += [intermed]
 				filenames_to_keep += [filename]
 			else: 
-				print "Skipping ",os.path.basename(filepath)
+				#print "Skipping ",os.path.basename(filepath)
 				num_discarded_files += 1
 
 		return filepaths_to_keep,intermeds_to_keep,filenames_to_keep,num_discarded_files 
-
+	
+	@tracelogdecorator
 	def is_of_interest(self,file_path, filename):
-		self.debugprint('retorrenter.is_of_interest(' + file_path + ',' + filename + ')')
 		
 		(path,extension) = os.path.splitext(file_path)
 		# trim the . from the extension for matching
@@ -571,17 +571,21 @@ class retorrenter:
 		tfiles = []
 		for tfile in the_torrentfiles:
 			cf = self.filenamer.convert_filename(tfile.rstrip('torrent').rstrip('.'),True,interactive=False) 	
-			score = SequenceMatcher('',str2utf8(arg_name),str2utf8(cf)).ratio()
+			score = SequenceMatcher('',os_utils.str2utf8(arg_name),os_utils.str2utf8(cf)).ratio()
 		
 			tfiles += [{'filename':tfile, 'conv_filename':cf, 'score':score } ]
 
 		
-		tfiles = sorted(tfiles, compare_scores)
+		tfiles = sorted(tfiles, self.compare_scores)
 
 		chosen_torrentfile = optionator('For: '+arg_name,[ t['filename'] for t in tfiles] )
 
 		return chosen_torrentfile
 	
+	# TODO: lambda-ify
+	def compare_scores(self,A,B):
+		    return cmp(B['score'],A['score'])
+
 	def gen_seeddir_paths(self,orig_foldername,orig_intermeds,orig_filenames):
 			
 		return [ self.seeddir + "/" + orig_foldername + "/" + intermeds + '/' + filename for intermeds,filename in zip(orig_intermeds,orig_filenames) ] 

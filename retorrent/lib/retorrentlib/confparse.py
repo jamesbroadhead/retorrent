@@ -8,6 +8,9 @@ from os.path import expanduser
 
 from os_utils import os_utils
 
+# TODO: Some object orientation ?
+# TODO: retorrent.conf -> use global_content_dirs
+
 config_paths = [\
 	os.path.abspath('./'),\
 	os.path.abspath(os.path.expanduser('~/.retorrent/')), \
@@ -18,8 +21,11 @@ stripsymbols ='\'" '
 
 # Rather than have 2 conf files, have one. 
 # [retorrent] section is special, the rest are 'categories'
-def parse_retorrentconf():
+def parse_retorrentconf(extra_configdir=''):
 	
+	if extra_configdir:
+		config_paths.insert(0,extra_configdir) 
+
 	filename = 'retorrent.conf'
 
 	defaultoptions = { 	'paths':			'',		\
@@ -104,8 +110,11 @@ def parse_retorrentconf():
 
 	return retorrent_output,output 
 
-def parse_fileext_details():
+def parse_fileext_details(extra_configdir=''):
 	
+	if extra_configdir:
+		config_paths.insert(0,extra_configdir) 
+
 	defaultoptions =  { 'type':'movie',\
 						'ignore_if_in_filename':'sample' }
 	
@@ -113,10 +122,6 @@ def parse_fileext_details():
 	
 	config = ConfigParser(defaultoptions)
 	files_read = config.read([ os.path.join(p,filename) for p in config_paths])	
-	
-	# TODO: Write a functional default fileext_details.conf - it's totally broken
-	if not len(files_read):
-		files_read = config.read(os.path.join('/main/checkouts/jamesbroadhead/retorrent/image/usr/share/retorrent',filename))
 	
 	output = [] 
 	
@@ -146,7 +151,10 @@ def parse_fileext_details():
 		}
 		
 		output.append(item)
-
+	
+	if not output:
+		raise EnvironmentError('Could not locate or load ' + filename + ' and cannot operate without it. A default should be in ' + config_paths[-1] + ', check your installation.')
+	
 	return output 
 
 def read_fileexts():
@@ -154,7 +162,11 @@ def read_fileexts():
 	fileexts = [ f['fileext'] for f in filetypes ]
 	return fileexts
 
-def parse_divider_symbols():
+def parse_divider_symbols(extra_configdir=''):
+	
+	if extra_configdir:
+		config_paths.insert(0,extra_configdir) 
+	
 	filename = 'divider_symbols.conf'
 	defaultoptions =  { 'symbols' : ' +-_@,' }
 	symbols = []	
@@ -174,9 +186,11 @@ def parse_divider_symbols():
 	
 	return symbols
 
-def find_removelist():
-	removelist_filename = 'removestrings.list'	
+def find_removelist(extra_configdir=''):
+	if extra_configdir:
+		config_paths.insert(0,extra_configdir) 
 
+	removelist_filename = 'removestrings.list'	
 	for path in config_paths:
 		filepath = os.path.join(path,removelist_filename)
 		if os.path.exists(filepath):

@@ -4,6 +4,8 @@ import platform
 import errno
 import os
 
+from logdecorators.tracelogdecorator import tracelogdecorator
+
 SI_pos = [ 'k','M','G','T' ]
 def freespace(p,units='B'):
 	"""
@@ -40,11 +42,16 @@ def freespace(p,units='B'):
 	
 	return space
 
+@tracelogdecorator
 def enough_space(orig_paths,proposed_path):
-	
-	filesize_B = sum([os.path.getsize(orig_path) for orig_path in orig_paths ])	
+	proposed_path = os.path.expanduser(proposed_path)
+	# first check if they're on the same volume
+	if same_volume(orig_paths,proposed_path):
+		return True
 	
 	proposed_path = os.path.expanduser(proposed_path)
+	
+	filesize_B = sum([os.path.getsize(orig_path) for orig_path in orig_paths ])	
 	if not os.path.exists(proposed_path):
 		proposed_path = os.path.dirname(proposed_path.rstrip('/'))
 		print proposed_path
@@ -58,6 +65,18 @@ def enough_space(orig_paths,proposed_path):
 			if not i: return False
 		return True
 
+@tracelogdecorator
+def same_volume(orig_paths,proposed_path):
+	prop_dev = device_number(proposed_path)	
+	print prop_dev	
+	for p in orig_paths:
+		print p
+		print device_number(p)
+		if not prop_dev == device_number(p):
+			return False
+	return True
+
+@tracelogdecorator
 def device_number(path):
 	return os.stat(os.path.expanduser(path)).st_dev
 
