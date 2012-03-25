@@ -60,7 +60,7 @@ def main():
 						os.remove(symlink_path)	
 						
 						# mkdir foo
-						mkdir_p(symlink_path)
+						os_utils.mkdir_p(symlink_path)
 						
 						link_contents(oldlink_realpath,symlink_path)
 						link_contents(content_path,symlink_path)
@@ -82,9 +82,9 @@ def link_contents(content_path,linkdir_path):
 		if not os.path.exists(f_sympath):
 			os.symlink(f_realpath,f_sympath)
 		elif os.path.exists(f_sympath) and \
-				not sym_sametarget(f_sympath,f_realpath):
+				not os_utils.sym_sametarget(f_sympath,f_realpath):
 			print 'Duplicate content found for ',f_sympath,' in'
-			print '==>', os.path,realpath(f_sympath)
+			print '==>', os.path.realpath(f_sympath)
 			print '   ', os.path.realpath(f_realpath)
 		else:
 			# symlink exists, but points to same location.
