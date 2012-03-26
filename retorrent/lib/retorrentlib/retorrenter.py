@@ -87,13 +87,8 @@ class retorrenter:
 		self.debugprint("Dirpath after autoset: " + self.dest_dirpath)
 
 		if self.dest_category == "": 
-			try:	
-				self.manually_set_dest_category(argument,orig_paths)
-			except:
-				# we are skipping this file.
-				print "skipping!"
-				self.reset_env()	
-				return self.null_output
+			self.manually_set_dest_category(argument,orig_paths)
+			
 			# TODO: Remove this. 
 			# All circumstances where s.d_c=='' should be caught instead.
 			if self.dest_category == '':
@@ -395,7 +390,6 @@ class retorrenter:
 				self.dest_category = folderopt
 				
 				self.autoset_dest_folder_from_dest_category(orig_paths)
-				
 				return
 		
 		if dest_category_name == '<cancel>':
@@ -406,7 +400,7 @@ class retorrenter:
 	
 	@tracelogdecorator
 	def autoset_dest_folder_from_dest_category(self,orig_paths):
-		if self.dest_category:	
+		if self.dest_category:
 			for path in self.dest_category['paths']:
 				self.debugprint('Possible path: ' + path)
 				if not os.path.exists(path):
