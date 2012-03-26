@@ -7,7 +7,7 @@ import os
 from logdecorators.tracelogdecorator import tracelogdecorator
 
 SI_pos = [ 'k','M','G','T' ]
-def freespace(p,units='B'):
+def freespace(p,si_prefix=''):
 	"""
 	Returns the number of free bytes on the drive that ``p`` is on
 	
@@ -32,12 +32,10 @@ def freespace(p,units='B'):
 		
 		space = s.f_frsize * s.f_bavail
 	
-	if not units in SI_pos:
-		raise ValueError	
-	
-	divisor= 1024 * SI_pos.index(units)
-		
-	if divisor > 0.01:
+	if si_prefix:
+		if not si_prefix in SI_pos:
+			raise ValueError('Invalid SI prefix')
+		divisor= 1024 * SI_pos.index(si_prefix)
 		space = float(size) / divisor
 	
 	return space
