@@ -6,7 +6,9 @@ import shutil
 from ConfigParser import ConfigParser
 from os.path import expanduser
 
+from logdecorators.tracelogdecorator import tracelogdecorator
 from os_utils import os_utils
+
 
 # TODO: Some object orientation ?
 # TODO: retorrent.conf -> use global_content_dirs
@@ -21,6 +23,8 @@ stripsymbols ='\'" '
 
 # Rather than have 2 conf files, have one. 
 # [retorrent] section is special, the rest are 'categories'
+
+@tracelogdecorator
 def parse_retorrentconf(extra_configdir=''):
 	
 	if extra_configdir:
