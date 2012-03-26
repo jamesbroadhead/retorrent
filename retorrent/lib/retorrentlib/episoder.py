@@ -495,18 +495,21 @@ class episoder:
 		else:
 			thisyear = datetime.datetime.now().year
 			if item.isdigit() and len(item) == 4 and int(item) <= thisyear:
-				options = ['Yes - Preserve', 'Yes - Remove', 'No']
-				is_year = ioptionator('Does ' + item + ' represent a year?', options) 
+				yes_remove = 'Yes - Remove'
+				yes_preserve = 'Yes - Preserve'
+				no = 'No'
+
+				is_year = optionator('Does ' + item + ' represent a year?', [yes_remove, yes_preserve, no]) 
 						
 				
-				if is_year == 0:
+				if is_year == yes_preserve:
 					self.preserve_years[int(item)] = True
 					return True,item
-				elif is_year == 1:
+				elif is_year == yes_remove:
 					self.preserve_years[int(item)] = False
 					return True,''
-				elif not is_year == 2:
-					print 'Taking ' + options[2]
+				elif not is_year == no:
+					print 'Taking ' + no
 		return False,item
 
 	# This receives a full part of the foldername ( eg. ep01)	
