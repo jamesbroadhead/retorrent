@@ -8,13 +8,17 @@ import os_utils
 
 from debugprinter import debugprinter
 from episoder import episoder
+from logdecorators.tracelogdecorator import tracelogdecorator
+from logdecorators.tracelogdecorator import tracelogdecorator
 
-class filenamer:
-	openbraces = [ "[" , "{", "(" ] 
-	closebraces = [ "]", "}", ")" ] 
-	hexdigits = "0123456789abcdefABCDEF"
+hexdigits = "0123456789abcdefABCDEF"
+openbraces = [ "[" , "{", "(" ] 
+closebraces = [ "]", "}", ")" ] 
 	
 
+
+class filenamer:
+	
 	def __init__(self, divider_list , filetypes_of_interest, the_debugprinter=debugprinter(False)):
 		
 		self.remove_list = removelist.read_list()
@@ -201,26 +205,10 @@ class filenamer:
 	def to_lowercase(self, filename_split):
 		# look for a checksum. Lowercase everything else
 		for index,item in enumerate(filename_split):
-			if not self.is_checksum(item):
+			if not is_checksum(item):
 				filename_split[index] = item.lower()
 		return filename_split
 
-
-	# this will prob. catch subbers too, they should be removed first
-	def is_checksum(self, item):
-		
-		# 8-digit checksum + braces	
-		if not len(item) == 10:
-			return False
-
-		if item[0] in self.openbraces and \
-			item[-1] in self.closebraces:
-	
-			for i in item[1:9]:
-				if not i in self.hexdigits:
-					return False
-		
-		return True
 
 	def remove_empty_elements(self, filename_split):
 		return [ item for item in filename_split if not item == '' ]	
@@ -249,21 +237,21 @@ class filenamer:
 	# remove braces from anything that isn't a checksum
 	def sort_out_braces(self, filename, is_foldername):
 		
-		for brace in self.openbraces:
+		for brace in openbraces:
 			
 			startindex=0
 			openbrace_index = filename[startindex:].find(brace)
 			
 			while not openbrace_index == -1:
 				
-				endbrace_index = filename[startindex:].find(self.closebraces[self.openbraces.index(brace)])
+				endbrace_index = filename[startindex:].find(closebraces[openbraces.index(brace)])
 				if endbrace_index == -1:
 					# there are no endbraces? 
 					# remove the startbrace and return
 					return filename[0:openbrace_index] + filename[openbrace_index:]
 				
 				# don't want checksums in foldernames. Preserve otherwise	
-				elif self.is_checksum(filename[openbrace_index:endbrace_index+1]):
+				elif is_checksum(filename[openbrace_index:endbrace_index+1]):
 					
 					if not is_foldername:
 						# convert to square brackets + continue	
@@ -288,9 +276,9 @@ class filenamer:
 		return filename
 
 	def braces_to_squarebraces(self, filename, openbrace_index, endbrace_index):
-		if filename[openbrace_index] in self.openbraces:
+		if filename[openbrace_index] in openbraces:
 			filename = filename[0:openbrace_index] + "[" + filename[openbrace_index+1:]
-		if filename[endbrace_index] in self.closebraces:
+		if filename[endbrace_index] in closebraces:
 			filename = filename[0:endbrace_index] + "]" + filename[endbrace_index+1:]
 
 		return filename
@@ -337,7 +325,7 @@ class filenamer:
 
 		rmlist = []	
 		for index,elem in enumerate(filename_split[epno_index:]):
-			if not self.is_checksum(elem) and not self.is_fileext(elem):
+			if not is_checksum(elem) and not self.is_fileext(elem):
 				rmlist += [index+epno_index]
 		
 		rmlist.sort(reverse=True)
@@ -346,3 +334,22 @@ class filenamer:
 			del filename_split[i]
 
 		return filename_split
+
+
+@tracelogdecorator
+def is_checksum(item):
+	
+	# 8-digit checksum + braces	
+	if not len(item) == 10:
+		return False
+
+	if not item[0] in openbraces or not item[-1] in closebraces:
+		return False	
+		
+	for i in item[1:9]:
+		if not i in hexdigits:
+			return False
+	
+	return True
+
+
