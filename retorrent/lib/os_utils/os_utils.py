@@ -59,7 +59,14 @@ def enough_space(orig_paths,proposed_path):
 
 @tracelogdecorator
 def same_volume(orig_paths,proposed_path):
-	prop_dev = device_number(proposed_path)	
+	pp = proposed_path		
+	
+	# Should only be one loop 
+	#	(eg. video/tv/foo -> video/tv)
+	while not os.path.exists(pp):
+		pp = os.path.dirname(pp)
+	prop_dev = device_number(pp)	
+	
 	for p in orig_paths:
 		if not prop_dev == device_number(p):
 			return False
