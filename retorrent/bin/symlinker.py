@@ -21,12 +21,14 @@ def main():
 			
 			if not os.path.islink(elem_path):
 				
-				for f in os.listdir(elem_path):
-					if not os.path.islink(os.path.join(elem_path,f)):
-						print 'Non-symlinked file detected in folder', elem_path
-						print '\t Non-symlinked folders should only contain symlinks'
+				if not len(os.listdir(elem_path)):
+						os.rmdir(elem_path)
+				else:
+					for f in os.listdir(elem_path):
+						if not os.path.islink(os.path.join(elem_path,f)):
+							print 'Non-symlinked file detected in folder', elem_path
+							print '\t Non-symlinked folders should only contain symlinks'
 				# TODO: Descend into dir, remove broken symlinks. 
-				# TODO: If dir is empty, remove
 			else:
 				if os.path.lexists(elem_path) and not os.path.exists(elem_path):
 					print 'Broken symlink! Removing.', elem
