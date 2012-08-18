@@ -21,7 +21,9 @@ def main():
 			
 			if not os.path.islink(elem_path):
 				
-				if not len(os.listdir(elem_path)):
+				if os.path.isfile(elem_path):
+					print '!! file in symlink dir: %s' % (elem_path)
+				elif not len(os.listdir(elem_path)):
 						os.rmdir(elem_path)
 				else:
 					for f in os.listdir(elem_path):
@@ -93,29 +95,37 @@ def main():
 				
 				# dir found in category_home. 
 				#	Broken symlinks and empty dirs should be gone already
-				#	TODO: Populate with symlinks to files in content dir 
 				elif not os.path.islink(symlink_path) and \
 						os.path.isdir(symlink_path):
-					
-					# If dir is full of symlinks, and all symlinks are to the same dir, remove all symlinks and symlink dir
-					symlinkdir_contents_paths = [ os.path.join(symlink_path, l) for l in os.listdir(symlink_path) ] 
-
-					if all([os.path.islink(f) for f in symlinkdir_contents_paths]) and \
-							all_symlinks_to_same_dir(content_path, symlinkdir_contents_paths):
-						for f in symlinkdir_contents_paths:
-							if os.path.islink(f):	
-								os.remove(f)
-							else:
-								print 'ERROR! Tried to remove a file! %s' % (f)
-						os.rmdir(symlink_path)	
-						print '\t%s no longer sourced from multiple locations' % (content,)
-						os.symlink(content_path,symlink_path)
-					else:
-						link_contents(content_path, symlink_path)
-						print '\t%s: sourced from multiple locations' % (content,)
+				
+					# now dealing with these in post-processing			
+					pass	
+				
 				else:
 					# the symlink exists + points at this content :D
 					pass
+	
+	
+	# prune dirs full of symlinks to the same place
+	for elem in os.listdir(category_home):
+		
+		if os.path.isdir(elem):
+			# If dir is full of symlinks, and all symlinks are to the same dir, remove all symlinks and symlink dir
+			symlinkdir_contents_paths = [ os.path.join(symlink_path, l) for l in os.listdir(symlink_path) ] 
+
+			if all([os.path.islink(f) for f in symlinkdir_contents_paths]) and \
+					all_symlinks_to_same_dir(content_path, symlinkdir_contents_paths):
+				for f in symlinkdir_contents_paths:
+					if os.path.islink(f):	
+						os.remove(f)
+					else:
+						print 'ERROR! Tried to remove a file! %s' % (f)
+				os.rmdir(symlink_path)	
+				print '\t%s no longer sourced from multiple locations' % (content,)
+				os.symlink(content_path,symlink_path)
+			else:
+				link_contents(content_path, symlink_path)
+				print '\t%s: sourced from multiple locations' % (content,)
 
 	
 def link_contents(content_path,linkdir_path):
