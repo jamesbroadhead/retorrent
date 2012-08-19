@@ -240,6 +240,7 @@ class episoder:
 				# Only one file, getting here is a mistake	
 				return ''
 			elif self.is_movie:
+				# TODO: verify that epno is single-digit only :(
 				return 'cd' + epno
 			else:
 				return 's01' + 'e' + epno
