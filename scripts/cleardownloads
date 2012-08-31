@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PATH=$PATH:$HOME/doc/scripts
+
+NEWDIR="$HOME/olddownloads/`nicedate`"
+echo $NEWDIR
+mkdir -p $NEWDIR
+mv ~/downloads/* $NEWDIR 
