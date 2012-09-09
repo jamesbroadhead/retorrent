@@ -12,7 +12,7 @@ def main():
 				
 		category_home = folderopt['home']	
 		os_utils.mkdir_p(os.path.expanduser(category_home))
-		print 'Considering: ', os.path.basename(category_home)
+		#print 'Considering: ', os.path.basename(category_home)
 	
 		removed = []
 		# remove broken symlinks 
@@ -53,18 +53,27 @@ def main():
 				continue	
 			
 			for content in os.listdir(content_dir):
-				
-				if os.path.isdir(content) and not len(os.listdir(content)):
-						os.remove(content)
-						print '%s: removed empty content dir' % (content,)
+				content_path = os.path.join(content_dir, content)	
+				# empty dir in content dir 
+				#print content_path	
+				if os.path.isdir(content_path) and not len(os.listdir(content_path)):
+						os.rmdir(content_path)
+						print '%s: removed empty content dir' % (content_path,)
 						continue
+				
+				# symlinks in content dir
+				elif os.path.islink(content_path):
+					print '%s: symlink in content dir'
+					if not os.path.exists(content_path):
+						print '%s: symlink was broken, removing'
+						os.remove(content_path)
 
 				# content can either be movie.avi or series.name/
-				content_path = os.path.abspath(os.path.join(content_dir,content))
+				content_abspath = os.path.abspath(os.path.join(content_dir,content))
 				symlink_path = os.path.abspath(os.path.join(category_home,content))
 				# link directly if symlink doesn't exist
 				if not os.path.exists(symlink_path):
-					os.symlink(content_path,symlink_path)
+					os.symlink(content_abspath,symlink_path)
 					if content in removed:
 						print 'Replaced a broken symlink',content
 
@@ -72,7 +81,7 @@ def main():
 				# 	and doesn't point to same location
 				elif os.path.islink(symlink_path) and \
 					not os.path.realpath(symlink_path) == \
-						os.path.realpath(content_path):
+						os.path.realpath(content_abspath):
 					
 					oldlink_realpath = os.path.realpath(symlink_path)
 					
@@ -80,18 +89,18 @@ def main():
 					#	create dir, populate with symlinks to the content 
 					#	in both
 					if os.path.isdir(oldlink_realpath) and \
-							os.path.isdir(content_path):
+							os.path.isdir(content_abspath):
 						# remove oldlink
 						os.remove(symlink_path)	
 						# mkdir foo
 						os_utils.mkdir_p(symlink_path)
 						
 						link_contents(oldlink_realpath,symlink_path)
-						link_contents(content_path,symlink_path)
+						link_contents(content_abspath,symlink_path)
 					else:
 						print 'Duplicate files, can\'t combine :('
 						print '\t',oldlink_realpath
-						print '\t',content_path
+						print '\t',content_abspath
 				
 				# dir found in category_home. 
 				#	Broken symlinks and empty dirs should be gone already
@@ -114,7 +123,7 @@ def main():
 			symlinkdir_contents_paths = [ os.path.join(symlink_path, l) for l in os.listdir(symlink_path) ] 
 
 			if all([os.path.islink(f) for f in symlinkdir_contents_paths]) and \
-					all_symlinks_to_same_dir(content_path, symlinkdir_contents_paths):
+					all_symlinks_to_same_dir(content_abspath, symlinkdir_contents_paths):
 				for f in symlinkdir_contents_paths:
 					if os.path.islink(f):	
 						os.remove(f)
@@ -122,9 +131,9 @@ def main():
 						print 'ERROR! Tried to remove a file! %s' % (f)
 				os.rmdir(symlink_path)	
 				print '\t%s no longer sourced from multiple locations' % (content,)
-				os.symlink(content_path,symlink_path)
+				os.symlink(content_abspath,symlink_path)
 			else:
-				link_contents(content_path, symlink_path)
+				link_contents(content_abspath, symlink_path)
 				print '\t%s: sourced from multiple locations' % (content,)
 
 	
