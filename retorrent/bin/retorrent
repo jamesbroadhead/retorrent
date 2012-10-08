@@ -47,11 +47,7 @@ def main():
 	torrentfiles = [ item['torrentfile'] for item in output if \
 			not item['torrentfile'] in blanks ]
 	
-	if len(torrentfiles) > 0:
-		print "Don't forget to start these in rtorrent-seed!"
-		for item in torrentfiles: 	
-			print '\t', item
-
+	os.system('symlinker')	
 
 def run_and_check(r,output):
 
