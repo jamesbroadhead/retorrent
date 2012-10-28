@@ -20,8 +20,9 @@ def freespace(p,si_prefix=''):
 		
 	# http://stackoverflow.com/questions/51658/cross-platform-space-remaining-on-volume-using-python
 	if platform.system() == 'Windows':
+		import ctypes
 		free_bytes = ctypes.c_ulonglong(0)
-		ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(folder), None, None, ctypes.pointer(free_bytes))
+		ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(p), None, None, ctypes.pointer(free_bytes))
 		space = free_bytes.value
 	else:	
 		s = os.statvfs(p)
@@ -36,7 +37,7 @@ def freespace(p,si_prefix=''):
 		if not si_prefix in SI_pos:
 			raise ValueError('Invalid SI prefix')
 		divisor= 1024 * SI_pos.index(si_prefix)
-		space = float(size) / divisor
+		space = float(space) / divisor
 	
 	return space
 

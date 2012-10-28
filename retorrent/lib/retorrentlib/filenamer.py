@@ -168,19 +168,7 @@ class filenamer:
 
 		return ufilename
 	
-	def remove_camelcase(self, filename):
-		if len(filename) == 0:
-			return filename 
-		outfilename = ""	
-		old = filename[0]
-		outfilename += old
-		for curr in filename[1:]:
-			if old.islower() and curr.isupper():
-				outfilename += "."		
-			old = curr
-			outfilename += curr
-		return outfilename  
-
+	
 	def add_necc_dots(self, filename):
 		divide_items = ["["]
 		for item in divide_items:
@@ -214,10 +202,8 @@ class filenamer:
 
 	def remove_empty_elements(self, filename_split):
 		return [ item for item in filename_split if not item == '' ]	
-		
 
 	def remove_divider_symbols(self, filename):
-		
 		for symbol in self.divider_list:
 			if symbol in filename:
 				filename = filename.replace(symbol,".")
@@ -295,13 +281,7 @@ class filenamer:
 		#self.debugprint('Filename after removal: ' + ','.join(fsplit))
 		return fsplit
 
-	def remove_empty_elements(self, filename_split):
-		outfilename = []
-		for i in filename_split:
-			if not i == "":
-				outfilename += [i]
-		return outfilename
-	
+		
 	# does this list contain '.mkv' or 'mkv' ?
 	def is_fileext(self,item):
 		return item in self.fileext_list

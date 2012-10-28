@@ -49,14 +49,13 @@ def main():
 	
 	os.system('symlinker')	
 
-def run_and_check(r,output):
-
+def run_and_check(r, output):
 	for out in output: 
 		for cmd in out['commands']:
 			os.system(cmd)
-		check_symlinks(r,out['symlinks'])
+		check_symlinks(r,out['symlinks'], out['commands'])
 
-def check_symlinks(r,symlinks):
+def check_symlinks(r, symlinks, commands):
 	output = r.check_symlinks(symlinks)	
 	if not output['success']:
 		for symlink in output['broken']:

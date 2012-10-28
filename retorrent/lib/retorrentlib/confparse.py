@@ -207,7 +207,3 @@ def find_removelist(extra_configdir=''):
 		open(default_path, 'w').close() 
 	
 	return default_path
-
-if __name__ == '__main__':
-	a = read_folderconfig()
-

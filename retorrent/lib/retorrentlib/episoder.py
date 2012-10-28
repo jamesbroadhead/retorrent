@@ -81,7 +81,7 @@ class episoder:
 							else:
 								split_fn[index] = self.gen_full_epno_string(remainder)
 						else: # special case	
-							epno = nice_epno_from_raw(remainder)
+							epno = self.nice_epno_from_raw(remainder)
 							split_fn[index] = subitem + epno
 						
 						return split_fn, True
@@ -105,8 +105,9 @@ class episoder:
 			elif subitem == start_ident and len(item) == len(subitem) and self.is_raw_epno(nextitem):
 				if start_ident in self.identifiers['start']:
 					split_fn[index] = self.gen_full_epno_string(nextitem)
-				else: # special case
-					split_fn[index] = start_ident + nice_epno_from_raw(nextitem)
+				else: 
+					# special case
+					split_fn[index] = start_ident + self.nice_epno_from_raw(nextitem)
 				
 				split_fn[index+1] = ''	
 				return split_fn, True
