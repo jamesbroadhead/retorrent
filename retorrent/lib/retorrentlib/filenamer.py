@@ -22,6 +22,7 @@ class filenamer:
 	def __init__(self, divider_list , filetypes_of_interest, the_debugprinter=debugprinter(False)):
 		
 		self.remove_list = removelist.read_list()
+		self.tmp_remove_list = []
 		
 		self.divider_list = divider_list
 		self.fileext_list = [ f['fileext'] for f in filetypes_of_interest ] 
@@ -83,7 +84,8 @@ class filenamer:
 		self.debugprint('filenamer.convert_filename, after filenamer.to_lowercase: ' + '[' + ', '.join(filename_split) + ']')
 		
 		filename_split = self.remove_extra_details(filename_split, self.remove_list)
-		
+		filename_split = self.remove_extra_details(filename_split, self.tmp_remove_list)
+	
 		self.debugprint('filenamer.convert_filename, after filenamer.remove_extra_details(removelist): ' + '[' + ', '.join(filename_split) + ']')
 		
 		# pre-2012 Don't want years tangling the episoder. 

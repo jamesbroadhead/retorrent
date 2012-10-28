@@ -457,7 +457,7 @@ class retorrenter:
 			self.filenamer.add_to_removelist(answer[1:])
 			return '-'
 		else:
-			self.filenamer.remove_list.append(answer)
+			self.filenamer.tmp_remove_list.append(answer)
 			return '-'	
 	
 	# For all files
