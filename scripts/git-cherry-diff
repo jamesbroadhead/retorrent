@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ "$1" = '' ] ; then
+    # get current branch, compare with master
+    echo "Unimplemented"
+    exit 1
+elif [ "$2" = '' ] ; then
+    upstream="master"
+    head="$1"
+else
+    upstream="$1"
+    head="$2"
+fi
+
+for l in $(git cherry $upstream $head) ; do
+    if [ $(echo "$l" | awk {'print $1'}) = '+' ] ; then
+        revis="$(echo "$l" | awk {'print $2'})"
+        echo $revis
+        echo $l
+        echo "git diff ${revis}^..${revis}"
+    else
+        echo $l
+    fi
+done

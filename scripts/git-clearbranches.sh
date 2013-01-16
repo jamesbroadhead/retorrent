@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $1 = '' ] ; then
+if [ "$1" = '' ] ; then
     basebranch="master"
 else
     basebranch="$1"
