@@ -60,7 +60,7 @@ class filenamer:
 		self.debugprint('filenamer.convert_filename, after self.remove_divider_symbols : ' + filename )
 
 		# remove braces from anything that isn't a checksum
-		filename = self.remove_braces(filename, preserve_checksum=not is_foldername)
+		filename = remove_braces(filename, preserve_checksum=not is_foldername)
 		
 		self.debugprint('filenamer.convert_filename, after self.sort_out_braces: ' + filename )
 
@@ -299,7 +299,7 @@ def is_checksum(item):
 		return True 
 	return False 
 
-def remove_braces(filename, openbrace, preserve_checksum=True):
+def remove_braces(filename, preserve_checksum=True):
 	"""
 	>>> remove_braces('foo.bar.(what).zamf', '(')
 	'foo.bar.what.zamf'
@@ -319,58 +319,35 @@ def remove_braces(filename, openbrace, preserve_checksum=True):
 	>>> remove_braces('The Band - Let Me Out - 1993 (Vinyl - MP3 - V0 (VBR)) (1).torrent', '(')
 	'The Band - Let Me Out - 1993.Vinyl - MP3 - V0.VBR.1.torrent'
 
-	"""	
-	closebrace = closebraces[openbraces.index(openbrace)]
-	outfilename = ''	
-	tmp=''
-	stack = []
-	for i, c in enumerate(filename):
-		#print outfilename	
-		if c == openbrace:
-			stack.append(i)
-			outfilename = dotjoin(outfilename, tmp)
-			tmp = ''
-		elif c == closebrace:
-			index_openbrace = stack.pop()
-			# flush tmp before the openbrace	
-			if is_checksum(tmp):
-				if preserve_checksum:
-					# convert to square brackets + continue	
-					tmp = '[' + tmp.upper() + ']'
-				else:
-					# remove the checksum + continue
-					tmp = ''
-			outfilename = dotjoin(outfilename, tmp)
-			tmp = ''
-		else:
-			tmp = tmp + c
-
-	outfilename = dotjoin(outfilename, tmp)
-
-
-	"""	
-	# look for another brace of the same type
-	if openbrace in filename[openbrace_index+1:]:
-		index_new_openbrace = filename[openbrace_index+1:].find(openbrace)
-		absindex_new_openbrace = openbrace_index + 1 + index_new_openbrace
-		filename = remove_upto_closebrace(filename,
-										  absindex_new_openbrace, openbrace)
-		print 'removed_inner:', filename
-	print 'examining: %s ' % (filename[openbrace_index:])	
-	# there are no more openbraces of this type in the filename. Match the first closebrace found
-	if not closebrace in filename:
-		return filename[0:openbrace_index] + filename[openbrace_index+1:]
-	
-	closebrace_index = filename.find(closebrace)
-
-
-	else:
-		# we have a pair of braces to remove
-		filename = '.'.join([filename[0:startindex].strip(' .'), 
-							 filename[startindex+1:endindex].strip(' .'),
-							 filename[endindex+1:].strip(' .')])
-
 	"""
+	for openbrace in openbraces:
+		closebrace = closebraces[openbraces.index(openbrace)]
+		outfilename = ''	
+		tmp=''
+		stack = []
+		for i, c in enumerate(filename):
+			#print outfilename	
+			if c == openbrace:
+				stack.append(i)
+				outfilename = dotjoin(outfilename, tmp)
+				tmp = ''
+			elif c == closebrace:
+				index_openbrace = stack.pop()
+				# flush tmp before the openbrace	
+				if is_checksum(tmp):
+					if preserve_checksum:
+						# convert to square brackets + continue	
+						tmp = '[' + tmp.upper() + ']'
+					else:
+						# remove the checksum + continue
+						tmp = ''
+				outfilename = dotjoin(outfilename, tmp)
+				tmp = ''
+			else:
+				tmp = tmp + c
+
+		outfilename = dotjoin(outfilename, tmp)
+
 	return outfilename
 
 def dotjoin(*args):
