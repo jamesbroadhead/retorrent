@@ -1,18 +1,30 @@
 #!/usr/bin/python
 
 import os
+import sys
 
 from os_utils import os_utils 
 from retorrentlib import confparse
 
+debug = 0 
+def debugprint(string, debuglevel=1):
+	"""
+	debuglevel = 0 - always print
+	debuglevel = 1 - print if -d
+	debuglevel = 2 - print if -dd
+	"""
+	if debuglevel <= debug :
+		print string
+
 def main():
 	foo,folderopts = confparse.parse_retorrentconf()	
 
+	for_postprocessing = {}
 	for folderopt in folderopts:
 				
 		category_home = folderopt['home']	
 		os_utils.mkdir_p(os.path.expanduser(category_home))
-		#print 'Considering: ', os.path.basename(category_home)
+		debugprint('Considering: %s' % (os.path.basename(category_home)))
 	
 		removed = []
 		# remove broken symlinks 
@@ -44,16 +56,16 @@ def main():
 		if category_home in folderopt['paths']:
 			print 'The content home is in the list of content paths. Cannot continue.'
 			continue
-
-		# make new ones
+		
+		# /mnt/foo/video/tv for instance
 		for content_dir in folderopt['paths']:
-			#print 'Looking at... ',content_dir	
+			debugprint('Looking at: %r' % (content_dir,))	
 			if not os.path.exists(content_dir):
-				#print 'A content dir is missing! Please create:',content_dir
-				continue	
+				os.makedirs(content_dir)
 			
 			for content in os.listdir(content_dir):
 				content_path = os.path.join(content_dir, content)	
+				debugprint('Examining: %s' % (content_path,), 2)
 				# empty dir in content dir 
 				#print content_path	
 				if os.path.isdir(content_path) and not len(os.listdir(content_path)):
@@ -83,6 +95,7 @@ def main():
 					not os.path.realpath(symlink_path) == \
 						os.path.realpath(content_abspath):
 					
+					debugprint('%s already exists, and there are two candidates, %s and %s' % (os.path.islink(symlink_path), os.path.realpath(symlink_path), os.path.realpath(content_abspath)))
 					oldlink_realpath = os.path.realpath(symlink_path)
 					
 					# they're both links to different directories
@@ -106,20 +119,23 @@ def main():
 				#	Broken symlinks and empty dirs should be gone already
 				elif not os.path.islink(symlink_path) and \
 						os.path.isdir(symlink_path):
-				
-					# now dealing with these in post-processing			
-					pass	
-				
+					debugprint('Will post-process: %s' % (symlink_path,))	
+					for_postprocessing.setdefault(symlink_path, []).append(content_abspath)	
 				else:
 					# the symlink exists + points at this content :D
+					debugprint('%s - OK' % (symlink_path,), 2)	
 					pass
 	
-	
+	for symlink_path, content_paths in for_postprocessing.iteritems():
+		debugprint('Postprocessing: %s' % (symlink_path,))
+		for c in content_paths:	
+			link_contents(c, symlink_path)
+
 	# prune dirs full of symlinks to the same place
 	for elem in os.listdir(category_home):
 		
 		if os.path.isdir(elem):
-			# If dir is full of symlinks, and all symlinks are to the same dir, remove all symlinks and symlink dir
+			# If dir is full of symlinks, and all symlinks are to the same dir, remove all symlinks, then symlink the dir
 			symlinkdir_contents_paths = [ os.path.join(symlink_path, l) for l in os.listdir(symlink_path) ] 
 
 			if all([os.path.islink(f) for f in symlinkdir_contents_paths]) and \
@@ -137,7 +153,7 @@ def main():
 				print '\t%s: sourced from multiple locations' % (content,)
 
 	
-def link_contents(content_path,linkdir_path):
+def link_contents(content_path, linkdir_path):
 	content_realpath = os.path.realpath(content_path)	
 	for fn in os.listdir(content_realpath):
 		f_realpath = os.path.join(content_realpath,fn)
@@ -162,4 +178,8 @@ def all_symlinks_to_same_dir(d, symlinks):
 	return True
 
 if __name__ == '__main__':
+	if '-d' in sys.argv:
+		debug = 1
+	elif '-dd' in sys.argv:
+		debug = 2
 	main()
