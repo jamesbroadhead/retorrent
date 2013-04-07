@@ -4,7 +4,6 @@ import os
 import shutil
 
 from ConfigParser import ConfigParser
-from os.path import expanduser
 
 from logdecorators.tracelogdecorator import tracelogdecorator
 from os_utils import os_utils
@@ -125,7 +124,6 @@ def parse_fileext_details(extra_configdir=''):
 	filename = 'fileext_details.conf'
 	
 	config = ConfigParser(defaultoptions)
-	files_read = config.read([ os.path.join(p,filename) for p in config_paths])	
 	
 	output = [] 
 	
@@ -139,7 +137,6 @@ def parse_fileext_details(extra_configdir=''):
 		
 		if not filetype	in filetypes_goodsizes.keys():
 			print 'CONFIG_WARNING: "'+filetype+'" is not a valid type setting for filetype '+filetype+'. Taking "movie".'	
-			treat_as = 'movie'
 		
 		# separate by commas, strip quotes
 		ignorestrs = [ os.path.expanduser(item.strip(stripsymbols)) for item in \

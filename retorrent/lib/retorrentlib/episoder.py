@@ -3,7 +3,7 @@ import roman
 
 
 from debugprinter import debugprinter
-from optionator import *
+from optionator import booloptionator, optionator 
 from os_utils import textcontrols 
 
 
@@ -15,10 +15,9 @@ class episoder:
 	alphabet = "abcdefghijklmnopqrstuvwxyz"
 	eng_numbers = ['one','two','three','four','five','six','seven','eight','nine','ten']
 	
-	identifiers = { 'start' : ['s', 'e', 'd','p', \
-								'ep', 'cd', 'pt' , \
-								'part', 'side',	\
-								'episode' ],
+	identifiers = { 'start' : ['s', 'e', 'd','p', 
+								'ep', 'cd', 'pt' , 
+								'part', 'side', 'series', 'episode' ],
 					'start_special' : [ 'op', 'ed' ]
 	}
 	numbers_to_ignore = [ '720', '264' ]
@@ -125,7 +124,7 @@ class episoder:
 				else: 
 					self.debugprint('in single digit number')	
 					# catch 5.1blah
-					if int(item) == 5 and nextitem[0].isdigit() and int(nextitem[0]) == 1:
+					if int(item) == 5 and nextitem and nextitem[0].isdigit() and int(nextitem[0]) == 1:
 						self.numbers_to_ignore += [5]	
 						split_fn[index] = ''	
 						return split_fn,False

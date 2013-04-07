@@ -19,6 +19,12 @@ def main():
 	if options.debug:
 		logging.basicConfig(level=logging.INFO)
 	
+	args = [ a for a in args if os.path.exists(a) ]
+
+	if not args:
+		print 'File(s) not found'
+		sys.exit(1)
+	
 	print options.configdir
 
 	config = { 'retorrentconf_folderopts': 
@@ -31,7 +37,7 @@ def main():
 			confparse.find_removelist(options.configdir)}
 
 	# TODO : proper logging, remove the options.debug arg
-	r = retorrenter.retorrenter(config,debug=options.debug)	
+	r = retorrenter.retorrenter(config, debug=options.debug)	
 	
 	seed_torrentfiles = []
 	
@@ -41,19 +47,14 @@ def main():
 		output += [r.handle_arg(i)] 
 	
 	run_and_check(r,output)
-
-	blanks = [ '', None ]
-	
-	torrentfiles = [ item['torrentfile'] for item in output if \
-			not item['torrentfile'] in blanks ]
-	
 	os.system('symlinker')	
 
 def run_and_check(r, output):
 	for out in output: 
 		for cmd in out['commands']:
 			os.system(cmd)
-		check_symlinks(r,out['symlinks'], out['commands'])
+		if out['commands']:
+			check_symlinks(r,out['symlinks'], out['commands'])
 
 def check_symlinks(r, symlinks, commands):
 	output = r.check_symlinks(symlinks)	

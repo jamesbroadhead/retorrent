@@ -1,14 +1,11 @@
 #!/usr/bin/ipython
 
 import os
-import string
 
 import removelist
-import os_utils
 
 from debugprinter import debugprinter
 from episoder import episoder
-from logdecorators.tracelogdecorator import tracelogdecorator
 from logdecorators.tracelogdecorator import tracelogdecorator
 
 hexdigits = "0123456789abcdefABCDEF"
@@ -301,52 +298,51 @@ def is_checksum(item):
 
 def remove_braces(filename, preserve_checksum=True):
 	"""
-	>>> remove_braces('foo.bar.(what).zamf', '(')
+	>>> remove_braces('foo.bar.(what).zamf') 
 	'foo.bar.what.zamf'
 
-	>>> remove_braces('foo.bar.(w(h)at).zamf', '(')
+	>>> remove_braces('foo.bar.(w(h)at).zamf')
 	'foo.bar.w.h.at.zamf'
 	
-	>>> remove_braces('foo.bar.what.(88888888).zamf', '(')
+	>>> remove_braces('foo.bar.what.(88888888).zamf')
 	'foo.bar.what.[88888888].zamf'
 
-	>>> remove_braces('foo.bar.what.(aaaaaaaa).zamf', '(')
+	>>> remove_braces('foo.bar.what.(aaaaaaaa).zamf')
 	'foo.bar.what.[AAAAAAAA].zamf'
 
-	>>> remove_braces('foo.bar.what.(88888888).zamf', '(', preserve_checksum=False)
+	>>> remove_braces('foo.bar.what.(88888888).zamf', preserve_checksum=False)
 	'foo.bar.what.zamf'
 
-	>>> remove_braces('The Band - Let Me Out - 1993 (Vinyl - MP3 - V0 (VBR)) (1).torrent', '(')
+	>>> remove_braces('The Band - Let Me Out - 1993 (Vinyl - MP3 - V0 (VBR)) (1).torrent')
 	'The Band - Let Me Out - 1993.Vinyl - MP3 - V0.VBR.1.torrent'
 
-	"""
-	for openbrace in openbraces:
-		closebrace = closebraces[openbraces.index(openbrace)]
-		outfilename = ''	
-		tmp=''
-		stack = []
-		for i, c in enumerate(filename):
-			#print outfilename	
-			if c == openbrace:
-				stack.append(i)
-				outfilename = dotjoin(outfilename, tmp)
-				tmp = ''
-			elif c == closebrace:
-				index_openbrace = stack.pop()
-				# flush tmp before the openbrace	
-				if is_checksum(tmp):
-					if preserve_checksum:
-						# convert to square brackets + continue	
-						tmp = '[' + tmp.upper() + ']'
-					else:
-						# remove the checksum + continue
-						tmp = ''
-				outfilename = dotjoin(outfilename, tmp)
-				tmp = ''
-			else:
-				tmp = tmp + c
+	>>> remove_braces('Able Baker [1981].mkv')
+	'Able Baker.1981.mkv'
 
-		outfilename = dotjoin(outfilename, tmp)
+	"""
+	outfilename = ''	
+	tmp=''
+	for i, c in enumerate(filename):
+		#print outfilename
+		if c in openbraces:
+			outfilename = dotjoin(outfilename, tmp)
+			tmp = ''
+		elif c in closebraces:
+			# TODO: non-matching braces ... 
+			# flush tmp before the openbrace	
+			if is_checksum(tmp):
+				if preserve_checksum:
+					# convert to square brackets + continue	
+					tmp = '[' + tmp.upper() + ']'
+				else:
+					# remove the checksum + continue
+					tmp = ''
+			outfilename = dotjoin(outfilename, tmp)
+			tmp = ''
+		else:
+			tmp = tmp + c
+
+	outfilename = dotjoin(outfilename, tmp)
 
 	return outfilename
 

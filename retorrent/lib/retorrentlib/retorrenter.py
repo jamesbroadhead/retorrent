@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import logging
 import os
 
 from difflib import SequenceMatcher
@@ -55,7 +54,7 @@ class retorrenter:
 		print "|\n|\n|\n|"
 		
 		if not os.path.exists(argument):
-			print 'Can\'t find path: ', argument 
+			print "Can't find path: %s" % (argument,)
 			return self.null_output 
 
 		the_path = os.path.abspath(argument)	

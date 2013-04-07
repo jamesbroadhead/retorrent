@@ -38,8 +38,6 @@ def could_be_roman(number,debug=False):
 			if debug: print 'Invalid Character!'	
 			return False
 
-		prev_largest = k
-		
 		# must catch LL etc.
 		if kindex > 0 and roman_to_int(k) >= roman_to_int(number[kindex-1]):
 
