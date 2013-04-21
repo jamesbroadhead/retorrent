@@ -337,18 +337,20 @@ class retorrenter:
 
     def autoset_dest_dirpath(self,possible_series_foldernames,orig_paths):
         """
-        Is the dest_dirpath what we're now calling the category?
+        dest_dirpath is the 'series name' or similar folder inside the
+            category folder
         """
 
         self.debugprint('retorrenter.autoset_dest_dirpath(' + ','.join(possible_series_foldernames)+')')
 
-        if self.dest_category == "":
-            category_names = self.categories.keys()
-        else:
+        if self.dest_category:
             # the dest category is already set from somewhere else
-            categories = [ self.dest_category ]
+            categories = [ (self.dest_category,
+                            self.categories[self.dest_category]) ]
+        else:
+            categories = self.categories.items()
 
-        for category, details in self.categories.items():
+        for category, details in categories:
             for cat_folder in details['content_paths']:
                 for poss_series_folder in possible_series_foldernames:
                     possible_path = expanduser(pjoin(cat_folder, poss_series_folder))

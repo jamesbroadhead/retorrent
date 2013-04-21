@@ -1,0 +1,7 @@
+#!/bin/bash
+
+pyflakes bin lib/*
+
+pylint -E bin
+
+(cd lib && pylint -E *)

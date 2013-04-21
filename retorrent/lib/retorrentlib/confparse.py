@@ -139,13 +139,13 @@ def validate_config(config):
         ok = False
         print("Config must have a 'global' key")
     if not 'content_root_paths' in config.get('global', {}):
-        failed = False
+        ok = False
         print("Config must have 'content_root_paths' under 'global'")
     if not 'categories' in config:
-        failed = False
+        ok = False
         print("Config must have a 'global' key")
     if not config.get('categories', []):
-        failed = False
+        ok = False
         print("Must define a single category under 'categories'")
     return ok
 
