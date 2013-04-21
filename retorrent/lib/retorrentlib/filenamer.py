@@ -8,7 +8,7 @@ from debugprinter import debugprinter
 from episoder import episoder
 from logdecorators.tracelogdecorator import tracelogdecorator
 
-hexdigits = "0123456789abcdefABCDEF"
+hexdigits = '0123456789abcdefABCDEF' + u'0123456789abcdefABCDEF'
 
 braces = {
     '[' : ']',
@@ -44,7 +44,7 @@ class filenamer:
         self.is_movie = is_movie
         self.the_episoder.set_movie(is_movie)
 
-    def convert_filename(self, filename,is_foldername,interactive=True):
+    def convert_filename(self, filename, is_foldername, interactive=True):
         self.the_episoder.interactive = interactive
 
         #if interactive:
@@ -276,6 +276,9 @@ def is_checksum(item):
     >>> is_checksum('halleo')
     False
 
+    >>> is_checksum(u'halleo')
+    False
+
     >>> is_checksum('8888888')
     False
 
@@ -287,10 +290,23 @@ def is_checksum(item):
 
     >>> is_checksum('(88888888)')
     True
+
+    >>> is_checksum(u'88888888')
+    True
+
+    >>> is_checksum(u'R8888888')
+    False
+
+    >>> is_checksum(u'[88888888]')
+    True
+
+    >>> is_checksum(u'[R8888888]')
+    False
     """
     # 8-digit checksum + braces
     if len(item) == 10:
-        if not item[0] in braces or item[-1] == braces.get(item[0], None):
+        if (not item[0] in braces or
+                not item[-1] == braces.get(item[0], None)):
             return False
         item = item[1:-1]
 
@@ -301,6 +317,7 @@ def is_checksum(item):
         return True
     return False
 
+@tracelogdecorator
 def remove_braces(filename, preserve_checksum=True, remove_content=True):
     """
     Removes braces and internal content, with special rules for checksums
@@ -339,6 +356,8 @@ def remove_braces(filename, preserve_checksum=True, remove_content=True):
     >>> remove_braces('Able Baker [1981].mkv', remove_content=True)
     'Able.Baker.mkv'
 
+    >>> remove_braces('[able].baker.charlie.S2...01.[720p.H264][AAAAAAAA].mkv')
+    'baker.charlie.S2.01.[AAAAAAAA].mkv'
     """
     brace_stack = Stack()
     content_stack = Stack()
@@ -386,6 +405,7 @@ def dotjoin(*args):
 
 def endot(string):
     string = string.replace(' ', '.')
+    string = string.replace('_', '.')
     while '..' in string:
         string = string.replace('..', '.')
     return string

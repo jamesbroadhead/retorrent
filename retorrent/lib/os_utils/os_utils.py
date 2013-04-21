@@ -7,7 +7,7 @@ import ctypes
 import errno
 import platform
 import os
-from os.path import basename, dirname
+from os.path import abspath, basename, dirname
 
 from logdecorators.tracelogdecorator import tracelogdecorator
 
@@ -144,7 +144,8 @@ def myglob(arg):
     """
     paths = []
     partial_fn = basename(arg)
-    for f in os.listdir(dirname(arg)):
+    dir_ = abspath(dirname(arg))
+    for f in os.listdir(dir_):
         if f.startswith(partial_fn):
             paths.append(os.path.join(dirname(arg),f))
     return paths
