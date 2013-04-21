@@ -21,6 +21,7 @@ class retorrenter:
         self.divider_symbols = config['parse_divider_symbols']
         self.removelist_path = config['find_removelist']
 
+        self.commands = []
         self.null_output = {'commands':[], 'symlinks':[], 'torrentfile':''}
         self.debug = debug
         self.debugprinter = debugprinter(self.debug)
@@ -44,6 +45,14 @@ class retorrenter:
 
     def set_num_interesting_files(self,num_interesting_files):
         self.filenamer.set_num_interesting_files(num_interesting_files)
+
+    def handle_args(self, arguments):
+        """
+        Takes a list of existing files, returns XXX
+        """
+        for a in arguments:
+            self.commands.append(self.handle_arg(a))
+
 
     def handle_arg(self,argument):
 
@@ -551,25 +560,34 @@ class retorrenter:
             return self.categories[self.dest_category]['treat_as'] == 'movies'
         return False
 
-    # TODO: Remove tfiles already picked during other options.
-    def find_torrentfile(self,the_path):
+    def find_torrentfile(self, the_path):
         # get the file / foldername (not necc. the same as the arg itself
         split_path = the_path.rsplit('/')
         arg_name = split_path[-1]
 
         the_torrentfiles =  os.listdir(self.global_conf['torrentfilesdir'])
+        exclude = [ c['torrentfile'] for c in self.commands ]
 
         tfiles = []
         for tfile in the_torrentfiles:
-            cf = self.filenamer.convert_filename(tfile.rstrip('torrent').rstrip('.'),True,interactive=False)
-            score = SequenceMatcher('',os_utils.str2utf8(arg_name),os_utils.str2utf8(cf)).ratio()
+            if tfile in exclude:
+                continue
+            cf = self.filenamer.convert_filename(
+                        tfile.rstrip('torrent').rstrip('.'),
+                        True,
+                        interactive=False)
+
+            score = SequenceMatcher('',
+                                    os_utils.str2utf8(arg_name),
+                                    os_utils.str2utf8(cf)).ratio()
 
             tfiles += [{'filename':tfile, 'conv_filename':cf, 'score':score } ]
 
 
         tfiles = sorted(tfiles, self.compare_scores)
 
-        chosen_torrentfile = optionator('For: '+arg_name,[ t['filename'] for t in tfiles] )
+        chosen_torrentfile = optionator('For: '+arg_name,
+                                        [t['filename'] for t in tfiles])
 
         return chosen_torrentfile
 

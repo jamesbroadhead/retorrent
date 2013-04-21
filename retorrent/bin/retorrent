@@ -42,11 +42,9 @@ def main():
     r = retorrenter.retorrenter(config, debug=options.debug)
 
     # get args (folders / files which are 100% downloaded.
-    output = []
-    for i in args:
-        output += [r.handle_arg(i)]
+    commands = r.handle_args(args)
 
-    run_and_check(r, output)
+    run_and_check(r, commands)
     print 'Running symlinker...'
     os.system('symlinker')
 
@@ -103,6 +101,7 @@ def parse_argv(argv):
     for a in argv:
         if not pexists(a):
             paths = myglob(a)
+            paths.sort()
             args.extend(paths)
         else:
             args.append(a)
