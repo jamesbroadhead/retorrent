@@ -43,6 +43,7 @@ def main():
         output += [r.handle_arg(i)]
 
     run_and_check(r, output)
+    print 'Running symlinker...'
     os.system('symlinker')
 
 def run_and_check(r, output):

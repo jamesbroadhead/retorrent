@@ -253,7 +253,7 @@ class retorrenter:
 
         commands += [ "mv -nv " + '"' + orig + '"' + " " + '"'+dest+'"' for (orig,dest) in zip(orig_paths,dest_paths) ]
 
-        do_seed = optionator("Should these be seeded?" , ['no', 'yes' , '<cancel>'] )
+        do_seed = optionator("Should these be seeded?" , ['yes', 'no' , '<cancel>'] )
         torrentfile = ''
         seeddir_paths = []
         # this means '<cancel>'
@@ -315,8 +315,10 @@ class retorrenter:
         return { 'success': True }
 
 
-    # What is the dest_dirpath
     def autoset_dest_dirpath(self,possible_series_foldernames,orig_paths):
+        """
+        Is the dest_dirpath what we're now calling the category?
+        """
 
         self.debugprint('retorrenter.autoset_dest_dirpath(' + ','.join(possible_series_foldernames)+')')
 
