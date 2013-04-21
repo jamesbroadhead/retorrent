@@ -2,6 +2,14 @@
 """
 Create symlinks, joining together retorrent content dirs
 
+Usage:
+    symlinker
+    symlinker [-s | --smbsafe]
+    symlinker [-d | --debug]
+
+Arguments:
+    -s --smbsafe      Create symlinks in the smbsafe directory with Samba-safe paths
+    -d --debug
 """
 
 import os
@@ -9,14 +17,14 @@ from os.path import abspath, basename, dirname, expanduser, isdir, isfile, lexis
 from os.path import islink, realpath
 from os.path import exists as pexists
 from os.path import join as pjoin
-
-
 import sys
 
-from os_utils import os_utils
+from docopt import docopt
+
+from os_utils.os_utils import mkdir_p, smbify, sym_sametarget
 from retorrentlib import confparse
 
-debug = 0
+debug = False
 def debugprint(string, debuglevel=1):
     """
     debuglevel = 0 - always print
@@ -26,14 +34,17 @@ def debugprint(string, debuglevel=1):
     if debuglevel <= debug :
         print string
 
-def main():
+def main(smbsafe=False, debuglevel=0):
     _, categories_conf = confparse.parse_retorrentconf()
 
     for_postprocessing = {}
     for _, category in categories_conf.items():
-
+        # print category
         category_home = category['symlink_path']
-        os_utils.mkdir_p(expanduser(category_home))
+        if smbsafe:
+            category_home = category['smbsafe_symlink_path']
+
+        mkdir_p(expanduser(category_home))
         debugprint('Considering: %s' % (basename(category_home)))
 
         removed = []
@@ -67,7 +78,7 @@ def main():
             print 'The content home is in the list of content paths. Cannot continue.'
             continue
 
-        # /mnt/foo/video/tv for instance
+        # /mnt/foo/video/tv, /mnt/bar/video/tv etc.
         for content_dir in category['content_paths']:
             debugprint('Looking at: %r' % (content_dir,))
             if not pexists(content_dir):
@@ -76,6 +87,7 @@ def main():
             for content in os.listdir(content_dir):
                 content_path = pjoin(content_dir, content)
                 debugprint('Examining: %s' % (content_path,), 2)
+
                 # empty dir in content dir
                 #print content_path
                 if isdir(content_path) and not len(os.listdir(content_path)):
@@ -92,7 +104,11 @@ def main():
 
                 # content can either be movie.avi or series.name/
                 content_abspath = abspath(pjoin(content_dir, content))
+
                 symlink_path = abspath(pjoin(category_home, content))
+                if smbsafe:
+                    symlink_path = abspath(pjoin(category_home, smbify(content)))
+
                 # link directly if symlink doesn't exist
                 if not pexists(symlink_path):
                     os.symlink(content_abspath, symlink_path)
@@ -118,7 +134,7 @@ def main():
                         # remove oldlink
                         os.remove(symlink_path)
                         # mkdir foo
-                        os_utils.mkdir_p(symlink_path)
+                        mkdir_p(symlink_path)
 
                         link_contents(oldlink_realpath, symlink_path)
                         link_contents(content_abspath, symlink_path)
@@ -175,7 +191,7 @@ def link_contents(content_path, linkdir_path):
         if not pexists(f_sympath):
             os.symlink(f_realpath, f_sympath)
         elif pexists(f_sympath) and \
-                not os_utils.sym_sametarget(f_sympath, f_realpath):
+                not sym_sametarget(f_sympath, f_realpath):
             print 'Duplicate content found for ', f_sympath,' in'
             print '==>', realpath(f_sympath)
             print '   ', realpath(f_realpath)
@@ -191,8 +207,7 @@ def all_symlinks_to_same_dir(d, symlinks):
     return True
 
 if __name__ == '__main__':
-    if '-d' in sys.argv:
-        debug = 1
-    elif '-dd' in sys.argv:
-        debug = 2
-    main()
+    arguments = docopt(__doc__)
+
+    debug = arguments['--debug']
+    main(smbsafe=arguments['--smbsafe'])

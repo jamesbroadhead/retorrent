@@ -128,3 +128,10 @@ def diskspace_used(path, si='kiB'):
 
 def sym_sametarget(a, b):
     return os.path.realpath(a) == os.path.realpath(b)
+
+def smbify(path):
+    """
+    For a given unix path, return a version that is legal for samba
+    """
+    return path.replace(':', '_')
+

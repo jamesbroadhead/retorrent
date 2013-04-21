@@ -17,7 +17,7 @@ import sys
 from logdecorators.tracelogdecorator import tracelogdecorator
 from os_utils.os_utils import mkdir_p
 
-# XXX: Use symlink_root_path in retorrent somewhere ...
+# XXX: Use global symlink_path in retorrent somewhere ...
 
 config_paths = [
     abspath('./'),
@@ -44,7 +44,8 @@ def parse_retorrentconf(extra_configdir=''):
         'seeddir'             : '~/seed',
         'seedtorrentfilesdir' : '~/seed/torrentfiles',
         'content_root_paths'  : [],
-        'symlink_root_path'   : '~/video'
+        'symlink_path'   : '~/video',
+        'smbsafe_symlink_path' : '~/smbsafevideo'
     }
 
     if not validate_config(config):
@@ -62,10 +63,11 @@ def parse_retorrentconf(extra_configdir=''):
             print('Unknown value type under global/%s' % (k,))
 
     category_defaults = {
-        'symlink_path' : '',
-        'content_paths': [],
-        'treat_as'     : 'tv',
-        'should_rename': 'True'
+        'symlink_path'        : '',
+        'smbsafe_symlink_path': '',
+        'content_paths'       : [],
+        'treat_as'            : 'tv',
+        'should_rename'       : 'True'
     }
     treat_as_options = [ 'movies', 'tv', 'files' ]
 
@@ -87,9 +89,10 @@ def parse_retorrentconf(extra_configdir=''):
             print("Illegal value for ['categories']['%s']['treat_as']" %(category,))
             sys.exit(1)
 
-        if not category_conf['symlink_path']:
-            category_conf['symlink_path'] = pjoin(global_conf['symlink_root_path'],
-                                                  category)
+        # use global options if no specific rules
+        for opt in ['symlink_path', 'smbsafe_symlink_path']:
+            if not category_conf[opt]:
+                category_conf[opt] = pjoin(global_conf[opt], category)
 
         categories[category] = category_conf
 
