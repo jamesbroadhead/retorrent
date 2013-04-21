@@ -7,6 +7,7 @@ import ctypes
 import errno
 import platform
 import os
+from os.path import basename, dirname
 
 from logdecorators.tracelogdecorator import tracelogdecorator
 
@@ -57,7 +58,7 @@ def enough_space(orig_paths, proposed_path):
 
     filesize_B = sum([os.path.getsize(orig_path) for orig_path in orig_paths ])
     if not os.path.exists(proposed_path):
-        proposed_path = os.path.dirname(proposed_path.rstrip('/'))
+        proposed_path = dirname(proposed_path.rstrip('/'))
 
     if filesize_B < freespace(proposed_path):
         return True
@@ -70,7 +71,7 @@ def same_volume(orig_paths, proposed_path):
     # Should only be one loop
     #    (eg. video/tv/foo -> video/tv)
     while not os.path.exists(pp):
-        pp = os.path.dirname(pp)
+        pp = dirname(pp)
     prop_dev = device_number(pp)
 
     for p in orig_paths:
@@ -105,7 +106,7 @@ def get_foldername(path):
     if len(path) == 0:
         return ''
 
-    return os.path.basename(path.strip('/'))
+    return basename(path.strip('/'))
 
 def str2utf8(string):
     if type(string) == type(u'unicode'):
@@ -135,3 +136,15 @@ def smbify(path):
     """
     return path.replace(':', '_')
 
+def myglob(arg):
+    """
+    with cd(dirname(partial_fn)):
+        glob.glob(partial_fn + '*')
+    didn't work for me
+    """
+    paths = []
+    partial_fn = basename(arg)
+    for f in os.listdir(dirname(arg)):
+        if f.startswith(partial_fn):
+            paths.append(os.path.join(dirname(arg),f))
+    return paths

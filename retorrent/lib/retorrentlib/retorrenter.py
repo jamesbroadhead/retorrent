@@ -1,32 +1,27 @@
 #!/usr/bin/env python
 
 import os
-from os.path import expanduser
+from os import listdir
+from os.path import expanduser, isdir, realpath
+from os.path import exists as pexists
 from os.path import join as pjoin
 
 from difflib import SequenceMatcher
 
 from debugprinter import debugprinter
 from filenamer import filenamer
+from retorrentlib.confparse import find_removelist, parse_divider_symbols, parse_fileext_details, parse_retorrentconf
 from logdecorators.tracelogdecorator import tracelogdecorator
 from optionator import optionator, eqoptionator
-from os_utils import os_utils
+from os_utils.os_utils import enough_space, mkdir_p, myglob, str2utf8
 
 class retorrenter:
-    def __init__(self, config, debug=False):
 
-        self.global_conf, self.categories = config['retorrentconf']
+    def __init__(self, configdir='', debug=False):
+        self.configdir = configdir
 
-        self.filetypes_of_interest = config['parse_fileext_details']
-        self.divider_symbols = config['parse_divider_symbols']
-        self.removelist_path = config['find_removelist']
-
-        self.commands = []
-        self.null_output = {'commands':[], 'symlinks':[], 'torrentfile':''}
         self.debug = debug
         self.debugprinter = debugprinter(self.debug)
-
-        self.reset_env()
 
     def debugprint(self,str,listol=[]):
         self.debugprinter.debugprint(str,listol)
@@ -39,30 +34,44 @@ class retorrenter:
         # The series or movie-name folder
         self.dest_dirpath = ''
 
-        self.filenamer = filenamer(self.divider_symbols, \
-                    self.filetypes_of_interest, \
-                    the_debugprinter=self.debugprinter)
-
-    def set_num_interesting_files(self,num_interesting_files):
-        self.filenamer.set_num_interesting_files(num_interesting_files)
+        self.filenamer = filenamer(self.divider_symbols,
+                                   self.filetypes_of_interest,
+                                   the_debugprinter=self.debugprinter)
 
     def handle_args(self, arguments):
-        """
-        Takes a list of existing files, returns XXX
-        """
+        content = []
         for a in arguments:
-            self.commands.append(self.handle_arg(a))
+            if pexists(a):
+                content.append(a)
+            else:
+                paths = myglob(a)
+                content.extend([ p for p in paths if pexists(p) ])
 
+        content.sort()
+        if not content:
+            print 'No content found'
+            return
 
-    def handle_arg(self,argument):
+        self.global_conf, self.categories = parse_retorrentconf( self.configdir)
+        self.filetypes_of_interest = parse_fileext_details(self.configdir)
+        self.divider_symbols = parse_divider_symbols(self.configdir)
+        self.removelist_path = find_removelist(self.configdir)
 
+        self.commands = []
+        for c in content:
+            # TODO: Could really do with removing this ...
+            self.reset_env()
+
+            commandset = self.handle_content(c)
+            if commandset:
+                self.commands.append(commandset)
+
+        return self.commands
+
+    def handle_content(self, content):
         print "|\n|\n|\n|"
 
-        if not os.path.exists(argument):
-            print "Can't find path: %s" % (argument,)
-            return self.null_output
-
-        the_path = os.path.abspath(argument)
+        the_path = os.path.abspath(content)
 
         # get a list of files to keep
         # NOTE: These are only those of the interesting files
@@ -73,16 +82,15 @@ class retorrenter:
 
         if len(orig_paths) == 0:
             print "No interesting files found! Skipping!"
-            self.reset_env()
-            return self.null_output
+            return
 
         self.debugprint("Dirpath before autoset: " + self.dest_dirpath)
 
-        possible_series_foldernames = [ \
-                self.filenamer.convert_filename(orig_filenames[0],True), \
+        possible_series_foldernames = [
+                self.filenamer.convert_filename(orig_filenames[0],True),
                 self.filenamer.convert_filename(orig_foldername,True) ]
 
-        possible_series_foldernames = [ i for i in possible_series_foldernames \
+        possible_series_foldernames = [ i for i in possible_series_foldernames
                 if not i == '' ]
 
         self.autoset_dest_dirpath(possible_series_foldernames,orig_paths)
@@ -91,27 +99,26 @@ class retorrenter:
         self.debugprint("Dirpath after autoset: " + self.dest_dirpath)
 
         if self.dest_category == "":
-            self.manually_set_dest_category(argument,orig_paths)
+            self.manually_set_dest_category(content, orig_paths)
 
             # TODO: Remove this.
             # All circumstances where s.d_c=='' should be caught instead.
             if self.dest_category == '':
                 # we are skipping this file.
                 print "skipping!"
-                self.reset_env()
-                return self.null_output
+                return
             else:
                 # recurse
-                return self.handle_arg(argument)
+                return self.handle_content(content)
 
         # At this point, self.dest_category is set.
         self.filenamer.set_movie(self.is_movie())
 
         if self.dest_folder == '':
             # not enough space :(
-            print '!!! Can\'t find enough space in any of that category to proceed!'
+            print "!!! Can't find enough space in any of that category to proceed!"
             print 'Free some disk space, or add another location.'
-            return self.null_output
+            return
 
         self.dest_folder = expanduser(self.dest_folder)
         self.dest_dirpath = expanduser(self.dest_dirpath)
@@ -121,12 +128,11 @@ class retorrenter:
         if self.categories[self.dest_category]['should_rename']:
             self.debugprint('About to generate dest_dirpath; '+self.dest_dirpath)
             if self.dest_dirpath == "":
-                self.manually_set_dest_dirpath(num_interesting_files, \
+                self.manually_set_dest_dirpath(num_interesting_files,
                         possible_series_foldernames)
                 if self.dest_dirpath == "":
                     print "Didn't set a directory - failing"
-                    self.reset_env()
-                    return self.null_output
+                    return
 
             # At this point, self.dest_dirpath contains the full folder path
             self.debugprint('Final dest_dirpath=' +self.dest_dirpath)
@@ -134,9 +140,9 @@ class retorrenter:
             ## Now to rename the filenames
             ##################################
             # create output paths based on the filenames
-            dest_filenames_from_files = [ self.filenamer.convert_filename(\
+            dest_filenames_from_files = [ self.filenamer.convert_filename(
                     os.path.basename(file),False) for file in orig_paths]
-            dest_paths_from_files = [ pjoin(self.dest_dirpath,filename) \
+            dest_paths_from_files = [ pjoin(self.dest_dirpath,filename)
                     for filename in dest_filenames_from_files ]
 
             self.debugprint('',[['dest_filenames_from_files',dest_filenames_from_files],['dest_paths_from_files',dest_paths_from_files]])
@@ -154,12 +160,12 @@ class retorrenter:
                     series_foldername_from_orig_foldername = ''
 
 
-                dest_filenames_based_on_folder = [ \
-                        self.filenamer.gen_final_filename_from_foldername( \
-                        series_foldername_from_orig_foldername, afile) \
+                dest_filenames_based_on_folder = [
+                        self.filenamer.gen_final_filename_from_foldername(
+                        series_foldername_from_orig_foldername, afile)
                         for afile in dest_filenames_from_files ]
 
-                dest_paths_from_folder = [ pjoin(self.dest_dirpath,file) \
+                dest_paths_from_folder = [ pjoin(self.dest_dirpath,file)
                         for file in dest_filenames_based_on_folder ]
 
                 self.debugprint('',[['dest_filenames_from_folder',dest_filenames_based_on_folder],['dest_paths_from_folder',dest_paths_from_folder]])
@@ -225,10 +231,9 @@ class retorrenter:
             answer = self.pose_question(question,options)
 
             if answer == '-':
-                return self.handle_arg(argument)
+                return self.handle_content(content)
             elif answer  == "cancel":
-                self.reset_env()
-                return self.null_output
+                return
             elif answer == "filenames":
                 dest_paths = dest_paths_from_files
             elif answer == "foldernames":
@@ -237,12 +242,12 @@ class retorrenter:
                 ## TODO: Re-attach file ext if ignored
 
                 print 'You ignored our suggestion; taking: "' + answer + '"'
-                dest_paths = [ pjoin(self.dest_folder,\
+                dest_paths = [ pjoin(self.dest_folder,
                         self.dest_dirpath,answer) ]
             else:
                 # more than one file
-                print 'We don\'t currently support manual mmvs :('
-                return self.handle_arg(argument)
+                print "We don't currently support manual mmvs :("
+                return self.handle_content(content)
 
         else:
             print "Not renaming files"
@@ -254,7 +259,7 @@ class retorrenter:
         torrentfile = ""
 
         # make the dir immediately, for the case show*avi
-        os_utils.mkdir_p(self.dest_dirpath)
+        mkdir_p(self.dest_dirpath)
 
         for dest in dest_paths:
             if os.path.exists(dest):
@@ -267,8 +272,7 @@ class retorrenter:
         seeddir_paths = []
         # this means '<cancel>'
         if do_seed == "":
-            self.reset_env()
-            return self.null_output
+            return
         elif do_seed  == "yes" :
             # link arg to .torrent via optionator
             torrentfile = self.find_torrentfile(the_path)
@@ -283,19 +287,24 @@ class retorrenter:
                                   self.global_conf['seedtorrentfilesdir']))
 
             # gen filenames + foldername for symlinked files
-            seeddir_paths = self.gen_seeddir_paths(orig_foldername,orig_intermeds,orig_filenames)
+            seeddir_paths = self.gen_seeddir_paths(orig_foldername,
+                                                   orig_intermeds,
+                                                   orig_filenames)
 
-            commands += [ "ln -s " + '"'+dest+'"' + " " + '"'+seedpath+'"' for dest,seedpath in zip(dest_paths,seeddir_paths) ]
+            commands += [ "ln -s " + '"'+dest+'"' + " " + '"'+seedpath+'"'
+                            for dest,seedpath in zip(dest_paths,seeddir_paths) ]
         else:
 
             # delete remainder of files in torrentdir
             # Don't delete the arg dir if it's the same as the target dir (renaming files in-place)
             dud_files_remaining = num_discarded_files > 0
-            only_ever_one_file_in_dir = os.path.isdir(argument) and num_interesting_files == 1
-            dir_is_now_empty = os.path.isdir(argument) and len(os.listdir(argument)) - num_interesting_files == 0
+            only_ever_one_file_in_dir = os.path.isdir(content) and num_interesting_files == 1
+            dir_is_now_empty = isdir(content) and len(listdir(content)) - num_interesting_files == 0
 
             # delete the source if there are remaining dud files / the dir is empty, provided that it's not also the dest
-            if (dud_files_remaining or only_ever_one_file_in_dir or dir_is_now_empty) and not os.path.realpath(argument) == os.path.realpath(self.dest_dirpath):
+            if ((dud_files_remaining or only_ever_one_file_in_dir or dir_is_now_empty)
+                    and not realpath(content) == realpath(self.dest_dirpath)):
+
                 if dir_is_now_empty:
                     commands += [ 'rmdir "' + the_path + '"' ]
                 else:
@@ -306,8 +315,10 @@ class retorrenter:
                     commands += [ 'ls -aR ' + the_path + '/']
                     commands += [ "rm -Irv " + the_path ]
 
-        self.reset_env()
         return { 'commands': commands, 'symlinks': seeddir_paths, 'torrentfile': torrentfile}
+
+    def set_num_interesting_files(self,num_interesting_files):
+        self.filenamer.set_num_interesting_files(num_interesting_files)
 
     def check_symlinks(self, seeddir_paths):
 
@@ -346,7 +357,7 @@ class retorrenter:
                         self.dest_category = category
 
                         self.dest_series_folder = poss_series_folder
-                        if os_utils.enough_space(orig_paths, possible_path):
+                        if enough_space(orig_paths, possible_path):
                             self.dest_folder = cat_folder
                             self.dest_dirpath = possible_path
                         else:
@@ -369,14 +380,14 @@ class retorrenter:
                 self.debugprint('Checking:' + possible_path)
                 self.debugprint('Equivalent candidate: ' + possible_path)
 
-                if os.path.exists(possible_path) and \
-                        os_utils.enough_space(orig_paths,possible_path):
+                if (os.path.exists(possible_path) and
+                        enough_space(orig_paths,possible_path)):
                     self.dest_folder = cat_folder
                     self.dest_dirpath = possible_path
                     return
 
             for cat_folder in self.dest_category['paths']:
-                if os_utils.enough_space(orig_paths,possible_path):
+                if enough_space(orig_paths,possible_path):
                     self.dest_folder = cat_folder
                     self.dest_dirpath = possible_path
                     return
@@ -389,7 +400,7 @@ class retorrenter:
             pass
 
 
-    def manually_set_dest_category(self,argument,orig_paths):
+    def manually_set_dest_category(self, argument, orig_paths):
         question = "Destination for " + argument
         dest_category_name = optionator(question, self.categories.keys() + ["<cancel>"] )
 
@@ -410,13 +421,14 @@ class retorrenter:
             for path in self.categories[self.dest_category]['content_paths']:
                 self.debugprint('Possible path: ' + path)
                 if not os.path.exists(path):
-                    print 'Warning: Config contains a path that doesn\'t exist: ' + path, 'Skipping...'
-                elif os_utils.enough_space(orig_paths,path):
+                    print "Warning: Config contains a path that doesn't exist: %s"%(
+                                path,)
+                elif enough_space(orig_paths,path):
                     self.debugprint('Setting dest_folder to: '+path)
                     self.dest_folder = path
                     return
 
-    def manually_set_dest_dirpath(self,num_interesting_files, \
+    def manually_set_dest_dirpath(self,num_interesting_files,
             possible_series_foldernames):
 
         self.debugprint('retorrenter.manually_set_dest_dirpath()')
@@ -442,11 +454,11 @@ class retorrenter:
             else:
                 # a new removeitem has been added - regenerate psf
 
-                possible_series_foldernames = [ \
-                    self.filenamer.convert_filename(item,True) \
+                possible_series_foldernames = [
+                    self.filenamer.convert_filename(item,True)
                     for item in possible_series_foldernames ]
 
-                self.manually_set_dest_dirpath(num_interesting_files, \
+                self.manually_set_dest_dirpath(num_interesting_files,
                         possible_series_foldernames)
                 return
 
@@ -552,7 +564,7 @@ class retorrenter:
                     return True
                 else:
                     self.debugprint('Size:' + str(disk_filesize_kB) +  'kB <' + str(foi['goodsize']) +'kB for:' + file_path)
-        self.debugprint(filename + ' didn\'t trigger any interest ...')
+        self.debugprint(filename + " didn't trigger any interest ...")
         return False
 
     def is_movie(self):
@@ -560,6 +572,7 @@ class retorrenter:
             return self.categories[self.dest_category]['treat_as'] == 'movies'
         return False
 
+    # TODO: episoder _must_ be able to return the epno - *use this*.
     def find_torrentfile(self, the_path):
         # get the file / foldername (not necc. the same as the arg itself
         split_path = the_path.rsplit('/')
@@ -578,22 +591,25 @@ class retorrenter:
                         interactive=False)
 
             score = SequenceMatcher('',
-                                    os_utils.str2utf8(arg_name),
-                                    os_utils.str2utf8(cf)).ratio()
+                                    str2utf8(arg_name),
+                                    str2utf8(cf)).ratio()
 
             tfiles += [{'filename':tfile, 'conv_filename':cf, 'score':score } ]
 
 
-        tfiles = sorted(tfiles, self.compare_scores)
+        tfiles = sorted(tfiles, self.compare_scored_tfiles)
 
         chosen_torrentfile = optionator('For: '+arg_name,
                                         [t['filename'] for t in tfiles])
 
         return chosen_torrentfile
 
-    # TODO: lambda-ify
-    def compare_scores(self,A,B):
-        return cmp(B['score'],A['score'])
+    def compare_scored_tfiles(self, A, B):
+        cmp_ = cmp(B['score'],A['score'])
+
+        if not cmp_ == 0:
+            return cmp_
+        return cmp(A['filename'], B['filename'])
 
     def gen_seeddir_paths(self,orig_foldername,orig_intermeds,orig_filenames):
 

@@ -12,7 +12,7 @@ from os.path import basename, dirname, expanduser
 import sys
 
 from os_utils.context_handlers import cd
-from retorrentlib import retorrenter, confparse
+from retorrentlib import retorrenter
 
 from optparse import OptionParser
 
@@ -23,30 +23,16 @@ def main():
     if options.debug:
         logging.basicConfig(level=logging.INFO)
 
-    args = parse_argv(argv)
-
-    if not args:
-        print 'File(s) not found'
-        sys.exit(1)
-
-    config = { 'retorrentconf':
-            confparse.parse_retorrentconf(options.configdir),
-        'parse_fileext_details':
-            confparse.parse_fileext_details(options.configdir),
-        'parse_divider_symbols':
-            confparse.parse_divider_symbols(options.configdir),
-        'find_removelist':
-            confparse.find_removelist(options.configdir)}
-
     # TODO : proper logging, remove the options.debug arg
-    r = retorrenter.retorrenter(config, debug=options.debug)
+    r = retorrenter.retorrenter(options.configdir, debug=options.debug)
 
     # get args (folders / files which are 100% downloaded.
-    commands = r.handle_args(args)
+    commands = r.handle_args(argv)
 
-    run_and_check(r, commands)
-    print 'Running symlinker...'
-    os.system('symlinker')
+    if commands:
+        run_and_check(r, commands)
+        print 'Running symlinker...'
+        os.system('symlinker')
 
 def run_and_check(r, output):
     for out in output:
@@ -92,28 +78,6 @@ def print_optionstructions():
     print '"-<WORD> will add WORD to the REMOVE_LIST'
     print '"+<WORD>" will set the dir to be WORD'
     print
-
-def parse_argv(argv):
-    """
-    Returns existing paths, and if the prefix is passed, all matching <prefix>*
-    """
-    args = []
-    for a in argv:
-        if not pexists(a):
-            paths = myglob(a)
-            paths.sort()
-            args.extend(paths)
-        else:
-            args.append(a)
-    return args
-
-def myglob(arg):
-    paths = []
-    partial_fn = basename(arg)
-    for f in os.listdir(dirname(arg)):
-        if f.startswith(partial_fn):
-            paths.append(os.path.join(dirname(arg),f))
-    return paths
 
 if __name__ == "__main__":
     try:
