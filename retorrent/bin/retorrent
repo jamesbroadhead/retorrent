@@ -4,22 +4,26 @@ retorrent - a media management tool
 
 Author: James Broadhead jamesbroadhead@gmail.com
 """
+from glob import glob
 import logging
 import os
+from os.path import exists as pexists
+from os.path import basename, dirname, expanduser
 import sys
 
+from os_utils.context_handlers import cd
 from retorrentlib import retorrenter, confparse
 
 from optparse import OptionParser
 
 def main():
 
-    options, args = parse_args()
+    options, argv = parse_args()
 
     if options.debug:
         logging.basicConfig(level=logging.INFO)
 
-    args = [ a for a in args if os.path.exists(a) ]
+    args = parse_argv(argv)
 
     if not args:
         print 'File(s) not found'
@@ -91,6 +95,26 @@ def print_optionstructions():
     print '"+<WORD>" will set the dir to be WORD'
     print
 
+def parse_argv(argv):
+    """
+    Returns existing paths, and if the prefix is passed, all matching <prefix>*
+    """
+    args = []
+    for a in argv:
+        if not pexists(a):
+            paths = myglob(a)
+            args.extend(paths)
+        else:
+            args.append(a)
+    return args
+
+def myglob(arg):
+    paths = []
+    partial_fn = basename(arg)
+    for f in os.listdir(dirname(arg)):
+        if f.startswith(partial_fn):
+            paths.append(os.path.join(dirname(arg),f))
+    return paths
 
 if __name__ == "__main__":
     try:
