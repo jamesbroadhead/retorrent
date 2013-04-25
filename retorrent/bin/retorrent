@@ -32,10 +32,10 @@ def main():
 
     for bundle in command_bundles:
         for sub_cmd in bundle['commands']:
-            os.system(sub_cmd)
-
-        if cmd['commands']:
-            r.check_symlinks(bundle)
+            retval = os.system(sub_cmd)
+            if not retval == 0:
+                break
+        r.check_symlinks(bundle)
 
     if command_bundles:
         os.system('symlinker')

@@ -322,13 +322,9 @@ class retorrenter:
         self.filenamer.set_num_interesting_files(num_interesting_files)
 
     def check_symlinks(self, command_bundle):
-        seeddir_paths = command_bundle['symlinks']
-        # check any symlinks that were created
 
-        broken_syms = []
-        for seedpath in seeddir_paths:
-            if not os.path.exists(seedpath):
-                broken_syms += [seedpath]
+        broken_syms = [ s for s in command_bundle.get('symlinks', [])
+                        if not pexists(s) ]
 
         if broken_syms:
             print "Broken symlinks - fix them then start the torrentfile"
