@@ -40,11 +40,11 @@ def parse_retorrentconf(extra_configdir=''):
         sys.exit(1)
 
     global_defaults = {
-        'torrentfilesdir'     : '~/torrents/torrentfiles',
-        'seeddir'             : '~/seed',
-        'seedtorrentfilesdir' : '~/seed/torrentfiles',
-        'content_root_paths'  : [],
-        'symlink_path'   : '~/video',
+        'torrentfilesdir'      : '~/torrents/torrentfiles',
+        'seeddir'              : '~/seed',
+        'seedtorrentfilesdir'  : '~/seed/torrentfiles',
+        'content_root_paths'   : [],
+        'symlink_path'         : '~/video',
         'smbsafe_symlink_path' : '~/smbsafevideo'
     }
 

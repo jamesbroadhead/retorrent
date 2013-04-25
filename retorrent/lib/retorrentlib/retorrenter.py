@@ -87,25 +87,22 @@ class retorrenter:
         self.debugprint("Dirpath before autoset: " + self.dest_dirpath)
 
         possible_series_foldernames = [
-                self.filenamer.convert_filename(orig_filenames[0],True),
-                self.filenamer.convert_filename(orig_foldername,True) ]
+                self.filenamer.convert_filename(orig_filenames[0], True),
+                self.filenamer.convert_filename(orig_foldername,   True) ]
 
         possible_series_foldernames = [ i for i in possible_series_foldernames
-                if not i == '' ]
+                                        if i ]
 
         self.autoset_dest_dirpath(possible_series_foldernames,orig_paths)
 
         self.debugprint('DestFolder after autoset: ' + self.dest_folder)
         self.debugprint("Dirpath after autoset: " + self.dest_dirpath)
 
-        if self.dest_category == "":
-            self.manually_set_dest_category(content, orig_paths)
+        if not self.dest_category:
+            self.manually_set_category(content, orig_paths)
 
-            # TODO: Remove this.
-            # All circumstances where s.d_c=='' should be caught instead.
-            if self.dest_category == '':
-                # we are skipping this file.
-                print "skipping!"
+            if not self.dest_category:
+                print "cancelled..."
                 return
             else:
                 # recurse
@@ -228,11 +225,12 @@ class retorrenter:
             print
 
             # Possibilities: '-', an option, '', foo (from +foo)
-            answer = self.pose_question(question,options)
+            answer = self.pose_question(question, options)
 
             if answer == '-':
                 return self.handle_content(content)
-            elif answer  == "cancel":
+            elif answer == "cancel":
+                print 'cancelled ...'
                 return
             elif answer == "filenames":
                 dest_paths = dest_paths_from_files
@@ -420,22 +418,21 @@ class retorrenter:
             pass
 
 
-    def manually_set_dest_category(self, argument, orig_paths):
+    def manually_set_category(self, argument, orig_paths):
         question = "Destination for " + argument
-        dest_category_name = optionator(question, self.categories.keys() + ["<cancel>"] )
+        dest_category_name = optionator(question,
+                                        self.categories.keys() + ["<cancel>"] )
 
         if dest_category_name in self.categories:
             self.dest_category = dest_category_name
             self.autoset_dest_folder_from_dest_category(orig_paths)
             return
 
-        # XXX
-        print dest_category_name
-        if dest_category_name == '<cancel>':
-            raise
+        if not dest_category_name:
+            return ''
         else:
             print 'Error -- category was unrecognised!'
-            self.manually_set_dest_category(argument,orig_paths)
+            self.manually_set_category(argument,orig_paths)
 
     @tracelogdecorator
     def autoset_dest_folder_from_dest_category(self,orig_paths):
