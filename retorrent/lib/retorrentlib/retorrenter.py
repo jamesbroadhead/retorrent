@@ -371,25 +371,34 @@ class retorrenter:
                             self.autoset_equivalent_dest_folder(orig_paths)
                         return
 
-    def autoset_equivalent_dest_folder(self,orig_paths):
-        self.debugprint('Trying to create an eqivalent dest_folder for ' + self.dest_category['category'] + '/' + self.dest_series_folder)
+    def dest_category_paths(self):
+        return self.categories[self.dest_category]['content_paths']
+
+    def autoset_equivalent_dest_folder(self, orig_paths):
+        self.debugprint('Trying to create an eqivalent dest_folder for %s' %
+                (pjoin(self.dest_category, self.dest_series_folder)))
 
         if self.dest_category and not self.dest_series_folder == "":
             # let's create an equivalent dir on a different drive
-            for cat_folder in self.dest_category['paths']:
+            for cat_folder in self.dest_category_paths():
                 possible_path = pjoin(cat_folder,self.dest_series_folder)
 
                 self.debugprint('Checking:' + possible_path)
                 self.debugprint('Equivalent candidate: ' + possible_path)
 
                 if (os.path.exists(possible_path) and
-                        enough_space(orig_paths,possible_path)):
+                        enough_space(orig_paths, possible_path)):
+                    self.debugprint('Equivalent candidate exists already and has enough space: ' + possible_path)
+
                     self.dest_folder = cat_folder
                     self.dest_dirpath = possible_path
                     return
 
-            for cat_folder in self.dest_category['paths']:
-                if enough_space(orig_paths,possible_path):
+            for cat_folder in self.dest_category_paths():
+                self.debugprint('Equivalent candidate has enough space: ' + possible_path)
+                possible_path = pjoin(cat_folder,self.dest_series_folder)
+
+                if enough_space(orig_paths, possible_path):
                     self.dest_folder = cat_folder
                     self.dest_dirpath = possible_path
                     return
@@ -411,6 +420,8 @@ class retorrenter:
             self.autoset_dest_folder_from_dest_category(orig_paths)
             return
 
+        # XXX
+        print dest_category_name
         if dest_category_name == '<cancel>':
             raise
         else:
