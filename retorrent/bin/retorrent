@@ -27,32 +27,18 @@ def main():
     r = retorrenter.retorrenter(options.configdir, debug=options.debug)
 
     # get args (folders / files which are 100% downloaded.
-    commands = r.handle_args(argv)
+    command_bundles = r.handle_args(argv)
 
-    if commands:
-        run_and_check(r, commands)
-        print 'Running symlinker...'
+
+    for bundle in command_bundles:
+        for sub_cmd in bundle['commands']:
+            os.system(sub_cmd)
+
+        if cmd['commands']:
+            r.check_symlinks(bundle)
+
+    if command_bundles:
         os.system('symlinker')
-
-def run_and_check(r, output):
-    for out in output:
-        for cmd in out['commands']:
-            os.system(cmd)
-        if out['commands']:
-            check_symlinks(r, out['symlinks'], out['commands'])
-
-def check_symlinks(r, symlinks, commands):
-    output = r.check_symlinks(symlinks)
-    if not output['success']:
-        for symlink in output['broken']:
-            print "!!!! " +  symlink + " is a broken symlink."
-        print "Broken symlinks - fix them then start the torrentfile"
-        print "Torrentfile: \t", output['torrentfile']
-        print 'Commands issued:'
-        for command in commands:
-            print '>> ', command
-
-        sys.exit("Broken Symlinks - bailing!")
 
 def parse_args():
     parser = OptionParser()

@@ -315,24 +315,33 @@ class retorrenter:
                     commands += [ 'ls -aR ' + the_path + '/']
                     commands += [ "rm -Irv " + the_path ]
 
-        return { 'commands': commands, 'symlinks': seeddir_paths, 'torrentfile': torrentfile}
+        # a command bundle
+        return { 'commands': commands,
+                 'symlinks': seeddir_paths,
+                 'torrentfile': torrentfile}
 
     def set_num_interesting_files(self,num_interesting_files):
         self.filenamer.set_num_interesting_files(num_interesting_files)
 
-    def check_symlinks(self, seeddir_paths):
-
+    def check_symlinks(self, command_bundle):
+        seeddir_paths = command_bundle['symlinks']
         # check any symlinks that were created
+
         broken_syms = []
         for seedpath in seeddir_paths:
             if not os.path.exists(seedpath):
                 broken_syms += [seedpath]
 
-        if len(broken_syms) > 0 :
-            return { 'success': False, 'broken': broken_syms }
+        if broken_syms:
+            print "Broken symlinks - fix them then start the torrentfile"
+            print
+            for b in broken_syms:
+                print "Torrentfile: \t", b
 
-        # We have moved the files, but are not seeding. Return an empty string.
-        return { 'success': True }
+            print
+            print 'Commands issued:'
+            for command in command_bundle['commands']:
+                print ' $%s' % (command,)
 
 
     def autoset_dest_dirpath(self,possible_series_foldernames,orig_paths):
