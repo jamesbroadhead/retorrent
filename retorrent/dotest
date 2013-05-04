@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# avoid getting retorrentlib from a system-wide install
+export PYTHONPATH=""
+
+cd lib
+python retorrentlib/episoder.py
+python retorrentlib/filenamer.py
+python retorrentlib/restring.py
+cd ..

@@ -4,17 +4,12 @@ retorrent - a media management tool
 
 Author: James Broadhead jamesbroadhead@gmail.com
 """
-from glob import glob
 import logging
+from optparse import OptionParser
 import os
-from os.path import exists as pexists
-from os.path import basename, dirname, expanduser
-import sys
 
-from os_utils.context_handlers import cd
 from retorrentlib import retorrenter
 
-from optparse import OptionParser
 
 def main():
 
@@ -29,15 +24,15 @@ def main():
     # get args (folders / files which are 100% downloaded.
     command_bundles = r.handle_args(argv)
 
-
-    for bundle in command_bundles:
-        for sub_cmd in bundle['commands']:
-            retval = os.system(sub_cmd)
-            if not retval == 0:
-                break
-        r.check_symlinks(bundle)
-
     if command_bundles:
+        for bundle in command_bundles:
+            for sub_cmd in bundle['commands']:
+                retval = os.system(sub_cmd)
+                if not retval == 0:
+                    break
+
+            if not r.check_symlinks(bundle):
+                break
         os.system('symlinker')
 
 def parse_args():

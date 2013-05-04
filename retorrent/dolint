@@ -1,7 +1,11 @@
 #!/bin/bash
 
-pyflakes bin lib/*
+# avoid getting retorrentlib from a system-wide install
+export PYTHONPATH=""
 
-pylint -E bin
+BIN="bin/is_seeded bin/remreffer bin/retorrent bin/symlinker"
 
+
+pyflakes $BIN lib/*
+pylint -E $BIN
 (cd lib && pylint -E *)

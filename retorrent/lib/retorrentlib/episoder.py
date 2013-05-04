@@ -3,6 +3,7 @@ import roman
 
 
 from debugprinter import debugprinter
+from logdecorators.tracelogdecorator import tracelogdecorator
 from optionator import booloptionator, optionator
 from os_utils.textcontrols import bold
 
@@ -245,16 +246,6 @@ class episoder:
             else:
                 return 's01' + 'e' + epno
 
-    def get_good_epno(self,filename):
-        return self.get_good_epno_from_split(filename.split('.'))
-
-    def get_good_epno_from_split(self,filename_split):
-        for i in filename_split:
-            if self.is_good_epno(i):
-                return i
-
-        return ''
-
     # <variable-length-number> + 'divider' + <variable_length_number>
     def convert_number_divider_number(self,item):
         if len(item) >= 3:
@@ -270,15 +261,49 @@ class episoder:
 
         return item,False
 
-    def is_good_epno(self,item):
-        self.debugprint('episoder.is_good_epno(' + item + ')')
+    def get_good_epno(self, filename):
+        return self.get_good_epno_from_split(filename.split('.'))
+
+    def get_good_epno_from_split(self, filename_split):
+        for i in filename_split:
+            if self.is_good_epno(i):
+                return i
+
+        return ''
+
+    @classmethod
+    @tracelogdecorator
+    def is_good_epno(cls, item):
+        """
+        >>> episoder.is_good_epno('s01e01')
+        True
+
+        >>> episoder.is_good_epno('s01e010')
+        True
+
+        >>> episoder.is_good_epno('e01')
+        False
+
+        >>> episoder.is_good_epno('ep01')
+        False
+
+        >>> episoder.is_good_epno('cd01')
+        True
+
+        >>> episoder.is_good_epno('op01')
+        True
+
+        >>> episoder.is_good_epno('ed01')
+        True
+        """
         if len(item) >= 4:
             if item[0:2] == 'cd' and item[2:].isdigit():
                 return True
             elif item[0] == 's' and item[1:3].isdigit() and \
                     item[3] == 'e' and item[4:].isdigit():
                 return True
-
+            elif item[0:2] in cls.identifiers['start_special'] and item[2:].isdigit():
+                return True
         return False
 
     def gen_n_digit_epno(self, N, epno,series="", nextitem=''):
@@ -522,3 +547,9 @@ class episoder:
 
     def set_movie(self,is_movie):
         self.is_movie = is_movie
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+

@@ -6,6 +6,8 @@ import removelist
 
 from debugprinter import debugprinter
 from episoder import episoder
+from retorrentlib.restring import add_necc_dots, dotjoin, endot, remove_camelcase
+from retorrentlib.restring import remove_dupe_dots, remove_zwsp
 from logdecorators.tracelogdecorator import tracelogdecorator
 
 hexdigits = '0123456789abcdefABCDEF' + u'0123456789abcdefABCDEF'
@@ -17,7 +19,6 @@ braces = {
 }
 
 class filenamer:
-
     def __init__(self, divider_list , filetypes_of_interest, the_debugprinter=debugprinter(False)):
 
         self.remove_list = removelist.read_list()
@@ -47,8 +48,6 @@ class filenamer:
     def convert_filename(self, filename, is_foldername, interactive=True):
         self.the_episoder.interactive = interactive
 
-        #if interactive:
-            #print 'Examining: ' + filename
         if filename == '':
             self.debugprint('Not converting blank filename!',[])
             return ''
@@ -64,18 +63,17 @@ class filenamer:
         self.debugprint('filenamer.convert_filename, after self.sort_out_braces: ' + filename )
 
         # Apparently, there are things called 'zero width spaces'. Remove them.
-        filename = self.remove_zwsp(filename)
-
-        self.debugprint('filenamer.convert_filename, after filenamer.remove_zwsp: ' + filename )
+        filename = remove_zwsp(filename)
+        self.debugprint('filenamer.convert_filename, after remove_zwsp: ' + filename )
 
         # change CamelCase to Camel.Case
-        filename = self.remove_camelcase(filename)
+        filename = remove_camelcase(filename)
 
-        self.debugprint('filenamer.convert_filename, after filenamer.remove_camelcase: ' + filename )
+        self.debugprint('filenamer.convert_filename, after remove_camelcase: ' + filename )
 
-        filename = self.add_necc_dots(filename)
+        filename = add_necc_dots(filename)
 
-        self.debugprint('filenamer.convert_filename, after filenamer.add_necc_dots: ' + filename )
+        self.debugprint('filenamer.convert_filename, after add_necc_dots: ' + filename )
 
         filename_split = filename.split('.')
         filename_split = self.to_lowercase(filename_split)
@@ -88,12 +86,11 @@ class filenamer:
         self.debugprint('filenamer.convert_filename, after filenamer.remove_extra_details(removelist): ' + '[' + ', '.join(filename_split) + ']')
 
         # pre-2012 Don't want years tangling the episoder.
-        # pre-2012 Doesn't work well either way, this is better                     #                than the opposite
+        # pre-2012 Doesn't work well either way, this is better than the opposite
         # 2012-03 Episoder needs to know about years, as they may have
         #                been preserved by filenamer. Therefore, episoder
         #                handles all year info now.
         #filename_split = self.remove_years(filename_split)
-
         #self.debugprint('filenamer.convert_filename, after episoder.remove_years: ' + '[' + ', '.join(filename_split) + ']')
 
         # Detect and Convert episode numbers.
@@ -111,21 +108,20 @@ class filenamer:
             filename_split = self.remove_following_text(filename_split,epno_index, is_foldername)
             self.debugprint('filenamer.convert_filename, not a movie (no episode number) so: after filenamer.remove_following_text: ' + '[' + ', '.join(filename_split) + ']')
 
-
-        # remove any empty elements from the filename
-        filename_split = self.remove_empty_elements(filename_split)
-
-        self.debugprint('filenamer.convert_filename, after filenamer.remove_empty_elements: ' + '[' + ', '.join(filename_split) + ']')
-
-        filename = ".".join(filename_split)
+        filename_split = [ i for i in filename_split if i ]
+        filename = dotjoin(*filename_split)
 
         self.debugprint('filenamer.convert_filename RETURNING:' + filename)
         return filename
 
-    # get TITLE from foldername
-    # get EPNO,FILEEXT from filename
-    # Make: TITLE.EPNO.FILEEXT
-    def gen_final_filename_from_foldername(self,the_dirpath, filename):
+    def gen_final_filename_from_foldername(self, the_dirpath, filename):
+        """
+        Replace the title in the filename passed with that passed as the folder name
+
+        # get TITLE from foldername
+        # get EPNO,FILEEXT from filename  // What about the checksum?
+        # Make: TITLE.EPNO.FILEEXT
+        """
         self.debugprint('filenamer.gen_final_filename_from_foldername(the_dirpath=' + the_dirpath + ', filename=' + filename + ')')
 
         # GET EPNO from filename
@@ -143,53 +139,11 @@ class filenamer:
 
         # join. We've lost the file ext ...
         filename_out = '.'.join((newfilename,epno,fileext))
-        filename_out = self.remove_dupe_dots(filename_out)
+        filename_out = remove_dupe_dots(filename_out)
 
         output = os.path.join(os.path.dirname(the_dirpath.strip('/')),filename_out)
 
         return output
-
-    # removes Zero Width Spaces from a string.
-    # Returns in UTF-8. HERE BE DRAGONS
-    def remove_zwsp(self,filename):
-
-        if type(filename) == type(u'unicode'):
-            ufilename = filename
-        else:
-            ufilename = unicode(filename,'utf-8', errors='ignore')
-
-        zwsp = u'\u200b'
-
-        while zwsp in ufilename:
-            ufilename = ufilename[0:ufilename.find(zwsp)] + ufilename[ufilename.find(zwsp)+len(zwsp):]
-
-        #filename = ufilename.encode()
-
-        return ufilename
-
-
-    def add_necc_dots(self, filename):
-        divide_items = ["["]
-        for item in divide_items:
-            if item in filename:
-                index = filename.find(item)
-                while not index == -1:
-                    if not index == 0 and not filename[index-1] == ".":
-                        filename = filename[0:index] + "." + filename[index:]
-                    # index + 2 is the next char after the item
-                    index = filename[index+2:].find(item)
-
-        return filename
-
-    def remove_dupe_dots(self,filename):
-        filename = filename.strip('.')
-
-        ddot_index = filename.find("..")
-        while not ddot_index == -1:
-            filename = filename[0:ddot_index] + filename[ddot_index+1:]
-            ddot_index = filename.find("..")
-
-        return filename
 
     def to_lowercase(self, filename_split):
         # look for a checksum. Lowercase everything else
@@ -198,28 +152,11 @@ class filenamer:
                 filename_split[index] = item.lower()
         return filename_split
 
-
-    def remove_empty_elements(self, filename_split):
-        return [ item for item in filename_split if not item == '' ]
-
     def remove_divider_symbols(self, filename):
         for symbol in self.divider_list:
             if symbol in filename:
                 filename = filename.replace(symbol,".")
         return filename
-
-    def remove_camelcase(self, filename):
-        if len(filename) == 0:
-            return filename
-        outfilename = ""
-        old = filename[0]
-        outfilename += old
-        for curr in filename[1:]:
-            if old.islower() and curr.isupper():
-                outfilename += "."
-            old = curr
-            outfilename += curr
-        return outfilename
 
     # this isn't the global 'remove_list', it's any list of things to remove
     def remove_extra_details(self, filename_split, remove_list):
@@ -229,7 +166,6 @@ class filenamer:
         fsplit = [ item for item in filename_split if not item in remove_list ]
         #self.debugprint('Filename after removal: ' + ','.join(fsplit))
         return fsplit
-
 
     # does this list contain '.mkv' or 'mkv' ?
     def is_fileext(self,item):
@@ -243,8 +179,10 @@ class filenamer:
                 return i
         return ''
 
-    def remove_following_text(self,filename_split,epno_index,is_foldername):
-
+    def remove_following_text(self, filename_split, epno_index, is_foldername):
+        """
+        removes the text following the epno_index except for checksums and the file extension
+        """
         # there is no epno in this filename
         if epno_index == -1:
             return filename_split
@@ -399,18 +337,10 @@ def remove_braces(filename, preserve_checksum=True, remove_content=True):
     output = endot(output)
     return output
 
-def dotjoin(*args):
-    stripped = [ a.strip('. ') for a in args if a]
-    return '.'.join(stripped)
-
-def endot(string):
-    string = string.replace(' ', '.')
-    string = string.replace('_', '.')
-    while '..' in string:
-        string = string.replace('..', '.')
-    return string
-
 class Stack:
+    """
+    A stack, with some extra functions for matching-brackets without reversing
+    """
     content = []
 
     def __nonzero__(self):
@@ -443,6 +373,7 @@ class Stack:
         item = self.content[-1]
         self.content = self.content[:-1]
         return item
+
 
 if __name__ == '__main__':
     import doctest

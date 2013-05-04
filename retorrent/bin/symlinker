@@ -17,7 +17,6 @@ from os.path import abspath, basename, dirname, expanduser, isdir, isfile, lexis
 from os.path import islink, realpath
 from os.path import exists as pexists
 from os.path import join as pjoin
-import sys
 
 from docopt import docopt
 
