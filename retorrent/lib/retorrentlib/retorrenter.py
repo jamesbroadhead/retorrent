@@ -474,11 +474,13 @@ class retorrenter:
 
     def filename_from_foldername(self, possible_series_foldernames, converted_filename) :
         """
-        @param filename : An already-converted filename, to extract epno, checksum and fileext from
+        @param filename : An already-converted filename,
+                            to extract epno, checksum and fileext from
         @param possible_series_foldernames : A list of foldernames to base the conversions on.
-                                             This either contains [], [foo] or [foo, bar]
-                                             Where foo is a string based on the first filename encountered
-                                             And bar is a string based on the folder passed, if the arg was a folder
+                            This either contains [], [foo] or [foo, bar]
+                            Where foo is a string based on the first filename encountered
+                            And bar is a string based on the folder passed, if the arg was a
+                            folder
         """
         if len(possible_series_foldernames) > 1:
             # Use the string generated from the foldername

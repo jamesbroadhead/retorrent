@@ -9,22 +9,6 @@ usually dealing with paths)
 ###
 # Functions dealing with split filenames and .'s
 ###
-def add_necc_dots(filename):
-    """
-    deprecated. use endot instead
-    """
-    divide_items = ["["]
-    for item in divide_items:
-        if item in filename:
-            index = filename.find(item)
-            while not index == -1:
-                if not index == 0 and not filename[index-1] == ".":
-                    filename = filename[0:index] + "." + filename[index:]
-                # index + 2 is the next char after the item
-                index = filename[index+2:].find(item)
-
-    return filename
-
 def dotjoin(*args):
     stripped = [ a.strip('. ') for a in args if a]
     return '.'.join(stripped)
@@ -35,19 +19,6 @@ def endot(string):
     while '..' in string:
         string = string.replace('..', '.')
     return string
-
-def remove_dupe_dots(filename):
-    """
-    deprecated. use endot instead
-    """
-    filename = filename.strip('.')
-
-    ddot_index = filename.find("..")
-    while not ddot_index == -1:
-        filename = filename[0:ddot_index] + filename[ddot_index+1:]
-        ddot_index = filename.find("..")
-
-    return filename
 
 ###
 # Other functions
@@ -77,10 +48,6 @@ def remove_camelcase(filename):
         outfilename += curr
     return outfilename
 
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-
 def remove_zwsp(filename):
     """
     # removes Zero Width Spaces from a string.
@@ -96,3 +63,11 @@ def remove_zwsp(filename):
     #    ufilename = ufilename[0:ufilename.find(zwsp)] + ufilename[ufilename.find(zwsp)+len(zwsp):]
         ufilename.replace(zwsp, '')
     return ufilename
+
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+
+
