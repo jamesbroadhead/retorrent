@@ -171,6 +171,15 @@ class retorrenter:
             rename_map = { p : pjoin(self.dest_dirpath, basename(p))
                            for p in orig_paths}
 
+        # Check for existing files, abort if found
+        already_exists = [ dst for src, dst in rename_map.items()
+                             if pexists(dst) ]
+        if already_exists:
+            print 'Some paths already exist, aborting.'
+            for ae in already_exists:
+                print '%r' % (ae,)
+            return
+
         return self.build_command_bundle(content_details, rename_map)
 
     def set_num_interesting_files(self, num_interesting_files):
@@ -615,10 +624,6 @@ class retorrenter:
 
         # make the dir immediately, for the case show*avi
         mkdir_p(self.dest_dirpath)
-
-        for src, dst in rename_map.items():
-            if os.path.exists(dst):
-                print 'Already exists, not moving: %r' % (dst,)
 
         commands.extend([ 'mv -nv "%s" "%s"' % (src, dst)
                           for src, dst in rename_map.items() ])
