@@ -1,12 +1,10 @@
-import datetime
 import roman
 
-
 from debugprinter import debugprinter
-from logdecorators.tracelogdecorator import tracelogdecorator
 from optionator import booloptionator, optionator
 from os_utils.textcontrols import bold
-
+from redecorators.tracelogdecorator import tracelogdecorator
+from retorrentlib.braced import is_year
 
 # TODO: Find all assumptions about two-digit episode numbers + mark with ASSUME
 # TODO: Fix all ASSUMES about 2-digit epnummbers
@@ -31,13 +29,12 @@ class episoder:
 
     romans_to_ignore = []
 
-
     num_interesting_files = 0
     is_movie = False
     interactive = False
     def __init__(self,debugprinter=debugprinter(False)):
         self.debugprinter = debugprinter
-        self.preserve_years = {}
+        self.preserve_years = set()
 
     def debugprint(self, str, listol=[]):
         self.debugprinter.debugprint(str,listol)
@@ -169,17 +166,16 @@ class episoder:
 
             # eg. 0104 == s01e04
             elif len(item) == 4:
-                is_year,item_mod = self.prune_possible_year(item)
-                if not is_year:
+                # de-unicode so that memoize works
+                if is_year(str(item), interactive=self.interactive):
+                    # it is a year, preserve it
+                    return split_fn, False
+                else:
                     split_fn[index] = self.gen_full_epno_string(item[2:], item[0:2])
                     return split_fn, True
-                else:
-                    # it is a year, remove if requested to
-                    split_fn[index] = item_mod
-                    return split_fn, False
-            else:
-                # it's a >5 digit number ... boring
-                return split_fn, False
+
+            # it's a >5 digit number ... boring
+            return split_fn, False
 
 
         self.debugprint('Checking '+item+ ' as a number_divider_number')
@@ -354,14 +350,12 @@ class episoder:
             # TODO [later] We definitely need episode numbers.
             return False
 
-        question = 'Is ' + bold(letter) + ' an episode or part number?'
         # nice defaults
-        if letter == 'a' or letter == 'b':
-            options = [ 'True', 'False' ]
-        else:
-            options = ['False', 'True']
-
-        answer = booloptionator(question, options)
+        default_false = False
+        if not (letter == 'a' or letter == 'b'):
+            default_false = True
+        answer = booloptionator('Is %s an episode or part number?' % (bold(letter),),
+                                yesno=True, default_false=default_false)
 
         self.single_letter_is_epno = answer
         self.isset_single_letter_is_epno = True
@@ -510,45 +504,6 @@ class episoder:
         print "episoder.number_is_episodenumber: assuming 2-digit is epno"
         return True
 
-    def prune_possible_year(self,item):
-        """
-        # == Old comment from filenamer.py ==
-        # pre-2012 Don't want years tangling the episoder.
-        # pre-2012 Doesn't work well either way, this is better than the opposite
-        # 2012-03 Episoder needs to know about years, as they may have
-        #                been preserved by filenamer. Therefore, episoder
-        #                handles all year info now.
-        #filename_split = self.remove_years(filename_split)
-        #self.debugprint('filenamer.convert_filename, after episoder.remove_years: ' + '[' + ', '.join(filename_split) + ']')
-        """
-
-        if item.isdigit() and int(item) in self.preserve_years:
-            if self.preserve_years[int(item)]:
-                return True,item
-            else:
-                return True,''
-        elif not self.interactive:
-            return False,item
-        else:
-            thisyear = datetime.datetime.now().year
-            if item.isdigit() and len(item) == 4 and int(item) <= thisyear:
-                yes_preserve = 'Yes - Preserve'
-                yes_remove = 'Yes - Remove'
-                no = 'No'
-
-                is_year = optionator('Does ' + item + ' represent a year?',
-                                     [yes_preserve, yes_remove, no])
-
-                if is_year == yes_preserve:
-                    self.preserve_years[int(item)] = True
-                    return True,item
-                elif is_year == yes_remove:
-                    self.preserve_years[int(item)] = False
-                    return True,''
-                elif not is_year == no:
-                    print 'Taking ' + no
-        return False,item
-
     # This receives a full part of the foldername ( eg. ep01)
     def is_raw_episode_numbering_string(self,string):
         return self.convert_if_episode_number([string], 0)[1]
@@ -558,6 +513,9 @@ class episoder:
 
     def set_movie(self,is_movie):
         self.is_movie = is_movie
+
+
+
 
 
 if __name__ == '__main__':

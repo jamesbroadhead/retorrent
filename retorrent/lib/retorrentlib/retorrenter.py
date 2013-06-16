@@ -12,7 +12,7 @@ from difflib import SequenceMatcher
 from debugprinter import debugprinter
 from filenamer import filenamer
 from retorrentlib.confparse import find_removelist, parse_divider_symbols, parse_fileext_details, parse_retorrentconf
-from logdecorators.tracelogdecorator import tracelogdecorator
+from redecorators.tracelogdecorator import tracelogdecorator
 from optionator import optionator, eqoptionator
 from os_utils.os_utils import enough_space, mkdir_p, myglob, str2utf8
 from os_utils.textcontrols import bold

@@ -3,8 +3,12 @@
 Utility module for functions dealing with strings containing substrings inside braces
 
 """
+import datetime
+
+from redecorators.memoize import memoize_ignore_kwargs
+from redecorators.tracelogdecorator import tracelogdecorator
+from retorrentlib.optionator import booloptionator
 from retorrentlib.restring import dotjoin, endot
-from logdecorators.tracelogdecorator import tracelogdecorator
 
 braces = {
     '[' : ']',
@@ -103,46 +107,30 @@ def extract_checksum(filename):
     return ''
 
 @tracelogdecorator
-def remove_braces(filename, preserve_checksum=True, remove_content=True):
+def remove_braces(filename, preserve_checksum=True):
     """
-    Removes braces and internal content, with special rules for checksums
+    Removes braces and internal content, with special rules for checksums and years
+
     Optionally preserves content, removing braces
 
-    >>> remove_braces('foo.bar.(what).zamf', remove_content=False)
-    'foo.bar.what.zamf'
-
-    >>> remove_braces('foo.bar.(what).zamf', remove_content=True)
+    >>> remove_braces('foo.bar.(what).zamf')
     'foo.bar.zamf'
 
-    >>> remove_braces('foo.bar.(w(h)at).zamf', remove_content=False)
-    'foo.bar.w.h.at.zamf'
-
-    >>> remove_braces('foo.bar.(w(h)at).zamf', remove_content=True)
+    >>> remove_braces('foo.bar.(w(h)at).zamf')
     'foo.bar.zamf'
 
-    >>> remove_braces('foo.bar.what.(88888888).zamf', remove_content=False)
-    'foo.bar.what.[88888888].zamf'
-
-    >>> remove_braces('foo.bar.what.(aaaaaaaa).zamf', remove_content=False)
-    'foo.bar.what.[AAAAAAAA].zamf'
-
-    >>> remove_braces('foo.bar.what.(88888888).zamf', preserve_checksum=False)
-    'foo.bar.what.zamf'
-
-    >>> remove_braces('The Band - Let Me Out - 1993 (Vinyl - MP3 - V0 (VBR)) (1).torrent', remove_content=False)
-    'The.Band.-.Let.Me.Out.-.1993.Vinyl.-.MP3.-.V0.VBR.1.torrent'
-
-    >>> remove_braces('The Band - Let Me Out - 1993 (Vinyl - MP3 - V0 (VBR)) (1).torrent', remove_content=True)
+    >>> remove_braces('The Band - Let Me Out - 1993 (Vinyl - MP3 - V0 (VBR)) (1).torrent')
     'The.Band.-.Let.Me.Out.-.1993.torrent'
 
-    >>> remove_braces('Able Baker [1981].mkv', remove_content=False)
+    >>> remove_braces('Able Baker [1981].mkv')
     'Able.Baker.1981.mkv'
-
-    >>> remove_braces('Able Baker [1981].mkv', remove_content=True)
-    'Able.Baker.mkv'
 
     >>> remove_braces('[able].baker.charlie.S2...01.[720p.H264][AAAAAAAA].mkv')
     'baker.charlie.S2.01.[AAAAAAAA].mkv'
+
+    >>> remove_braces('[able].baker.charlie.S2...01.[720p.H264][AAAAAAAA].mkv', preserve_checksum=False)
+    'baker.charlie.S2.01.mkv'
+
     """
     brace_stack = Stack()
     content_stack = Stack()
@@ -158,19 +146,22 @@ def remove_braces(filename, preserve_checksum=True, remove_content=True):
             if c == brace_stack.peek():
                 brace_stack.pop()
                 # contains brace content
-                if is_checksum(content_stack.peek()):
+                peeked_content = content_stack.peek()
+                if is_checksum(peeked_content):
                     if preserve_checksum:
                         # append the checksum to the output
                         content_stack.push('[' + content_stack.pop().upper() + ']')
                     else:
                         content_stack.pop()
+
+                elif is_year(peeked_content):
+                    # preserve the year sans-brackets
+                    content_stack.push(content_stack.pop())
+
                 else:
-                    # other content inside brackets
-                    if remove_content:
-                        content_stack.pop()
-                        # remove the content
-                    else:
-                        content_stack.push('')
+                    # remove the content
+                    content_stack.pop()
+
             else:
                 content_stack.replace_first(content_stack.peek() + c)
         else:
@@ -183,6 +174,21 @@ def remove_braces(filename, preserve_checksum=True, remove_content=True):
 
     output = endot(output)
     return output
+
+def ask_is_year(item):
+    if booloptionator('Does ' + item + ' represent a year?'):
+        return True
+    return False
+
+@memoize_ignore_kwargs
+def is_year(item, interactive=True):
+    thisyear = datetime.datetime.now().year
+    if item.isdigit() and len(item) == 4 and int(item) <= thisyear:
+        if not interactive:
+            return False
+        return ask_is_year(item)
+
+    return False
 
 class Stack:
     """

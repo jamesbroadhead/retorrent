@@ -27,7 +27,7 @@ def boptionator(text, option_list):
 
 # returns the item
 def optionator(text, option_list):
-    answer = boptionator(text,option_list)[1]
+    answer = boptionator(text, option_list)[1]
     if answer in ['<blank>', '<cancel>', '<none>']:
         return ''
     return answer
@@ -51,12 +51,17 @@ def eqoptionator(text, option_list):
     answer = optionator(text, newlist)
     return answer
 
-def booloptionator(text,option_list):
-    answer = optionator(text,option_list)
+def booloptionator(text, yesno=False, default_false=False):
+    option_list = ['True', 'False']
+    if yesno:
+        option_list = ['Yes', 'No']
 
-    if answer == 'True':
+    if default_false:
+        option_list.reverse()
+
+    answer = optionator(text, option_list)
+    answer = answer.lower()
+
+    if answer == 'true' or answer == 'yes':
         return True
-    elif answer == 'False':
-        return False
-    else:
-        return booloptionator(text,option_list)
+    return False

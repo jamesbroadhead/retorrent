@@ -9,7 +9,7 @@ import platform
 import os
 from os.path import abspath, basename, dirname
 
-from logdecorators.tracelogdecorator import tracelogdecorator
+from redecorators.tracelogdecorator import tracelogdecorator
 
 def freespace(path, si_prefix=''):
     """

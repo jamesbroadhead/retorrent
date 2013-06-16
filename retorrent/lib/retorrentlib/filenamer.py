@@ -54,7 +54,7 @@ class filenamer:
 
         self.debugprint('filenamer.convert_filename, after self.remove_divider_symbols : ' + filename )
 
-        # remove braces from anything that isn't a checksum
+        # remove braces from anything that isn't a checksum or a year
         filename = remove_braces(filename, preserve_checksum=not is_foldername)
 
         self.debugprint('filenamer.convert_filename, after self.sort_out_braces: ' + filename )

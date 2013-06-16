@@ -14,7 +14,7 @@ from os.path import exists as pexists
 import shutil
 import sys
 
-from logdecorators.tracelogdecorator import tracelogdecorator
+from redecorators.tracelogdecorator import tracelogdecorator
 from os_utils.os_utils import mkdir_p
 
 # XXX: Use global symlink_path in retorrent somewhere ...
