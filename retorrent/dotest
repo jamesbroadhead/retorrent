@@ -4,7 +4,12 @@
 export PYTHONPATH=""
 
 cd lib
-python retorrentlib/episoder.py
-python retorrentlib/filenamer.py
-python retorrentlib/restring.py
+
+for d in * ; do
+    cd $d
+    for py in *.py ; do
+        python $py
+    done
+    cd ..
+done
 cd ..
