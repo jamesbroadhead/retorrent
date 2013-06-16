@@ -91,6 +91,7 @@ class retorrenter:
         ln -s <home>/<category>/<dest_dirname>/<filename> => <seeddir>/<original_dirname>/...
         """
         print "|\n|\n|\n|"
+        print 'For: %s' % (content,)
 
         content_abspath = abspath(content)
 
@@ -637,22 +638,13 @@ class retorrenter:
         if do_seed == "":
             return
         elif do_seed  == "yes" :
-            # link arg to .torrent via optionator
-            torrentfile = self.find_torrentfile(content_abspath)
 
             if orig_foldername:
                 commands.append('mv -nv "%s" "%s"' % (content_abspath,
                                                       self.global_conf['seeddir']))
 
-            if not torrentfile == '':
-                # move torrentfile to seeddir
-                commands.append('mv -nv "%s" "%s"' % (
-                                  pjoin(self.global_conf['torrentfilesdir'], torrentfile),
-                                  self.global_conf['seedtorrentfilesdir']))
-
             # TODO: this should be a src -> dst dict
             # TODO: this should be inside the rename_map
-
             seeddir_paths = { orig_path : pjoin(self.global_conf['seeddir'], orig_foldername,
                                                 intermeds, filename)
                               for orig_path, intermeds, filename
@@ -661,6 +653,15 @@ class retorrenter:
             commands.extend(['ln -s "%s" "%s"' % (rename_map[orig_path],
                                                   seeddir_paths[orig_path])
                              for orig_path in seeddir_paths])
+
+            # link arg to .torrent via optionator
+            torrentfile = self.find_torrentfile(content_abspath)
+            if torrentfile:
+                # move torrentfile to seeddir
+                commands.append('mv -nv "%s" "%s"' % (
+                                  pjoin(self.global_conf['torrentfilesdir'], torrentfile),
+                                  self.global_conf['seedtorrentfilesdir']))
+
         else:
 
             # delete remainder of files in torrentdir
@@ -689,24 +690,28 @@ class retorrenter:
                  'symlinks'   : [ seeddir_paths
                                   for orig_path, seeddir_paths
                                   in seeddir_paths.items() ],
-                 'torrentfile': torrentfile}
+                 'torrentfile': torrentfile,
+                 'commands_run' : []}
 
 
-    def check_symlinks(self, command_bundle):
+def check_result(command_bundle, failed):
 
-        broken_syms = [ s for s in command_bundle.get('symlinks', [])
-                        if not pexists(s) ]
+    broken_syms = [ s for s in command_bundle.get('symlinks', [])
+                    if not pexists(s) ]
 
-        if broken_syms:
-            print "Broken symlinks - fix them then start the torrentfile"
-            print
-            for b in broken_syms:
-                print "Torrentfile: \t", b
+    if failed or broken_syms:
+        print "Broken symlinks - fix them then start the torrentfile"
+        print
+        for b in broken_syms:
+            print "Broken: \t", b
 
-            print
-            print 'Commands issued:'
-            for command in command_bundle['commands']:
-                print ' $%s' % (command,)
-            return False
-        return True
+        print
+        print 'Commands: (those run are #-prefixed)'
+        for command in command_bundle['commands']:
+            if command in command_bundle['commands_run']:
+                print '# %s' % (command,)
+            else:
+                print command
 
+        return False
+    return True

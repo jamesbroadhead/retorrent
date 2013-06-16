@@ -511,6 +511,17 @@ class episoder:
         return True
 
     def prune_possible_year(self,item):
+        """
+        # == Old comment from filenamer.py ==
+        # pre-2012 Don't want years tangling the episoder.
+        # pre-2012 Doesn't work well either way, this is better than the opposite
+        # 2012-03 Episoder needs to know about years, as they may have
+        #                been preserved by filenamer. Therefore, episoder
+        #                handles all year info now.
+        #filename_split = self.remove_years(filename_split)
+        #self.debugprint('filenamer.convert_filename, after episoder.remove_years: ' + '[' + ', '.join(filename_split) + ']')
+        """
+
         if item.isdigit() and int(item) in self.preserve_years:
             if self.preserve_years[int(item)]:
                 return True,item
@@ -521,12 +532,12 @@ class episoder:
         else:
             thisyear = datetime.datetime.now().year
             if item.isdigit() and len(item) == 4 and int(item) <= thisyear:
-                yes_remove = 'Yes - Remove'
                 yes_preserve = 'Yes - Preserve'
+                yes_remove = 'Yes - Remove'
                 no = 'No'
 
-                is_year = optionator('Does ' + item + ' represent a year?', [yes_remove, yes_preserve, no])
-
+                is_year = optionator('Does ' + item + ' represent a year?',
+                                     [yes_preserve, yes_remove, no])
 
                 if is_year == yes_preserve:
                     self.preserve_years[int(item)] = True

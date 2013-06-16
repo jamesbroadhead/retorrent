@@ -8,7 +8,7 @@ import logging
 from optparse import OptionParser
 import os
 
-from retorrentlib import retorrenter
+from retorrentlib.retorrenter import check_result, retorrenter
 
 
 def main():
@@ -19,19 +19,22 @@ def main():
         logging.basicConfig(level=logging.INFO)
 
     # TODO : proper logging, remove the options.debug arg
-    r = retorrenter.retorrenter(options.configdir, debug=options.debug)
+    r = retorrenter(options.configdir, debug=options.debug)
 
     # get args (folders / files which are 100% downloaded.
     command_bundles = r.handle_args(argv)
 
     if command_bundles:
         for bundle in command_bundles:
+            failed=False
             for sub_cmd in bundle['commands']:
                 retval = os.system(sub_cmd)
+                bundle['commands_run'].append(sub_cmd)
                 if not retval == 0:
+                    failed=True
                     break
 
-            if not r.check_symlinks(bundle):
+            if not check_result(bundle, failed) or failed:
                 break
         os.system('symlinker')
 

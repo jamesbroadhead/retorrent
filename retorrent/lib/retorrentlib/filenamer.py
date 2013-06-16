@@ -4,12 +4,12 @@ from os.path import dirname
 from os.path import join as pjoin
 
 
-from braced import  extract_checksum, is_checksum, remove_braces
+from braced import extract_checksum, is_checksum, remove_braces
 from debugprinter import debugprinter
 from episoder import episoder
 from retorrentlib import removeset
 from retorrentlib.restring import dotjoin, endot, remove_camelcase, remove_zwsp
-from retorrentlib.relist import remove_elements_based_on_list
+from retorrentlib.relist import lowercase_non_checksums, remove_nonfinal_elements_if_in_set
 
 class filenamer:
     def __init__(self, divider_list, filetypes_of_interest,
@@ -73,22 +73,20 @@ class filenamer:
         self.debugprint('filenamer.convert_filename, after endot: ' + filename )
 
         filename_split = filename.split('.')
-        filename_split = self.to_lowercase(filename_split)
+        filename_split = lowercase_non_checksums(filename_split)
 
-        self.debugprint('filenamer.convert_filename, after filenamer.to_lowercase: ' + '[' + ', '.join(filename_split) + ']')
+        self.debugprint('filenamer.convert_filename, after filenamer.lowercase_non_checksums: ' + '[' + ', '.join(filename_split) + ']')
 
-        filename_split = remove_elements_based_on_list(filename_split, self.remove_set)
-        self.debugprint('filenamer.convert_filename, after filenamer.remove_elements_based_on_list(removeset): ' + '[' + ', '.join(filename_split) + ']')
+        if not is_foldername:
+            # this is a filename ending in a file extension -- preserve the extension
+            filename_split = remove_nonfinal_elements_if_in_set(filename_split,
+                                                        self.remove_set | self.tmp_remove_set)
 
-        filename_split = remove_elements_based_on_list(filename_split, self.tmp_remove_set)
+        else:
+            # may prune the final element if it's in the removeset
+            filename_split = [ elem for elem in filename_split
+                               if not elem in self.remove_set | self.tmp_remove_set ]
 
-        # pre-2012 Don't want years tangling the episoder.
-        # pre-2012 Doesn't work well either way, this is better than the opposite
-        # 2012-03 Episoder needs to know about years, as they may have
-        #                been preserved by filenamer. Therefore, episoder
-        #                handles all year info now.
-        #filename_split = self.remove_years(filename_split)
-        #self.debugprint('filenamer.convert_filename, after episoder.remove_years: ' + '[' + ', '.join(filename_split) + ']')
 
         # Detect and Convert episode numbers.
         # NEW! Movies have cd01,cd02-so they go through episoder
@@ -105,10 +103,9 @@ class filenamer:
             self.debugprint('filenamer.convert_filename, creating a folder name, so : after filenamer.remove_elements_based_on_list(file_extensions): ' + '[' + ', '.join(filename_split) + ']')
 
         if not self.is_movie:
-            filename_split = self.remove_following_text(filename_split,epno_index, is_foldername)
+            filename_split = self.remove_following_text(filename_split, epno_index, is_foldername)
             self.debugprint('filenamer.convert_filename, not a movie (no episode number) so: after filenamer.remove_following_text: ' + '[' + ', '.join(filename_split) + ']')
 
-        filename_split = [ i for i in filename_split if i ]
         filename = dotjoin(*filename_split)
 
         self.debugprint('filenamer.convert_filename RETURNING:' + filename)
@@ -124,21 +121,20 @@ class filenamer:
         """
         self.debugprint('filenamer.gen_final_filename_from_foldername(the_dirpath=' + the_dirpath + ', filename=' + filename + ')')
 
+        title = self.convert_filename(the_dirpath, is_foldername=True)
+
         # GET EPNO from filename
         # run convert_filename on filename as a filename. Then pull epno
-        filename = self.convert_filename(filename,is_foldername=False)
-        self.debugprint('converted the filename to: ',filename)
+        generated_filename = self.convert_filename(filename, is_foldername=False)
         epno = self.the_episoder.get_good_epno(filename)
+
         checksum = extract_checksum(filename)
         # TODO: preserve year if in filename
 
         fileext = self.find_fileext(filename)
 
-        # Get Title from Foldername
-        #foldername = os_utils.get_foldername(the_dirpath)
-        title = self.convert_filename(the_dirpath, is_foldername=True)
-
-        self.debugprint('filenamer.gen_final_filename_from_foldername: Got: filename=' + filename + ' epno=' +epno+ ' fileext=' + fileext)
+        self.debugprint('filenamer.gen_final_filename_from_foldername:')
+        self.debugprint('Given filename={filename}, generated_filename={generated_filename}, title={title}, epno={epno}, checksum={checksum}, fileext={fileext}'.format(filename=filename, generated_filename=generated_filename, title=title, epno=epno, checksum=checksum, fileext=fileext))
 
         # join. We've lost the file ext ...
         filename_out = dotjoin(title, epno, checksum, fileext)
@@ -146,13 +142,6 @@ class filenamer:
         output = pjoin(dirname(the_dirpath.strip('/')),filename_out)
 
         return output
-
-    def to_lowercase(self, filename_split):
-        # look for a checksum. Lowercase everything else
-        for index,item in enumerate(filename_split):
-            if not is_checksum(item):
-                filename_split[index] = item.lower()
-        return filename_split
 
     def remove_divider_symbols(self, filename):
         for symbol in self.divider_list:
