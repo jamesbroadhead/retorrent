@@ -17,6 +17,8 @@ from optionator import optionator, eqoptionator
 from os_utils.os_utils import enough_space, mkdir_p, myglob, str2utf8
 from os_utils.textcontrols import bold
 
+RECALCULATE = '-'
+
 class retorrenter:
 
     def __init__(self, configdir='', debug=False):
@@ -159,7 +161,7 @@ class retorrenter:
         if self.categories[self.dest_category]['should_rename']:
             rename_map = self.build_rename_map(content_details, possible_series_foldernames)
 
-            if rename_map == '-':
+            if rename_map == RECALCULATE:
                 # User added a term to filter. Recurse. (this is a horrible model...)
                 return self.handle_content(content)
             elif not rename_map:
@@ -311,7 +313,7 @@ class retorrenter:
 
             dirpath_ans = self.pose_question(dirpath_q, dirpath_q_opts)
 
-            if not dirpath_ans == '-':
+            if not dirpath_ans == RECALCULATE:
                 self.dest_dirpath = pjoin(self.dest_folder,dirpath_ans)
             else:
                 # a new removeitem has been added - regenerate psf
@@ -324,8 +326,8 @@ class retorrenter:
                         possible_series_foldernames)
                 return
 
-    # Note: returns '-' if a recurse is needed
     def pose_question(self,question,options):
+        # Note: returns RECALCULATE ('-') if a recurse is needed
 
         answer = eqoptionator(question,options)
 
@@ -334,11 +336,11 @@ class retorrenter:
         elif answer.startswith('+'):
             return answer[1:]
         elif answer.startswith('-'):
-            self.filenamer.add_to_removelist(answer[1:])
-            return '-'
+            self.filenamer.add_to_removeset(answer[1:])
+            return RECALCULATE
         else:
-            self.filenamer.tmp_remove_list.append(answer)
-            return '-'
+            self.filenamer.add_to_tmp_removeset(answer)
+            return RECALCULATE
 
     # For all files
     # Needs to return:
@@ -580,7 +582,7 @@ class retorrenter:
 
         rename_map = {}
 
-        # Possibilities: '-', an option, '', foo (from +foo)
+        # Possibilities: RECALCULATE, an option, '', foo (from +foo)
         answer = self.pose_question(question, options)
 
         if answer == "filenames":
@@ -591,8 +593,8 @@ class retorrenter:
             rename_map = deepcopy(mutual)
             rename_map.update({ p : fns['path_from_foldername']
                                     for p, fns in multiple.items() })
-        elif answer == '-':
-            return answer
+        elif answer == RECALCULATE:
+            return RECALCULATE
         elif answer and len(orig_paths) == 1:
             ## TODO: Re-attach file ext (and maybe checksum) if not supplied
             print 'You ignored our suggestion; taking: %r' % (answer,)

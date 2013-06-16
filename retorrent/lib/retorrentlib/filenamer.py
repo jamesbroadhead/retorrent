@@ -3,19 +3,20 @@
 from os.path import dirname
 from os.path import join as pjoin
 
-import removelist
 
 from braced import  extract_checksum, is_checksum, remove_braces
 from debugprinter import debugprinter
 from episoder import episoder
-from retorrentlib.restring import dotjoin, endot, remove_camelcase
-from retorrentlib.restring import remove_zwsp
+from retorrentlib import removeset
+from retorrentlib.restring import dotjoin, endot, remove_camelcase, remove_zwsp
+from retorrentlib.relist import remove_elements_based_on_list
 
 class filenamer:
-    def __init__(self, divider_list , filetypes_of_interest, the_debugprinter=debugprinter(False)):
+    def __init__(self, divider_list, filetypes_of_interest,
+                 the_debugprinter=debugprinter(False)):
 
-        self.remove_list = removelist.read_list()
-        self.tmp_remove_list = []
+        self.remove_set = removeset.read_from_file()
+        self.tmp_remove_set = set()
 
         self.divider_list = divider_list
         self.fileext_list = [ f['fileext'] for f in filetypes_of_interest ]
@@ -28,8 +29,11 @@ class filenamer:
     def debugprint(self, str, listol=[]):
         self.debugprinter.debugprint(str,listol)
 
-    def add_to_removelist(self,item):
-        self.remove_list = removelist.add_and_sync(self.remove_list,item)
+    def add_to_removeset(self, item):
+        self.remove_set = removeset.add_and_sync(self.remove_set, item)
+
+    def add_to_tmp_removeset(self, item):
+        self.tmp_remove_set.add(item)
 
     def set_num_interesting_files(self,num_interesting_files):
         self.the_episoder.set_num_interesting_files(num_interesting_files)
@@ -73,10 +77,10 @@ class filenamer:
 
         self.debugprint('filenamer.convert_filename, after filenamer.to_lowercase: ' + '[' + ', '.join(filename_split) + ']')
 
-        filename_split = self.remove_extra_details(filename_split, self.remove_list)
-        filename_split = self.remove_extra_details(filename_split, self.tmp_remove_list)
+        filename_split = remove_elements_based_on_list(filename_split, self.remove_set)
+        self.debugprint('filenamer.convert_filename, after filenamer.remove_elements_based_on_list(removeset): ' + '[' + ', '.join(filename_split) + ']')
 
-        self.debugprint('filenamer.convert_filename, after filenamer.remove_extra_details(removelist): ' + '[' + ', '.join(filename_split) + ']')
+        filename_split = remove_elements_based_on_list(filename_split, self.tmp_remove_set)
 
         # pre-2012 Don't want years tangling the episoder.
         # pre-2012 Doesn't work well either way, this is better than the opposite
@@ -93,9 +97,12 @@ class filenamer:
         self.debugprint('filenamer.convert_filename, after episoder.add_series_episode_details: ' + '[' + ', '.join(filename_split) + ']')
 
         if is_foldername:
+
             # don't want file extensions in a folder name
-            filename_split = self.remove_extra_details(filename_split,self.fileext_list)
-            self.debugprint('filenamer.convert_filename, creating a folder name, so : after filenamer.remove_extra_details(file_extensions): ' + '[' + ', '.join(filename_split) + ']')
+            if filename_split[-1] in self.fileext_list:
+                filename_split = filename_split[:-1]
+
+            self.debugprint('filenamer.convert_filename, creating a folder name, so : after filenamer.remove_elements_based_on_list(file_extensions): ' + '[' + ', '.join(filename_split) + ']')
 
         if not self.is_movie:
             filename_split = self.remove_following_text(filename_split,epno_index, is_foldername)
@@ -123,6 +130,8 @@ class filenamer:
         self.debugprint('converted the filename to: ',filename)
         epno = self.the_episoder.get_good_epno(filename)
         checksum = extract_checksum(filename)
+        # TODO: preserve year if in filename
+
         fileext = self.find_fileext(filename)
 
         # Get Title from Foldername
@@ -150,15 +159,6 @@ class filenamer:
             if symbol in filename:
                 filename = filename.replace(symbol,".")
         return filename
-
-    # this isn't the global 'remove_list', it's any list of things to remove
-    def remove_extra_details(self, filename_split, remove_list):
-        self.debugprint('')
-        self.debugprint('Will remove any of : ' + ','.join(remove_list))
-        #self.debugprint('Filename before removal: ' + ','.join(filename_split))
-        fsplit = [ item for item in filename_split if not item in remove_list ]
-        #self.debugprint('Filename after removal: ' + ','.join(fsplit))
-        return fsplit
 
     # does this list contain '.mkv' or 'mkv' ?
     def is_fileext(self, item):
@@ -198,8 +198,6 @@ class filenamer:
         return filename_split
 
 
-
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
-

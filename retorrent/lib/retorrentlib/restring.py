@@ -3,7 +3,7 @@
 retorrent.restring
 
 A set of utility functions for dealing with strings in a retorrent-specific manner,
-usually dealing with paths)
+usually dealing with paths
 """
 
 ###
