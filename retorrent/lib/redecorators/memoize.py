@@ -8,7 +8,6 @@ def memoize(obj):
     def memoizer(*args, **kwargs):
         # looks like this doesn't sort kwargs ...
         key = str(args) + str(kwargs)
-        print key
         if key not in cache:
             cache[key] = obj(*args, **kwargs)
         return cache[key]
@@ -22,8 +21,6 @@ def memoize_ignore_kwargs(obj):
     def memoizer(*args, **kwargs):
         # looks like this doesn't sort kwargs ...
         key = str(args)
-        print key
-        print cache
         if key not in cache:
             cache[key] = obj(*args, **kwargs)
         return cache[key]

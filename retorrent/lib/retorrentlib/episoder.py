@@ -184,7 +184,6 @@ class episoder:
         if nsn:
             split_fn[index] = item
             return split_fn,True
-        #print item, nsn
 
         ## SPECIAL CASES
 
