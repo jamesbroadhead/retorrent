@@ -6,7 +6,7 @@ from os.path import join as pjoin
 
 from braced import extract_checksum, is_checksum, remove_braces
 from debugprinter import debugprinter
-from episoder import episoder
+from episoder import Episoder
 from retorrentlib import removeset
 from retorrentlib.restring import dotjoin, endot, remove_camelcase, remove_zwsp
 from retorrentlib.relist import lowercase_non_checksums, remove_nonfinal_elements_if_in_set
@@ -21,7 +21,7 @@ class filenamer:
         self.divider_list = divider_list
         self.fileext_list = [ f['fileext'] for f in filetypes_of_interest ]
 
-        self.the_episoder = episoder()
+        self.the_episoder = Episoder()
         self.debugprinter = the_debugprinter
 
         self.is_movie = False

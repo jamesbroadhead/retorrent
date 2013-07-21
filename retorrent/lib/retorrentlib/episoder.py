@@ -13,7 +13,7 @@ from retorrentlib.braced import is_year
 # TODO: Find all assumptions about two-digit episode numbers + mark with ASSUME
 # TODO: Fix all ASSUMES about 2-digit epnummbers
 
-class episoder:
+class Episoder:
 
     alphabet = "abcdefghijklmnopqrstuvwxyz"
     eng_numbers = ['one','two','three','four','five','six','seven','eight','nine','ten']
@@ -37,6 +37,9 @@ class episoder:
     interactive = False
     def __init__(self):
         self.preserve_years = set()
+
+    def __repr__(self):
+        return '<Episoder>'
 
     # TODO: need to sort out dirs that have 01-04 or similar
     # TODO: new episode numbering "episode 1", [01x01]
