@@ -1,0 +1,149 @@
+{
+    "ass": {
+        "filetype": "plaintext",
+        "goodsize": 4,
+        "ignore_if_in_filename": [
+            "spanish"
+        ]
+    },
+    "avi": {
+        "filetype": "movie",
+        "goodsize": 5120,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "djvu": {
+        "filetype": "binaryfile",
+        "goodsize": 100,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "epub": {
+        "filetype": "plaintext",
+        "goodsize": 4,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "flv": {
+        "filetype": "movie",
+        "goodsize": 5120,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "lit": {
+        "filetype": "plaintext",
+        "goodsize": 4,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "m4v": {
+        "filetype": "movie",
+        "goodsize": 5120,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "mkv": {
+        "filetype": "movie",
+        "goodsize": 5120,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "mobi": {
+        "filetype": "plaintext",
+        "goodsize": 4,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "mp3": {
+        "filetype": "binaryfile",
+        "goodsize": 100,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "mp4": {
+        "filetype": "movie",
+        "goodsize": 5120,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "ogm": {
+        "filetype": "movie",
+        "goodsize": 5120,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "ogv": {
+        "filetype": "movie",
+        "goodsize": 5120,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "pdf": {
+        "filetype": "plaintext",
+        "goodsize": 4,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "sfv": {
+        "filetype": "plaintext",
+        "goodsize": 4,
+        "ignore_if_in_filename": [
+            "spanish"
+        ]
+    },
+    "srt": {
+        "filetype": "plaintext",
+        "goodsize": 4,
+        "ignore_if_in_filename": [
+            "spanish"
+        ]
+    },
+    "ssa": {
+        "filetype": "plaintext",
+        "goodsize": 4,
+        "ignore_if_in_filename": [
+            "spanish"
+        ]
+    },
+    "sub": {
+        "filetype": "plaintext",
+        "goodsize": 4,
+        "ignore_if_in_filename": [
+            "spanish"
+        ]
+    },
+    "ts": {
+        "filetype": "movie",
+        "goodsize": 5120,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "txt": {
+        "filetype": "plaintext",
+        "goodsize": 4,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
+    "wmv": {
+        "filetype": "movie",
+        "goodsize": 5120,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    }
+}

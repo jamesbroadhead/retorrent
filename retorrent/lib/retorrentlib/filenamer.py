@@ -12,14 +12,14 @@ from retorrentlib.restring import dotjoin, endot, remove_camelcase, remove_zwsp
 from retorrentlib.relist import lowercase_non_checksums, remove_nonfinal_elements_if_in_set
 
 class filenamer:
-    def __init__(self, divider_list, filetypes_of_interest,
+    def __init__(self, divider_list, filetype_definitions,
                  the_debugprinter=debugprinter(False)):
 
         self.remove_set = removeset.read_from_file()
         self.tmp_remove_set = set()
 
         self.divider_list = divider_list
-        self.fileext_list = [ f['fileext'] for f in filetypes_of_interest ]
+        self.fileext_list = [ fileext for fileext in filetype_definitions ]
 
         self.the_episoder = Episoder()
         self.debugprinter = the_debugprinter

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from copy import deepcopy
+import logging
 import os
 from os import listdir
 from os.path import abspath, basename, expanduser, isdir, realpath
@@ -39,7 +40,7 @@ class retorrenter:
         self.dest_dirpath = ''
 
         self.filenamer = filenamer(self.divider_symbols,
-                                   self.filetypes_of_interest,
+                                   self.filetype_definitions,
                                    the_debugprinter=self.debugprinter)
 
     def handle_args(self, arguments):
@@ -57,7 +58,7 @@ class retorrenter:
             return
 
         self.global_conf, self.categories = parse_retorrentconf( self.configdir)
-        self.filetypes_of_interest = parse_fileext_details(self.configdir)
+        self.filetype_definitions = parse_fileext_details(self.configdir)
         self.divider_symbols = parse_divider_symbols(self.configdir)
         self.removelist_path = find_removelist(self.configdir)
 
@@ -411,33 +412,37 @@ class retorrenter:
         return filepaths_to_keep,intermeds_to_keep,filenames_to_keep,num_discarded_files
 
     @tracelogdecorator
-    def is_of_interest(self,file_path, filename):
+    def is_of_interest(self, file_path, filename):
 
         (path,extension) = os.path.splitext(file_path)
         # trim the . from the extension for matching
         extension = extension[1:].lower()
 
-        for foi in self.filetypes_of_interest:
-            if extension == foi['fileext']:
-                # if the filename has something which excludes it, skip it
-                # eg. 'sample'
-                for exclude in foi['ignore_if_in_filename']:
-                    if exclude == '':
-                        continue
-                    if not filename.lower().find(exclude.lower()) == -1:
-                        # this file has a phrase which excludes it
-                        self.debugprint(filename + ' contains a phrase which excludes it')
-                        return False
-                filestat = os.stat(file_path)
-                # this will actually get the size of all the blocks, not the space used.
-                # Close enough ... :P
-                disk_filesize_kB = filestat.st_blocks*filestat.st_blksize/(8*1024)
+        if extension in self.filetype_definitions:
+            details = self.filetype_definitions[extension]
 
-                if disk_filesize_kB > foi['goodsize']:
-                    return True
-                else:
-                    self.debugprint('Size:' + str(disk_filesize_kB) +  'kB <' + str(foi['goodsize']) +'kB for:' + file_path)
-        self.debugprint(filename + " didn't trigger any interest ...")
+            # if the filename has something which excludes it, skip it
+            # eg. 'sample'
+            for exclude in details['ignore_if_in_filename']:
+                if exclude == '':
+                    continue
+                if not filename.lower().find(exclude.lower()) == -1:
+                    # this file has a phrase which excludes it
+                    self.debugprint(filename + ' contains a phrase which excludes it')
+                    return False
+
+
+            filestat = os.stat(file_path)
+            # this will actually get the size of all the blocks, not the space used.
+            # Close enough ... :P
+            disk_filesize_kB = filestat.st_blocks*filestat.st_blksize/(8*1024)
+
+            if disk_filesize_kB > details['goodsize']:
+                return True
+            else:
+                logging.info('Size: %rkB < %rkB for: %r' % (disk_filesize_kB,
+                                                           details['goodsize'], file_path))
+        logging.info(filename + " didn't trigger any interest ...")
         return False
 
     def is_movie(self):

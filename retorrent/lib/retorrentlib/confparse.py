@@ -14,6 +14,8 @@ from os.path import exists as pexists
 import shutil
 import sys
 
+import simplejson as json
+
 from redecorators.tracelogdecorator import tracelogdecorator
 from os_utils.os_utils import mkdir_p
 
@@ -156,54 +158,44 @@ def parse_fileext_details(extra_configdir=''):
     if extra_configdir:
         config_paths.insert(0, extra_configdir)
 
-    defaultoptions =  { 'type':'movie',
-                        'ignore_if_in_filename':'sample' }
+    filename = 'fileext_details.json'
 
-    filename = 'fileext_details.conf'
+    for prepath in config_paths:
+        path = pjoin(prepath, filename)
+        if pexists(path):
+            filepath = path
 
-    config = SafeConfigParser(defaultoptions)
-
-    file_read = config.read(pjoin(cp, filename) for cp in config_paths)
-
-    if not file_read:
-        raise EnvironmentError('Could not locate or load ' + filename + ' and cannot operate ' +
-                               'without it. A default should be in ' + config_paths[-1] +
+    if not filepath:
+        raise EnvironmentError('Could not locate or load %s and cannot operate' % (filename,) +
+                               'without it. A default should be in %s' % (config_paths[-1],) +
                                ', check your installation.')
 
-    output = []
-    filetypes_goodsizes = {'movie'     : 5120,
-                           'binaryfile':  100,
-                           'plaintext' :    4}
-    stripsymbols = '\'" '
-    for fileext in config.sections():
+    with open(filepath) as fh:
+        content = dict(json.loads(fh.read()))
 
-        filetype = config.get(fileext,'type').split('#')[0].strip(stripsymbols)
+    default_filetypes_goodsizes = {
+            'movie'     : 5120,
+            'binaryfile':  100,
+            'plaintext' :    4
+    }
 
-        if not filetype in filetypes_goodsizes.keys():
-            print('CONFIG_WARNING: "'+filetype+'" is not a valid type setting for filetype ' +
-                  filetype+'. Taking "movie".')
+    for fileext, conf in content.items():
+        if not 'filetype' in conf:
+            conf['filetype'] = 'movie'
 
-        # separate by commas, strip quotes
-        ignorestrs = [ expanduser(item.strip(stripsymbols)) for item in
-                config.get(fileext,'ignore_if_in_filename').split('#')[0].split(',') ]
+        if not conf['filetype'] in default_filetypes_goodsizes:
+            raise EnvironmentError('"filetype" in %r stanzas must be one of %r. Got: %r' % (
+                                    filename, default_filetypes_goodsizes.keys(),
+                                    conf['filetype']))
 
+        if not 'ignore_if_in_filename' in conf:
+            conf['filetype'] = [ 'sample' ]
 
-        goodsize = filetypes_goodsizes[filetype]
+        if not 'goodsize' in conf:
+            conf['goodsize'] = default_filetypes_goodsizes[conf['filetype']]
 
-        item =     { 'fileext':fileext,
-            'filetype':filetype,
-            'ignore_if_in_filename':ignorestrs,
-            'goodsize' : goodsize
-        }
+    return content
 
-        output.append(item)
-
-    return output
-
-def read_fileexts():
-    filetypes = parse_fileext_details()
-    fileexts = [ f['fileext'] for f in filetypes ]
-    return fileexts
 
 def parse_divider_symbols(extra_configdir=''):
 

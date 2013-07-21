@@ -7,7 +7,6 @@ Author: James Broadhead jamesbroadhead@gmail.com
 import logging
 from optparse import OptionParser
 import os
-import sys
 
 from retorrentlib.retorrenter import check_result, retorrenter
 
