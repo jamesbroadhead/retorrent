@@ -24,6 +24,8 @@ class Episoder:
                     'start_special' : [ 'op', 'ed' ]
     }
     numbers_to_ignore = [ '720', '264' ]
+    pairs_to_ignore = [ ('5', '1') ]  # 5.1
+
 
     digits_in_epno = 0
 
@@ -47,13 +49,17 @@ class Episoder:
     # TODO: Rewrite this to incorporate is_raw_episode_details
     def add_series_episode_details(self, split_fn, is_foldername=False):
         for index,item in enumerate(split_fn):
-            # agressive pre-parsing
-            if not item in self.numbers_to_ignore:
-                split_fn, is_epno = self.convert_if_episode_number(split_fn, index,is_foldername)
+            nextitem = self.set_nextitem_if_exists(split_fn, index)
 
-                # if this item in the split filename was detected as an episode number, return the new split_filename
-                if is_epno:
-                    return split_fn,index
+            # agressive pre-parsing
+            if item in self.numbers_to_ignore or (item, nextitem) in self.pairs_to_ignore:
+                continue
+            split_fn, is_epno = self.convert_if_episode_number(split_fn, index, is_foldername)
+
+            # if this item in the split filename was detected as an episode number,
+            # return the new split_filename
+            if is_epno:
+                return split_fn,index
 
         return split_fn,-1
 
