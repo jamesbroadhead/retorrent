@@ -16,13 +16,15 @@ def main():
 
     options, argv = parse_args()
 
-    if options.debug:
-        logging.basicConfig(stream=sys.stdout)
-    else:
-        logging.basicConfig(filename=os.path.expanduser('~/.retorrent/retorrent.log'),
-                                                        level=logging.INFO)
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
+
+    myhandler = logging.FileHandler(os.path.expanduser('~/.retorrent/retorrent.log'))
+    logger.addHandler(myhandler)
+
+    if not options.debug:
+        # stdout
+        del logger.handlers[0]
 
     r = retorrenter(options.configdir, debug=options.debug)
 
