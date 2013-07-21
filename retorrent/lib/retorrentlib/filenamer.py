@@ -21,7 +21,7 @@ class filenamer:
         self.divider_list = divider_list
         self.fileext_list = [ f['fileext'] for f in filetypes_of_interest ]
 
-        self.the_episoder = episoder(the_debugprinter)
+        self.the_episoder = episoder()
         self.debugprinter = the_debugprinter
 
         self.is_movie = False

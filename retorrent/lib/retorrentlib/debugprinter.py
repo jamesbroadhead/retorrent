@@ -1,17 +1,13 @@
-
+import logging
 
 class debugprinter:
-    
+
     def __init__(self, debug):
         self.debug = debug
-        self.debugprint('Initing a debugprinter')    
+        logging.info('Initing a debugprinter')
 
-    def debugprint(self, str, listol=[]):
-            if self.debug:
-                print str
-                
-                for list in listol:
-                    print list
+    def debugprint(self, string, lists=[]):
+        logging.info(string)
 
-    def dprint(self,str,listol=[]):
-        self.debugprint(str,listol)
+        for l in lists:
+            logging.info(l)

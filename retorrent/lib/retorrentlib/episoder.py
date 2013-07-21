@@ -1,10 +1,14 @@
 import roman
 
-from debugprinter import debugprinter
-from optionator import booloptionator, optionator
+import logging
 from os_utils.textcontrols import bold
+
+
+from optionator import booloptionator, optionator
 from redecorators.tracelogdecorator import tracelogdecorator
 from retorrentlib.braced import is_year
+
+
 
 # TODO: Find all assumptions about two-digit episode numbers + mark with ASSUME
 # TODO: Fix all ASSUMES about 2-digit epnummbers
@@ -21,7 +25,6 @@ class episoder:
     }
     numbers_to_ignore = [ '720', '264' ]
 
-
     digits_in_epno = 0
 
     isset_single_letter_is_epno = False
@@ -32,13 +35,8 @@ class episoder:
     num_interesting_files = 0
     is_movie = False
     interactive = False
-    def __init__(self,debugprinter=debugprinter(False)):
-        self.debugprinter = debugprinter
+    def __init__(self):
         self.preserve_years = set()
-
-    def debugprint(self, str, listol=[]):
-        self.debugprinter.debugprint(str,listol)
-
 
     # TODO: need to sort out dirs that have 01-04 or similar
     # TODO: new episode numbering "episode 1", [01x01]
@@ -55,9 +53,8 @@ class episoder:
 
         return split_fn,-1
 
-
+    @tracelogdecorator
     def convert_if_episode_number(self, split_fn, index, is_foldername=False):
-        self.debugprint('episoder.convert_if_episode_number(index=' + str(index),[['split_fn',split_fn]])
         item = split_fn[index]
         nextitem = self.set_nextitem_if_exists(split_fn, index)
 
@@ -120,7 +117,7 @@ class episoder:
                 if self.is_raw_epno(nextitem):
                     split_fn = self.replace_doubleitem(split_fn, index, self.gen_full_epno_string(nextitem,item))
                 else:
-                    self.debugprint('in single digit number')
+                    logging.info('in single digit number')
                     # catch 5.1blah
                     if int(item) == 5 and nextitem and nextitem[0].isdigit() and int(nextitem[0]) == 1:
                         self.numbers_to_ignore += [5]
@@ -178,7 +175,7 @@ class episoder:
             return split_fn, False
 
 
-        self.debugprint('Checking '+item+ ' as a number_divider_number')
+        logging.info('Checking '+item+ ' as a number_divider_number')
         # 1x1 1x02 or  or 1x001 1e3
         item, nsn = self.convert_number_divider_number(item)
         if nsn:
@@ -216,9 +213,8 @@ class episoder:
         return split_fn, False
 
     # TODO: How many digits in series / epno length?
+    @tracelogdecorator
     def gen_full_epno_string(self,epno,series="", nextitem=''):
-        self.debugprint('episoder.gen_full_epno_string(epno=' + str(epno) + ', series=' + str(series) + ', nextitem=' +  nextitem + ')')
-
         epno = self.nice_epno_from_raw(epno)
 
         if len(nextitem) > 0 and self.is_raw_epno(nextitem):
@@ -249,7 +245,7 @@ class episoder:
                 subitem = item[0:i]
                 divider = item[i]
                 supitem = item[i+1:]
-                self.debugprint('episoder:convert_number_divider_number: '+subitem+','+divider+','+supitem)
+                logging.info('episoder:convert_number_divider_number: '+subitem+','+divider+','+supitem)
                 if (subitem.isdigit() and divider.isalpha() and supitem.isdigit()):
                     item = self.gen_full_epno_string(supitem, subitem)
                     return item, True
@@ -360,15 +356,15 @@ class episoder:
         self.isset_single_letter_is_epno = True
 
         if answer:
-            self.debugprint(letter + ' IS an episode number')
+            logging.info(letter + ' IS an episode number')
         else:
-            self.debugprint(letter + ' is not an episode number')
+            logging.info(letter + ' is not an episode number')
 
             # A single letter may also trip the roman numeral code.
             # Add this letter to an roman.ignore list
             if roman.could_be_roman(letter):
                 self.romans_to_ignore += [letter]
-                self.debugprint('If so, will ignore ' +letter + ' as a roman numeral')
+                logging.info('If so, will ignore ' +letter + ' as a roman numeral')
 
 
 
@@ -442,11 +438,12 @@ class episoder:
 
         return outstring
 
-    # If:     Is a single letter
-    # AND:     Single Letters are epnos
+    @tracelogdecorator
     def is_in_alphabet(self,string):
-        self.debugprint('episoder.is_in_alphabet:'+ string)
-
+        """
+        if:     Is a single letter
+        AND:     Single Letters are epnos
+        """
         if not len(string) == 1 or not string.isalpha():
             return False
 

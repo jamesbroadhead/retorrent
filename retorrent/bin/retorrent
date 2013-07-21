@@ -7,6 +7,7 @@ Author: James Broadhead jamesbroadhead@gmail.com
 import logging
 from optparse import OptionParser
 import os
+import sys
 
 from retorrentlib.retorrenter import check_result, retorrenter
 
@@ -16,9 +17,13 @@ def main():
     options, argv = parse_args()
 
     if options.debug:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(stream=sys.stdout)
+    else:
+        logging.basicConfig(filename=os.path.expanduser('~/.retorrent/retorrent.log'),
+                                                        level=logging.INFO)
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
 
-    # TODO : proper logging, remove the options.debug arg
     r = retorrenter(options.configdir, debug=options.debug)
 
     # get args (folders / files which are 100% downloaded.
