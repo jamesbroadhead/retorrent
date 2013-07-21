@@ -451,7 +451,9 @@ class retorrenter:
         split_path = the_path.rsplit('/')
         arg_name = split_path[-1]
 
-        the_torrentfiles =  os.listdir(self.global_conf['torrentfilesdir'])
+        the_torrentfiles = [ f for f in
+                             os.listdir(self.global_conf['torrentfilesdir'])
+                             if not f == '.keep' ]
         exclude = [ c['torrentfile'] for c in self.commands ]
 
         tfiles = []
@@ -501,7 +503,7 @@ class retorrenter:
             # Use the string generated from the first filename
             src_foldername = possible_series_foldernames[0]
         else:
-            src_foldername = ['']
+            src_foldername = ''
 
         return self.filenamer.gen_final_filename_from_foldername(src_foldername,
                                                                  converted_filename)

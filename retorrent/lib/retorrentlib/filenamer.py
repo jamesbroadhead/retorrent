@@ -119,7 +119,7 @@ class filenamer:
         # get EPNO,FILEEXT from filename  // What about the checksum?
         # Make: TITLE.EPNO.FILEEXT
         """
-        self.debugprint('filenamer.gen_final_filename_from_foldername(the_dirpath=' + the_dirpath + ', filename=' + filename + ')')
+        self.debugprint('filenamer.gen_final_filename_from_foldername(the_dirpath=%r, filename=%r)' % (the_dirpath, filename))
 
         title = self.convert_filename(the_dirpath, is_foldername=True)
 

@@ -469,10 +469,6 @@ class episoder:
             return True
         return False
 
-    # TODO remove one of these
-    def letter_to_number(self, letter):
-        return self.alphabet.index(letter) + 1
-    # TODO remove one of these
     def conv_from_alphabet(self, letter):
         ordinal = self.alphabet.index(letter) + 1
         return str(ordinal)
