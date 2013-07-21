@@ -8,6 +8,7 @@ import errno
 import platform
 import os
 from os.path import abspath, basename, dirname
+from os.path import exists as pexists
 
 from redecorators.tracelogdecorator import tracelogdecorator
 
@@ -134,7 +135,11 @@ def smbify(path):
     """
     For a given unix path, return a version that is legal for samba
     """
-    return path.replace(':', '_')
+    path = path.replace(':', '_')
+    path = path.replace(';', '_')
+
+    return path
+
 
 def myglob(arg):
     """
@@ -144,7 +149,13 @@ def myglob(arg):
     """
     paths = []
     partial_fn = basename(arg)
+
     dir_ = abspath(dirname(arg))
+    # if arg ended in a /, dirname(arg) will be arg without the slash
+
+    if not pexists(dir_):
+        dir_ = abspath(dirname(dir_))
+
     for f in os.listdir(dir_):
         if f.startswith(partial_fn):
             paths.append(os.path.join(dirname(arg),f))

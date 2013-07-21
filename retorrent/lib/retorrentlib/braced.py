@@ -5,7 +5,7 @@ Utility module for functions dealing with strings containing substrings inside b
 """
 import datetime
 
-from redecorators.memoize import memoize_ignore_kwargs
+from redecorators.memoize import memoize_record_interactive
 from redecorators.tracelogdecorator import tracelogdecorator
 from retorrentlib.optionator import booloptionator
 from retorrentlib.restring import dotjoin, endot
@@ -180,7 +180,7 @@ def ask_is_year(item):
         return True
     return False
 
-@memoize_ignore_kwargs
+@memoize_record_interactive
 def is_year(item, interactive=True):
     thisyear = datetime.datetime.now().year
     if item.isdigit() and len(item) == 4 and int(item) <= thisyear:
