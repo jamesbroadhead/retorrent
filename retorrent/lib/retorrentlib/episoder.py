@@ -31,6 +31,7 @@ class Episoder:
     single_letter_is_epno = True
 
     known_romans = {}
+    known_eng_numbers = {}
 
     num_interesting_files = 0
     is_movie = False
@@ -122,7 +123,8 @@ class Episoder:
             if len(item) == 1:
                 #1\\01
                 if self.is_raw_epno(nextitem):
-                    split_fn = self.replace_doubleitem(split_fn, index, self.gen_full_epno_string(nextitem,item))
+                    split_fn = self.replace_doubleitem(split_fn, index,
+                                                       self.gen_full_epno_string(nextitem,item))
                 else:
                     logging.info('in single digit number')
                     # catch 5.1blah
@@ -500,11 +502,19 @@ class Episoder:
         print 'Partial match; write more cases! // ', string
         return
 
-    def is_eng_number(self,somestring):
-        if somestring in self.eng_numbers:
-            return True
-        else:
-            return False
+    @tracelogdecorator
+    def is_eng_number(self, substring, whole_item=''):
+        if substring in self.known_eng_numbers:
+            return self.known_eng_numbers[substring]
+
+        if substring in self.eng_numbers:
+            whole_item_text = ', from %s' % (whole_item,) if whole_item else ''
+            treat_as_epno = booloptionator('Is "%s"%s a part number?' % (
+                                           substring, whole_item_text),
+                                           yesno=True, default_false=True)
+            self.known_eng_numbers[substring] = treat_as_epno
+            return treat_as_epno
+        return False
 
     def conv_eng_number(self, somestring):
         ordinal = self.eng_numbers.index(somestring) + 1
