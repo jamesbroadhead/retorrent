@@ -30,7 +30,7 @@ class Episoder:
     isset_single_letter_is_epno = False
     single_letter_is_epno = True
 
-    romans_to_ignore = []
+    known_romans = {}
 
     num_interesting_files = 0
     is_movie = False
@@ -70,7 +70,7 @@ class Episoder:
             # TODO : for s01e10, this now passes 01e10 to is_raw_epno. disaster!
             if subitem == start_ident:
                 if len(item) > len(start_ident):
-                    if self.is_raw_epno(remainder):
+                    if self.is_raw_epno(remainder, item):
                         if start_ident in self.identifiers['start']:
                             # check the next item before committing
                             if self.is_raw_serno(item) and self.is_raw_epno(nextitem):
@@ -86,20 +86,24 @@ class Episoder:
                         maybe_serno = remainder.split('e')[0]
                         maybe_epno = remainder.split('e')[1]
                         if self.is_raw_serno(maybe_serno) and \
-                                self.is_raw_epno(maybe_epno):
+                                self.is_raw_epno(maybe_epno, item):
                             split_fn[index] = self.gen_full_epno_string(maybe_epno,maybe_serno)
                             return split_fn,True
 
 
             # // eg. s04.e05
-            elif subitem == start_ident and self.is_raw_serno(remainder) and self.is_raw_epno(nextitem):
+            elif (subitem == start_ident and
+                    self.is_raw_serno(remainder) and
+                    self.is_raw_epno(nextitem)):
                 if start_ident in self.identifiers['start']:
                     split_fn[index] = self.gen_full_epno_string(nextitem,remainder)
                     split_fn[index+1] = ''
                     return split_fn, True
 
 
-            elif subitem == start_ident and len(item) == len(subitem) and self.is_raw_epno(nextitem):
+            elif (subitem == start_ident and
+                    len(item) == len(subitem) and
+                    self.is_raw_epno(nextitem)):
                 if start_ident in self.identifiers['start']:
                     split_fn[index] = self.gen_full_epno_string(nextitem)
                 else:
@@ -194,7 +198,8 @@ class Episoder:
 
         # eg. 1of5, 01of05
         elif 'of' in item:
-            if self.is_raw_epno(item.split('of')[0]) and self.is_raw_epno(item.split('of')[1]):
+            if (self.is_raw_epno(item.split('of')[0], item) and
+                    self.is_raw_epno(item.split('of')[1], item)):
                 split_fn[index] = self.gen_full_epno_string(item.split('of')[0])
                 return split_fn, True
 
@@ -319,14 +324,11 @@ class Episoder:
             return False
 
     def ask_for_digits_in_epno(self, split_fn, item):
-
-
         question = 'In: "' + '.'.join(split_fn) + '", ' + item + ' means:'
 
-        options = { \
-                self.gen_n_digit_epno(2,item[1:3], item[0]) : 2, \
-                self.gen_n_digit_epno(3,item)                 : 3, \
-                'Not an episode number!' : 0}
+        options = { self.gen_n_digit_epno(2,item[1:3], item[0]) : 2,
+                    self.gen_n_digit_epno(3,item)               : 3,
+                    'Not an episode number!' : 0}
 
         keys = options.keys()
         keys.sort(reverse=True)
@@ -366,7 +368,7 @@ class Episoder:
             # A single letter may also trip the roman numeral code.
             # Add this letter to an roman.ignore list
             if roman.could_be_roman(letter):
-                self.romans_to_ignore += [letter]
+                self.known_romans[letter] = False
                 logging.info('If so, will ignore ' +letter + ' as a roman numeral')
 
 
@@ -378,22 +380,23 @@ class Episoder:
         return ''
 
 
-    def is_raw_serno(self,serno):
+    def is_raw_serno(self, serno, whole_item=''):
         if len(serno) > 0 and serno.lower().startswith('s'):
             return self.is_raw_epno(serno[1:])
         elif len(serno) > 0 and serno.lower().startswith('e'):
             return False
 
-        return self.is_raw_epno(serno)
+        return self.is_raw_epno(serno, whole_item)
 
 
     # This receives a number string (eg. ep01 --> 01)
     # It also now accepts e01 etc.
-    def is_raw_epno(self,epno):
-        if self.is_eng_number(epno)             \
-                or self.is_in_alphabet(epno)    \
-                or self.is_roman_numeral(epno)     \
-                or epno.isdigit():
+    @tracelogdecorator
+    def is_raw_epno(self, epno, whole_item=''):
+        if (self.is_eng_number(epno)
+                or self.is_in_alphabet(epno)
+                or self.is_roman_numeral(epno, whole_item)
+                or epno.isdigit()):
             return True
         else:
             if epno.lower().endswith('v2'):
@@ -402,10 +405,10 @@ class Episoder:
                 return self.is_raw_epno(epno[1:])
             return False
 
-    def nice_epno_from_raw(self,epno):
+    def nice_epno_from_raw(self, epno, whole_item=''):
         if self.is_eng_number(epno):
             epno = self.conv_eng_number(epno)
-        elif self.is_roman_numeral(epno):
+        elif self.is_roman_numeral(epno, whole_item):
             epno = self.conv_from_roman(epno)
         elif self.is_in_alphabet(epno):
             epno = self.conv_from_alphabet(epno)
@@ -456,18 +459,31 @@ class Episoder:
         # It's a single letter, and we're accepting those
         return self.single_letter_is_epno
 
+    @tracelogdecorator
+    def is_roman_numeral(self, substring, whole_item=""):
+        """
+        This would be a good candidate for memoize_if_interactive
+        """
+        if not substring:
+            return False
 
-    def is_roman_numeral(self, string):
-        if len(string) == 0:
+        if substring in self.known_romans:
+            return self.known_romans[substring]
+
+        if not roman.could_be_roman(substring):
             return False
-        elif string in self.romans_to_ignore:
+
+        # testing shows that high numbers are probably just letters
+        if roman.roman_to_int(substring) > 30:
             return False
-        if roman.could_be_roman(string):
-            # testing shows that high numbers are probably just letters
-            if roman.roman_to_int(string) > 30:
-                return False
-            return True
-        return False
+
+        whole_item_text = ', from %s' % (whole_item,) if whole_item else ''
+        is_roman = booloptionator('Is "%s"%s a roman numeral?' % (
+                                    substring, whole_item_text),
+                                yesno=True, default_false=True)
+        self.known_romans[substring] = is_roman
+        return is_roman
+
 
     def conv_from_alphabet(self, letter):
         ordinal = self.alphabet.index(letter) + 1
