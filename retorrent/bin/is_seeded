@@ -23,8 +23,8 @@ def main(only_unseeded, targets):
         print ' '.join(unseeded)
     else:
         print "Seeded:"
-        for i in seeded:
-            print "\t", i
+        for k, v in seeded.items():
+            print "\t %s => %s" % (k, v)
         print "Unseeded:"
         for j in unseeded:
             print "\t", j
