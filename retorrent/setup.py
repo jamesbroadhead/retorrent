@@ -19,5 +19,6 @@ setup(name='retorrent',
         'bin/is_seeded',
         'bin/remreffer',
         'bin/retorrent',
+        'bin/seedme',
         'bin/symlinker']
     )

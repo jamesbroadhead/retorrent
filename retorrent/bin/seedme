@@ -1,0 +1,52 @@
+#!/bin/bash
+
+dlfilename="$1"
+goodpath="$2"
+tfile="$3"
+
+seedpath="${HOME}/seed/$1"
+seedtfilepath="$HOME/seed/torrentfiles/$(basename "$tfile")"
+
+(if [[ "$dlfilename" == "" ]] || [[ "$goodpath" == "" ]] || [[ "$tfile" == "" ]] ; then
+	echo "Usage:"
+    echo "  seedme <FILE> <DEST> <TORRENTFILE>"
+elif ! [ -f "$dlfilename" ] || ! [ -f "$tfile" ] ; then
+    QUIT=1
+    if ! [ -f "$dlfilename" ] ; then
+        echo "Can't find $dlfilename"
+        QUIT=0
+    fi
+    if ! [ -f "$tfile" ] ; then
+        echo "Can't find $tfile"
+        QUIT=0
+    fi
+    if [ $QUIT -eq 0 ] ; then
+        exit 1
+    fi
+elif [ -f "$goodpath" ] ; then
+	echo "$goodpath already exists"
+	md5dlfilename=$(md5sum "$dlfilename" | awk {'print $1'})
+	md5goodpath=$(md5sum "$goodpath" | awk {'print $1'})
+	if [ $md5dlfilename == $md5goodpath ] ; then
+		echo "Same file - removing new version"
+		rm "$dlfilename"
+		if [ -f "$seedtfilepath" ] ; then
+			rm "$tfile"
+		else
+			echo "Downloaded file isn't seeded w. this tfile (seed it!)"
+		fi
+	else
+		echo "$goodpath exists and is different"
+	fi
+elif [ -f "$seedpath" ] ; then
+	echo "$seedpath exist"
+else
+	mv "$dlfilename" "$goodpath"
+	if [ ! -d $(dirname "$seedpath") ] ; then
+	    # probably torrents/FOO/foo.mkv -> seed/FOO/foo.mkv
+        mkdir -p $(dirname "$seedpath")
+        rmdir $(dirname $dlfilename)
+    fi
+	ln -s "$goodpath" "$seedpath"
+	mv "$tfile" "$seedtfilepath"
+fi) &
