@@ -1,9 +1,10 @@
-See http://code.google.com/p/jamesbroadhead/ for general project details. 
+See http://code.google.com/p/jamesbroadhead/ for general project details.
 
-ReTorrent is a set of python scripts to manage the moving,renaming and seeding of torrents-content through the creation of symlinks. There are other scripts available here which were written for my own convenience, but which I thought might be useful to others (and I don't believe in posting them on a blog, where they can stagnate). 
+ReTorrent is a set of python scripts to manage the moving,renaming and seeding of torrents-content through the creation of symlinks. There are other scripts available here which were written for my own convenience, but which I thought might be useful to others (and I don't believe in posting them on a blog, where they can stagnate).
 
-Please submit Bug Reports if you use these and encounter any. Patches are always welcome. For the best legibility, I suggest that you use 4-space-width TAB characters. It is such a shame that modelines are a security hole.
+Please submit bug reports happen to encounter any.
+Patches are always welcome. For the best legibility, I suggest that you use 4-space tabs. It is such a shame that modelines are a security hole.
 
 Copyright and Licensing:
 	Unless otherwise noted, all code under this repository is © 2009- James Broadhead, available under licence under the GPL v3, as available on gnu.org.
-	If you would like any of this content under a different license, I am open to suggestions and offers. 
+	If you would like any of this content under a different license, I am open to suggestions and offers.
