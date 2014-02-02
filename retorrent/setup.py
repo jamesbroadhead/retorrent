@@ -14,8 +14,10 @@ setup(name='retorrent',
                     ['conf/divider_symbols.conf',
                      'conf/fileext_details.json',
                      'conf/retorrentconf.py_skel'])],
-    scripts=['bin/is_seeded',
-             'bin/remreffer',
-             'bin/retorrent',
-             'bin/symlinker']
+    scripts=[
+        'bin/find_tfile',
+        'bin/is_seeded',
+        'bin/remreffer',
+        'bin/retorrent',
+        'bin/symlinker']
     )

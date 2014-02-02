@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+
+from os.path import isdir
+import sys
+
+from retorrentlib.find_tfile import gen_map, tfile_from_filename
+
+def main(paths):
+    files_tfiles = gen_map()
+
+    for path in paths:
+        if isdir(path):
+            print 'Dirs not supported just yet; %r' % (path,)
+            return ''
+
+        print '%r => %r' % (path, tfile_from_filename(path, files_tfiles))
+
+if __name__ == '__main__':
+    args = sys.argv[1:]
+
+    main(args)
