@@ -19,40 +19,6 @@ hexdigits = '0123456789abcdefABCDEF' + u'0123456789abcdefABCDEF'
 
 @tracelogdecorator
 def is_checksum(item):
-    """
-    >>> is_checksum('88888888')
-    True
-
-    >>> is_checksum('halleo')
-    False
-
-    >>> is_checksum(u'halleo')
-    False
-
-    >>> is_checksum('8888888')
-    False
-
-    >>> is_checksum('888888888')
-    False
-
-    >>> is_checksum('[88888888]')
-    True
-
-    >>> is_checksum('(88888888)')
-    True
-
-    >>> is_checksum(u'88888888')
-    True
-
-    >>> is_checksum(u'R8888888')
-    False
-
-    >>> is_checksum(u'[88888888]')
-    True
-
-    >>> is_checksum(u'[R8888888]')
-    False
-    """
     # 8-digit checksum + braces
     if len(item) == 10:
         if (not item[0] in braces or
@@ -71,32 +37,7 @@ def is_checksum(item):
 def extract_checksum(filename):
     """
     For a filename delimited by dots, return the first checksum
-    >>> extract_checksum('[AAAAAAAA]')
-    '[AAAAAAAA]'
 
-    >>> extract_checksum('AAAAAAAA')
-    '[AAAAAAAA]'
-
-    >>> extract_checksum('[aaaaaaaa]')
-    '[AAAAAAAA]'
-
-    >>> extract_checksum('aaaaaaaa')
-    '[AAAAAAAA]'
-
-    >>> extract_checksum('foo.aaaaaaaa')
-    '[AAAAAAAA]'
-
-    >>> extract_checksum('aaaaaaaa.foo')
-    '[AAAAAAAA]'
-
-    >>> extract_checksum('foo.aaaaaaaa.bar')
-    '[AAAAAAAA]'
-
-    >>> extract_checksum('aaaaaaaa.bbbbbbbb')
-    '[AAAAAAAA]'
-
-    >>> extract_checksum('words.are.neat')
-    ''
     """
     for segment in filename.split('.'):
 
@@ -112,24 +53,6 @@ def remove_braces(filename, preserve_checksum=True):
     Removes braces and internal content, with special rules for checksums and years
 
     Optionally preserves content, removing braces
-
-    >>> remove_braces('foo.bar.(what).zamf')
-    'foo.bar.zamf'
-
-    >>> remove_braces('foo.bar.(w(h)at).zamf')
-    'foo.bar.zamf'
-
-    >>> remove_braces('The Band - Let Me Out - 1993 (Vinyl - MP3 - V0 (VBR)) (1).torrent')
-    'The.Band.-.Let.Me.Out.-.1993.torrent'
-
-    >>> remove_braces('Able Baker [1981].mkv')
-    'Able.Baker.1981.mkv'
-
-    >>> remove_braces('[able].baker.charlie.S2...01.[720p.H264][AAAAAAAA].mkv')
-    'baker.charlie.S2.01.[AAAAAAAA].mkv'
-
-    >>> remove_braces('[able].baker.charlie.S2...01.[720p.H264][AAAAAAAA].mkv', preserve_checksum=False)
-    'baker.charlie.S2.01.mkv'
 
     """
     brace_stack = Stack()
@@ -226,9 +149,3 @@ class Stack:
         item = self.content[-1]
         self.content = self.content[:-1]
         return item
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-

@@ -281,28 +281,6 @@ class Episoder:
     @classmethod
     @tracelogdecorator
     def is_good_epno(cls, item):
-        """
-        >>> episoder.is_good_epno('s01e01')
-        True
-
-        >>> episoder.is_good_epno('s01e010')
-        True
-
-        >>> episoder.is_good_epno('e01')
-        False
-
-        >>> episoder.is_good_epno('ep01')
-        False
-
-        >>> episoder.is_good_epno('cd01')
-        True
-
-        >>> episoder.is_good_epno('op01')
-        True
-
-        >>> episoder.is_good_epno('ed01')
-        True
-        """
         if len(item) >= 4:
             if item[0:2] == 'cd' and item[2:].isdigit():
                 return True
@@ -540,12 +518,3 @@ class Episoder:
 
     def set_movie(self,is_movie):
         self.is_movie = is_movie
-
-
-
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-

@@ -13,3 +13,5 @@ for d in * ; do
     cd ..
 done
 cd ..
+
+nosetests tests

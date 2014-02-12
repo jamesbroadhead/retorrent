@@ -694,8 +694,8 @@ class retorrenter:
 
         # a command bundle
         return { 'commands'   : commands,
-                 'symlinks'   : [ seeddir_paths
-                                  for orig_path, seeddir_paths
+                 'symlinks'   : [ seeddir_paths_
+                                  for orig_path, seeddir_paths_
                                   in seeddir_paths.items() ],
                  'torrentfile': torrentfile,
                  'commands_run' : []}
