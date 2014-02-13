@@ -13,7 +13,7 @@ def main(paths):
             print 'Dirs not supported just yet; %r' % (path,)
             return ''
 
-        print '%r => %r' % (path, tfile_from_filename(path, files_tfiles))
+        print tfile_from_filename(path, files_tfiles)
 
 if __name__ == '__main__':
     args = sys.argv[1:]

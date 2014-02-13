@@ -2,7 +2,7 @@
 
 dlfilename="$1"
 goodpath="$2"
-tfile="$3"
+tfile="$(find_tfile "$1")"
 
 seedpath="${HOME}/seed/$1"
 seedtfilepath="$HOME/seed/torrentfiles/$(basename "$tfile")"
