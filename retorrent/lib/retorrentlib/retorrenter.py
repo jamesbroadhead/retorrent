@@ -11,8 +11,9 @@ from os.path import join as pjoin
 from difflib import SequenceMatcher
 
 from debugprinter import debugprinter
-from filenamer import filenamer
+from retorrentlib.filenamer import filenamer
 from retorrentlib.confparse import find_removelist, parse_divider_symbols, parse_fileext_details, parse_retorrentconf
+from retorrentlib.find_tfile import tfile_from_filename
 from redecorators.tracelogdecorator import tracelogdecorator
 from optionator import optionator, eqoptionator
 from os_utils.os_utils import enough_space, mkdir_p, myglob, str2utf8
@@ -20,13 +21,17 @@ from os_utils.textcontrols import bold
 
 RECALCULATE = '-'
 
-class retorrenter:
+class retorrenter(object):
 
-    def __init__(self, configdir='', debug=False):
+    def __init__(self, configdir='', debug=False, feature_flags=None):
         self.configdir = configdir
 
         self.debug = debug
         self.debugprinter = debugprinter(self.debug)
+
+        self.feature_flags = feature_flags
+        if feature_flags is None:
+            self.feature_flags = {}
 
     def debugprint(self,str,listol=[]):
         self.debugprinter.debugprint(str,listol)
@@ -451,7 +456,7 @@ class retorrenter:
         return False
 
     # TODO: episoder _must_ be able to return the epno - *use this*.
-    def find_torrentfile(self, the_path):
+    def old_find_torrentfile(self, the_path):
         # get the file / foldername (not necc. the same as the arg itself
         split_path = the_path.rsplit('/')
         arg_name = split_path[-1]
@@ -630,7 +635,6 @@ class retorrenter:
 
         ##### LET'S BUILD SOME COMMANDS!
         commands = []
-        torrentfile = ""
 
         # make the dir immediately, for the case show*avi
         mkdir_p(self.dest_dirpath)
@@ -662,7 +666,15 @@ class retorrenter:
                              for orig_path in seeddir_paths])
 
             # link arg to .torrent via optionator
-            torrentfile = self.find_torrentfile(content_abspath)
+            if self.feature_flags.get('old_torrentfile_detection', False):
+                def new_find_torrentfile(filepath):
+                    return tfile_from_filename(
+                        filepath, tfilesdir=self.global_conf['torrentfilesdir'])
+                find_torrentfile = new_find_torrentfile
+            else:
+                find_torrentfile = self.old_find_torrentfile
+
+            torrentfile = find_torrentfile(content_abspath)
             if torrentfile:
                 # move torrentfile to seeddir
                 commands.append('mv -nv "%s" "%s"' % (

@@ -25,19 +25,23 @@ def main():
         # stdout
         del logger.handlers[0]
 
-    r = retorrenter(options.configdir, debug=options.debug)
+    feature_flags = {
+        'old_torrentfile_detection' : options.old_torrentfile_detection
+    }
+
+    r = retorrenter(options.configdir, debug=options.debug, feature_flags=feature_flags)
 
     # get args (folders / files which are 100% downloaded.
     command_bundles = r.handle_args(argv)
 
     if command_bundles:
         for bundle in command_bundles:
-            failed=False
+            failed = False
             for sub_cmd in bundle['commands']:
                 retval = os.system(sub_cmd)
                 bundle['commands_run'].append(sub_cmd)
                 if not retval == 0:
-                    failed=True
+                    failed = True
                     break
 
             if not check_result(bundle, failed) or failed:
@@ -56,6 +60,12 @@ def parse_args():
                     help='Print debug messages (where implemented)',
                     action='store_true',
                     dest='debug',
+                    default=False)
+
+    parser.add_option('-t', '--old-torrentfile-detection',
+                    help='Use old, not new torrentfile behaviour',
+                    action='store_true',
+                    dest='old_torrentfile_detection',
                     default=False)
 
     options, args = parser.parse_args()

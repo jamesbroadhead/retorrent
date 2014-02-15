@@ -6,10 +6,11 @@ from os.path import join as pjoin
 
 from torrentparse.torrentparse import TorrentParser as TP
 
-def gen_map():
-    tfiledir = abspath(expanduser('~/torrents/torrentfiles'))
-    tfiles = [ pjoin(tfiledir, f)
-               for f in listdir(tfiledir)
+default_path = abspath(expanduser('~/torrents/torrentfiles'))
+
+def gen_map(tfilesdir=default_path):
+    tfiles = [ pjoin(tfilesdir, f)
+               for f in listdir(tfilesdir)
                if f.endswith('torrent')]
 
     files_tfiles = {}
@@ -19,9 +20,12 @@ def gen_map():
             files_tfiles[filename] = tfile
     return files_tfiles
 
-def tfile_from_filename(filename, files_tfiles=None):
+def tfile_from_filename(filename, files_tfiles=None, tfilesdir=default_path):
+    """
+    @param: files_tfiles : pre-generated output from gen_map
+    """
     if files_tfiles is None:
-        files_tfiles = gen_map()
+        files_tfiles = gen_map(tfilesdir)
 
     filename = basename(filename)
     return files_tfiles.get(filename, '')
