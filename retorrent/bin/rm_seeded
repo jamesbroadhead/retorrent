@@ -1,0 +1,35 @@
+#!/usr/bin/python
+"""
+Usage:
+    rm_seeded TARGETS...
+
+"""
+import sys
+
+from docopt import docopt
+
+from retorrentlib import seededlib
+from retorrentlib.confparse import parse_retorrentconf
+from retorrentlib.find_tfile import gen_map, tfile_from_filename
+from retorrentlib.remreffer import remref
+
+def main(targets):
+    config, _ = parse_retorrentconf()
+    seeddir = config.get('seeddir')
+    seed_tfilesdir = config.get('seed')
+
+    seeded, unseeded = seededlib.is_seeded(targets, seeddir=seeddir)
+
+    files_tfiles = gen_map(seed_tfilesdir)
+    tfiles = [ tfile_from_filename(seedpath, files_tfiles)
+               for videopath, seedpath in seeded.items() ]
+
+    return remref(unseeded + tfiles + seeded.keys() + seeded.values())
+
+if __name__ == '__main__':
+    arguments = docopt(__doc__)
+    try:
+        returncode = main(arguments['TARGETS'])
+        sys.exit(returncode)
+    except KeyboardInterrupt:
+        pass

@@ -3,8 +3,8 @@ import os
 from os.path import abspath, expanduser, isdir, realpath
 from os.path import join as pjoin
 
-def is_seeded(args):
-    seeddir = expanduser('~/seed')
+default_seeddir = expanduser('~/seed')
+def is_seeded(args, seeddir=default_seeddir):
     seed_map = [ (root,dirs,files) for root, dirs, files in os.walk(seeddir, followlinks=True) ]
 
     seed_filepaths = {}
