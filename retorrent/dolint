@@ -3,10 +3,15 @@
 # avoid getting retorrentlib from a system-wide install
 export PYTHONPATH=""
 
-BIN="bin/is_seeded bin/remreffer bin/retorrent bin/symlinker"
-
-
-pyflakes $BIN lib/*
-pylint -E $BIN
+BINFILES=""
+for i in bin/* ; do
+    RES="$(head -n 1 "$i" | grep -q python)"
+    if [ $? -eq 0 ] ; then
+        BINFILES="$BINFILES $i"
+    fi
+done
+echo $BINFILES
+pyflakes $BINFILES lib/*
+pylint -E $BINFILES
 (cd lib && pylint -E *)
 (cd tests && pylint -E *)
