@@ -4,6 +4,7 @@ Usage:
     rm_seeded TARGETS...
 
 """
+import os
 import sys
 
 from docopt import docopt
@@ -15,8 +16,14 @@ from retorrentlib.remreffer import remref
 
 def main(targets):
     config, _ = parse_retorrentconf()
-    seeddir = config.get('seeddir')
-    seed_tfilesdir = config.get('seed')
+    seeddir = config['seeddir']
+    seed_tfilesdir = config['seedtorrentfilesdir']
+    assert seeddir is not None and seed_tfilesdir is not None
+
+    targets = [ t for t in targets if os.path.exists(t) ]
+    if not targets:
+        print 'No extant targets!'
+        sys.exit(1)
 
     seeded, unseeded = seededlib.is_seeded(targets, seeddir=seeddir)
 
@@ -24,7 +31,11 @@ def main(targets):
     tfiles = [ tfile_from_filename(seedpath, files_tfiles)
                for videopath, seedpath in seeded.items() ]
 
-    return remref(unseeded + tfiles + seeded.keys() + seeded.values())
+    res = remref(unseeded + tfiles + seeded.keys() + seeded.values())
+
+    print 'Remember: if there were dirs in seed/, they will remain!'
+
+    return res
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)

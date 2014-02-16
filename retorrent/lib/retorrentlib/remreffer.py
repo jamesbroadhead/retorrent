@@ -9,6 +9,8 @@ def remref(args):
     for item in paths:
         pathlist.extend(add_item(item))
 
+    pathlist = uniq(pathlist)
+
     for item in pathlist:
         print item
 
@@ -21,7 +23,6 @@ def remref(args):
 
 def add_item(item):
     pathlist = []
-
 
     # add the item. if it's a symlink, add the symlink
     if os.path.exists(item):
@@ -44,4 +45,10 @@ def add_item(item):
 def trim_trailing_slashes(args):
     return [ arg[0:-1] if arg[-1] == '/' else arg for arg in args  ]
 
-
+def uniq(pathlist):
+    """ preserving sort order, remove duplicates """
+    out = []
+    for p in pathlist:
+        if not p in out:
+            out.append(p)
+    return out

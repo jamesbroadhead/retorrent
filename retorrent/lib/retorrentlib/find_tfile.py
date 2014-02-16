@@ -15,9 +15,12 @@ def gen_map(tfilesdir=default_path):
 
     files_tfiles = {}
     for tfile in tfiles:
-        files_details = TP(tfile).get_files_details()
-        for filename, size in files_details:
-            files_tfiles[filename] = tfile
+        try:
+            files_details = TP(tfile).get_files_details()
+            for filename, size in files_details:
+                files_tfiles[filename] = tfile
+        except:
+            pass
     return files_tfiles
 
 def tfile_from_filename(filename, files_tfiles=None, tfilesdir=default_path):

@@ -10,7 +10,7 @@ for i in bin/* ; do
         BINFILES="$BINFILES $i"
     fi
 done
-echo $BINFILES
+
 pyflakes $BINFILES lib/*
 pylint -E $BINFILES
 (cd lib && pylint -E *)
