@@ -7,6 +7,6 @@ from retorrentlib.remreffer import remref
 
 if __name__ == '__main__':
     try:
-        sys.exit(remref(sys.argv))
+        sys.exit(remref(sys.argv[1:]))
     except KeyboardInterrupt:
         pass
