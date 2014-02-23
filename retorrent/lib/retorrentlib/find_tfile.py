@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from os import listdir
-from os.path import abspath, basename, expanduser
+from os.path import abspath, basename, expanduser, isdir, isfile
 from os.path import join as pjoin
 
 from torrentparse.torrentparse import TorrentParser as TP
@@ -30,5 +30,18 @@ def tfile_from_filename(filename, files_tfiles=None, tfilesdir=default_path):
     if files_tfiles is None:
         files_tfiles = gen_map(tfilesdir)
 
+    if isdir(filename):
+        # cheat, and get a file inside the dir
+        filename = pick_file(filename)
+
     filename = basename(filename)
     return files_tfiles.get(filename, '')
+
+def pick_file(dirpath):
+    dircontent = listdir(dirpath)
+
+    for f in dircontent:
+        path = pjoin(dirpath, f)
+        if isfile(path):
+            return f
+    raise Exception('Passed a dir with no content!')

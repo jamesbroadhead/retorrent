@@ -39,7 +39,11 @@ def main():
         for bundle in command_bundles:
             failed = False
             for sub_cmd in bundle['commands']:
-                retval = os.system(sub_cmd)
+                try:
+                    retval = os.system(sub_cmd)
+                except Exception as e:
+                    print e
+                    retval = -1
                 bundle['commands_run'].append(sub_cmd)
                 if not retval == 0:
                     failed = True

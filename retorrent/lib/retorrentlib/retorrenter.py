@@ -654,7 +654,7 @@ class retorrenter(object):
             torrentfile_commands = self.build_torrentfile_commands(
                     content_abspath, orig_foldername, orig_paths,
                     rename_map, orig_intermeds, orig_filenames)
-            commands.append(torrentfile_commands)
+            commands.extend(torrentfile_commands)
         else:
             # delete remainder of files in torrentdir
             # Don't delete the arg dir if it's the same as the target dir
@@ -713,19 +713,22 @@ class retorrenter(object):
         # link arg to .torrent via optionator
         if self.feature_flags.get('old_torrentfile_detection', False):
             torrentfile = self.old_find_torrentfile(content_abspath)
+
         else:
             torrentfile = tfile_from_filename(content_abspath,
                                 tfilesdir=self.global_conf['torrentfilesdir'])
-        if not torrentfile:
-            print 'Failed to find torrentfile'
-        else:
+            if not torrentfile:
+                print 'Failed to find torrentfile'
+                torrentfile = self.old_find_torrentfile(content_abspath)
+
+        if torrentfile:
             print 'Using torrentfile %r' % (torrentfile,)
             # move torrentfile to seeddir
             commands.append('mv -nv "%s" "%s"' % (
                   pjoin(self.global_conf['torrentfilesdir'], torrentfile),
                   self.global_conf['seedtorrentfilesdir']))
 
-
+        return commands
 
 def check_result(command_bundle, failed):
 
