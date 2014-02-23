@@ -610,8 +610,10 @@ class retorrenter(object):
             return RECALCULATE
         elif answer and len(orig_paths) == 1:
             ## TODO: Re-attach file ext (and maybe checksum) if not supplied
-            print 'You ignored our suggestion; taking: %r' % (answer,)
-            rename_map = { orig_paths[0] : pjoin(self.dest_folder, self.dest_dirpath, answer) }
+            print 'You ignored our suggestion; supplying: %r' % (answer,)
+            result = pjoin(self.dest_folder, self.dest_dirpath, answer)
+            print 'Result: %r' % (result,)
+            rename_map = { orig_paths[0] : result }
 
         elif answer and len(orig_paths) > 1:
             # more than one file
@@ -667,22 +669,19 @@ class retorrenter(object):
 
             # link arg to .torrent via optionator
             if self.feature_flags.get('old_torrentfile_detection', False):
-                def new_find_torrentfile(filepath):
-                    return tfile_from_filename(
-                        filepath, tfilesdir=self.global_conf['torrentfilesdir'])
-                find_torrentfile = new_find_torrentfile
+                torrentfile = self.old_find_torrentfile(content_abspath)
             else:
-                find_torrentfile = self.old_find_torrentfile
-
-            torrentfile = find_torrentfile(content_abspath)
-            if torrentfile:
+                torrentfile = tfile_from_filename(content_abspath,
+                                    tfilesdir=self.global_conf['torrentfilesdir'])
+            if not torrentfile:
+                print 'Failed to find torrentfile'
+            else:
                 # move torrentfile to seeddir
                 commands.append('mv -nv "%s" "%s"' % (
-                                  pjoin(self.global_conf['torrentfilesdir'], torrentfile),
-                                  self.global_conf['seedtorrentfilesdir']))
+                      pjoin(self.global_conf['torrentfilesdir'], torrentfile),
+                      self.global_conf['seedtorrentfilesdir']))
 
         else:
-
             # delete remainder of files in torrentdir
             # Don't delete the arg dir if it's the same as the target dir
             # (renaming files in-place)
@@ -692,9 +691,12 @@ class retorrenter(object):
             dir_is_now_empty = ( isdir(content_abspath) and
                                  (len(listdir(content_abspath)) - len(orig_paths)) == 0)
 
-            # delete the source if there are remaining dud files / the dir is empty, provided that it's not also the dest
-            if ((dud_files_remaining or only_ever_one_file_in_dir or dir_is_now_empty)
-                    and not realpath(content_abspath) == realpath(self.dest_dirpath)):
+            # delete the source if there are remaining dud files / the dir is empty,
+            # provided that it's not also the dest
+            if ( ( dud_files_remaining or
+                   only_ever_one_file_in_dir or
+                   dir_is_now_empty)
+                 and (realpath(content_abspath) != realpath(self.dest_dirpath))):
 
                 if dir_is_now_empty:
                     commands.append('rmdir "%s"' % (content_abspath,))

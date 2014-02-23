@@ -1,21 +1,38 @@
 import os
 from subprocess import Popen
 
-def remref(args):
-    paths = trim_trailing_slashes(args)
+def remref(to_delete, to_skip=None):
+    if to_skip is None:
+        to_skip = []
+    to_skip = set(to_skip)
 
-    print "Would delete:"
+    paths = trim_trailing_slashes(to_delete)
+
     pathlist = []
     for item in paths:
         pathlist.extend(add_item(item))
 
-    pathlist = uniq(pathlist)
+    skipping = set([ p for p in pathlist if p in to_skip ])
+    deleting = [ p for p in pathlist if not p in skipping ]
 
-    for item in pathlist:
-        print item
+    if skipping:
+        print 'Skipping:'
+        for s in skipping:
+            print s
 
+    if not deleting:
+        print 'Nothing to delete'
+        return 0
+
+    print "Would delete:"
+    for p in deleting:
+        print p
+
+    return do_delete(deleting)
+
+def do_delete(deleting):
     command = ['rm','-Irv']
-    command.extend(pathlist)
+    command.extend(deleting)
 
     p = Popen(command)
     sts = os.waitpid(p.pid, 0)[1]

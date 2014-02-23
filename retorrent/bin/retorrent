@@ -7,6 +7,7 @@ Author: James Broadhead jamesbroadhead@gmail.com
 import logging
 from optparse import OptionParser
 import os
+from os.path import expanduser
 
 from retorrentlib.retorrenter import check_result, retorrenter
 
@@ -18,7 +19,7 @@ def main():
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
 
-    myhandler = logging.FileHandler(os.path.expanduser('~/.retorrent/retorrent.log'))
+    myhandler = logging.FileHandler(expanduser('~/.retorrent/retorrent.log'))
     logger.addHandler(myhandler)
 
     if not options.debug:
