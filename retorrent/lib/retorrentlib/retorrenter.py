@@ -651,36 +651,10 @@ class retorrenter(object):
         if do_seed == "":
             return
         elif do_seed  == "yes" :
-
-            if orig_foldername:
-                commands.append('mv -nv "%s" "%s"' % (content_abspath,
-                                                      self.global_conf['seeddir']))
-
-            # TODO: this should be a src -> dst dict
-            # TODO: this should be inside the rename_map
-            seeddir_paths = { orig_path : pjoin(self.global_conf['seeddir'], orig_foldername,
-                                                intermeds, filename)
-                              for orig_path, intermeds, filename
-                              in zip(orig_paths, orig_intermeds, orig_filenames) }
-
-            commands.extend(['ln -s "%s" "%s"' % (rename_map[orig_path],
-                                                  seeddir_paths[orig_path])
-                             for orig_path in seeddir_paths])
-
-            # link arg to .torrent via optionator
-            if self.feature_flags.get('old_torrentfile_detection', False):
-                torrentfile = self.old_find_torrentfile(content_abspath)
-            else:
-                torrentfile = tfile_from_filename(content_abspath,
-                                    tfilesdir=self.global_conf['torrentfilesdir'])
-            if not torrentfile:
-                print 'Failed to find torrentfile'
-            else:
-                # move torrentfile to seeddir
-                commands.append('mv -nv "%s" "%s"' % (
-                      pjoin(self.global_conf['torrentfilesdir'], torrentfile),
-                      self.global_conf['seedtorrentfilesdir']))
-
+            torrentfile_commands = self.build_torrentfile_commands(
+                    content_abspath, orig_foldername, orig_paths,
+                    rename_map, orig_intermeds, orig_filenames)
+            commands.append(torrentfile_commands)
         else:
             # delete remainder of files in torrentdir
             # Don't delete the arg dir if it's the same as the target dir
@@ -713,6 +687,44 @@ class retorrenter(object):
                                   in seeddir_paths.items() ],
                  'torrentfile': torrentfile,
                  'commands_run' : []}
+
+
+    def build_torrentfile_commands(self, content_abspath, orig_foldername,
+                                   orig_paths, rename_map,
+                                   orig_intermeds, orig_filenames):
+        commands = []
+
+        if orig_foldername:
+            commands.append('mv -nv "%s" "%s"' % (content_abspath,
+                                                  self.global_conf['seeddir']))
+
+        # TODO: this should be a src -> dst dict
+        # TODO: this should be inside the rename_map
+        seeddir_paths = {
+            orig_path : pjoin(self.global_conf['seeddir'], orig_foldername,
+                              intermeds, filename)
+                        for orig_path, intermeds, filename
+                        in zip(orig_paths, orig_intermeds, orig_filenames) }
+
+        commands.extend(['ln -s "%s" "%s"' % (rename_map[orig_path],
+                                              seeddir_paths[orig_path])
+                         for orig_path in seeddir_paths])
+
+        # link arg to .torrent via optionator
+        if self.feature_flags.get('old_torrentfile_detection', False):
+            torrentfile = self.old_find_torrentfile(content_abspath)
+        else:
+            torrentfile = tfile_from_filename(content_abspath,
+                                tfilesdir=self.global_conf['torrentfilesdir'])
+        if not torrentfile:
+            print 'Failed to find torrentfile'
+        else:
+            print 'Using torrentfile %r' % (torrentfile,)
+            # move torrentfile to seeddir
+            commands.append('mv -nv "%s" "%s"' % (
+                  pjoin(self.global_conf['torrentfilesdir'], torrentfile),
+                  self.global_conf['seedtorrentfilesdir']))
+
 
 
 def check_result(command_bundle, failed):
