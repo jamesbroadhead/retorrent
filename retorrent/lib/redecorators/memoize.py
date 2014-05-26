@@ -28,5 +28,6 @@ def memoize_record_interactive(obj):
         res = obj(*args, **kwargs)
         if 'interactive' in kwargs and kwargs['interactive']:
             cache[key] = res
+        return res
 
     return memoizer

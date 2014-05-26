@@ -3,7 +3,7 @@
 Utility module for functions dealing with strings containing substrings inside braces
 
 """
-import datetime
+from datetime import datetime
 
 from redecorators.memoize import memoize_record_interactive
 from redecorators.tracelogdecorator import tracelogdecorator
@@ -48,7 +48,7 @@ def extract_checksum(filename):
     return ''
 
 @tracelogdecorator
-def remove_braces(filename, preserve_checksum=True):
+def remove_braces(filename, preserve_checksum=True, interactive=False):
     """
     Removes braces and internal content, with special rules for checksums and years
 
@@ -59,7 +59,6 @@ def remove_braces(filename, preserve_checksum=True):
     content_stack = Stack()
     output = ''
     for i, c in enumerate(filename):
-        #print c, output, content_stack.content
         # looking for an openbracket
         if c in braces:
             brace_stack.push(braces[c])
@@ -70,6 +69,7 @@ def remove_braces(filename, preserve_checksum=True):
                 brace_stack.pop()
                 # contains brace content
                 peeked_content = content_stack.peek()
+
                 if is_checksum(peeked_content):
                     if preserve_checksum:
                         # append the checksum to the output
@@ -77,7 +77,7 @@ def remove_braces(filename, preserve_checksum=True):
                     else:
                         content_stack.pop()
 
-                elif is_year(peeked_content):
+                elif is_year(peeked_content, interactive=interactive):
                     # preserve the year sans-brackets
                     content_stack.push(content_stack.pop())
 
@@ -105,9 +105,12 @@ def ask_is_year(item):
 
 @memoize_record_interactive
 def is_year(item, interactive=True):
-    thisyear = datetime.datetime.now().year
+    thisyear = datetime.now().year
     if item.isdigit() and len(item) == 4 and int(item) <= thisyear:
         if not interactive:
+            # let's take 1940+ as a year.
+            if 1940 <= int(item) <= thisyear:
+                return True
             return False
         return ask_is_year(item)
 

@@ -18,6 +18,7 @@ def endot(string):
     string = string.replace('_', '.')
     while '..' in string:
         string = string.replace('..', '.')
+    string = string.strip('.')
     return string
 
 ###
