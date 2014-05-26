@@ -12,6 +12,7 @@ for i in bin/* ; do
 done
 
 pyflakes $BINFILES lib/*
-pylint -E $BINFILES
-(cd lib && pylint -E *)
-(cd tests && pylint -E *)
+
+pylint --rcfile=pylintrc -E $BINFILES
+(cd lib   && pylint --rcfile=../pylintrc -E *)
+(cd tests && pylint --rcfile=../pylintrc -E *)
