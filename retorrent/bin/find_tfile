@@ -1,17 +1,39 @@
 #!/usr/bin/env python
+"""
+Usage:
+    find_tfile TARGETS...
+    find_tfile --tfiledir=DIR TARGETS...
 
-import sys
+Options:
+    -t, --tfiledir The .torrent dir to search within
+"""
+from os.path import expanduser
+from docopt import docopt
 
 from retorrentlib.find_tfile import gen_map, tfile_from_filename
 
-def main(paths):
-    files_tfiles = gen_map()
+def main(paths, tfilesdir=None):
+    if tfilesdir is None:
+        files_tfiles = gen_map()
+    else:
+        tfilesdir = expanduser(tfilesdir)
+        files_tfiles = gen_map(tfilesdir)
 
-    for path in paths:
-       print tfile_from_filename(path, files_tfiles)
+    return [ tfile_from_filename(path, files_tfiles)
+             for path in paths ]
 
+
+def print_results(results):
+    for r in results:
+        if r:
+            print r
 
 if __name__ == '__main__':
-    args = sys.argv[1:]
+    arguments = docopt(__doc__)
 
-    main(args)
+    tfiledir = arguments['--tfiledir']
+    targets = arguments['TARGETS']
+
+    results = main(targets, tfiledir)
+
+    print_results(results)
