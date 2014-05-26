@@ -1,23 +1,30 @@
 Retorrent is a media management and re-seeding tool.
 
-It renames media files from their original filenames to ones that are systematic and easy to organise, into a format compatible with the default filename parsers which come with the XBMC Media Centre.
+*retorrent* is a command-line media management tool which renames newly downloaded files into a standard format, and symlinks back to ease seeding. The main goal of this project is to allow the user to rename all of their media without losing the ability to seed, with as little user-input as possible.
 
-The initial retorrent code comes from a time where I was still learning python, and so some elements of it do not work as well as they might. Contributions and/or advice are welcome.
+The average download requires 3-4 presses of 'Enter' for all of its files to be moved to a 'videos' folder, renamed in a standard manner, reverse symlinked to a 'seeding' directory, and provided with its .torrent files.For filenames that are 'easy' to convert, this is reduced even further (1-2 keypresses)
+
+It renames media files from their original filenames to ones that are systematic and easy to organise, into a format compatible with the default filename parsers which come with XBMC (Media Centre).
+
+The initial retorrent code comes from a time where I was still learning python, and so some elements of it do not work as well as they might. Contributions and/or advice are welcome. Contributions which do not improve test coverage  will not be accepted
 
 Some of this code comes from publically accessible code, which may not be covered by the blanket GPL, as the rest of the code in this project is. These sections are commented and attributed, please refer to the attribution for licensing details.
 
 New Torrent Workflow:
 	Download a .torrent file using your browser.
 	Put the .torrent file in your TORRENTFILESDIR
-	Allow your torrent client to download the content to your TORRENTDIR (TORRENTDIR != TORRENTFILESDIR)
-	Use retorrent to move the content to a media directory. Appropriate symlinks are created in SEEDDIR, and the .torrent file is moved to SEEDTORRENTFILESDIR
-	Use symlinker to create symlinks between the media directories and the central media repository (the directory scanned by your media center).
-	(Use the content as you see fit)
+	Allow your torrent client to download the content to your TORRENTDIR
+        (TORRENTDIR != TORRENTFILESDIR)
+	Call retorrent on the downloaded file.
+        Retorrent will move the content to your media directory with a nice filename
+        Retorrent will create symlinks in SEEDDIR with the original filenames
+        Retorrent will find the matching .torrent file and move it to SEEDTORRENTFILESDIR
+
+If you define multiple content directories (maybe you have many hard disks), use *symlinker* to create a separate directory tree with symlinks to all of your content. This may then be easily navigated and/or scanned by your media center software.
 
 Removing a Torrent Workflow:
 	Determine if content file foo.mkv is seeded using is_seeded.py
-	If you still want to remove it, remove all the child symlinks using remreffer
-
+	If you still want to remove it, remove all the child symlinks using *remreffer*
 
 Non-pypi deps ( :-/ )
-    https://github.com/mohanraj-r/torrentparse
+    https://github.com/jamesbroadhead/torrentparse
