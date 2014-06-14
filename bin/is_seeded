@@ -20,7 +20,7 @@ def main(only_unseeded, targets):
     seeded,unseeded = seededlib.is_seeded(targets)
 
     if only_unseeded:
-        print ' '.join(unseeded)
+        print ' '.join([ '"%s"' % (u,) for u in unseeded])
     else:
         print "Seeded:"
         for k, v in seeded.items():
