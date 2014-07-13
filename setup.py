@@ -22,5 +22,7 @@ setup(name='retorrent',
         'bin/retorrent',
         'bin/rm_seeded',
         'bin/seedme',
-        'bin/symlinker']
-    )
+        'bin/symlinker',
+        'bin/unseed_broken',
+    ]
+)

@@ -1,0 +1,16 @@
+#!/bin/bash -e
+
+D="$1"
+TFILEDIR="$1/torrentfiles"
+
+if ! [ -d "${D}" ] || ! [ -d "${TFILEDIR}" ] ; then
+    echo "Pass a seeddir as the first argument"
+    exit 1
+fi
+
+
+FILES=$(find ${D} -type l -xtype l)
+TFILES="$(find_tfile --tfiledir="${TFILEDIR}" "${FILES}")"
+
+rm -iv ${FILES} ${TFILES}
+
