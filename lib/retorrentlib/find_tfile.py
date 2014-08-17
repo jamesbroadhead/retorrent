@@ -1,14 +1,21 @@
 #!/usr/bin/env python
 
 from os import listdir
-from os.path import abspath, basename, expanduser, isdir, isfile
+from os.path import basename, expanduser, isdir, isfile
 from os.path import join as pjoin
 
 from torrentparse.torrentparse import TorrentParser as TP
 
-default_path = abspath(expanduser('~/torrents/torrentfiles'))
 
-def gen_map(tfilesdir=default_path):
+def find_tfiles(paths, tfilesdir):
+    tfilesdir = expanduser(tfilesdir)
+    files_tfiles = gen_map(tfilesdir)
+
+    return [ tfile_from_filename(path, tfilesdir, files_tfiles)
+             for path in paths ]
+
+
+def gen_map(tfilesdir):
     tfiles = [ pjoin(tfilesdir, f)
                for f in listdir(tfilesdir)
                if f.endswith('torrent')]
@@ -23,7 +30,7 @@ def gen_map(tfilesdir=default_path):
             pass
     return files_tfiles
 
-def tfile_from_filename(filename, files_tfiles=None, tfilesdir=default_path):
+def tfile_from_filename(filename, tfilesdir, files_tfiles=None):
     """
     @param: files_tfiles : pre-generated output from gen_map
     """

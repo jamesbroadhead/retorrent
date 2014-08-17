@@ -2,26 +2,19 @@
 """
 Usage:
     find_tfile TARGETS...
-    find_tfile --tfiledir=DIR TARGETS...
+    find_tfile --tfilesdir=DIR TARGETS...
 
 Options:
-    -t, --tfiledir The .torrent dir to search within
+    -t, --tfilesdir The .torrent dir to search within
 """
-from os.path import expanduser
+from os.path import abspath, expanduser
 from docopt import docopt
 
-from retorrentlib.find_tfile import gen_map, tfile_from_filename
+from retorrentlib.find_tfile import find_tfiles
 
-def main(paths, tfilesdir=None):
-    if tfilesdir is None:
-        files_tfiles = gen_map()
-    else:
-        tfilesdir = expanduser(tfilesdir)
-        files_tfiles = gen_map(tfilesdir)
-
-    return [ tfile_from_filename(path, files_tfiles)
-             for path in paths ]
-
+def main(targets, tfilesdir):
+    tfilesdir = expanduser(tfilesdir)
+    return find_tfiles(targets, tfilesdir)
 
 def print_results(results):
     for r in results:
@@ -31,9 +24,10 @@ def print_results(results):
 if __name__ == '__main__':
     arguments = docopt(__doc__)
 
-    tfiledir = arguments['--tfiledir']
+    default_tfilesdir = abspath(expanduser('~/torrents/torrentfiles'))
+
+    tfilesdir = arguments['--tfilesdir'] or default_tfilesdir
     targets = arguments['TARGETS']
 
-    results = main(targets, tfiledir)
-
+    results = main(targets, tfilesdir)
     print_results(results)

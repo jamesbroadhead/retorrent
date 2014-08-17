@@ -716,7 +716,7 @@ class retorrenter(object):
 
         else:
             torrentfile = tfile_from_filename(content_abspath,
-                                tfilesdir=self.global_conf['torrentfilesdir'])
+                                self.global_conf['torrentfilesdir'])
             if not torrentfile:
                 print 'Failed to find torrentfile'
                 torrentfile = self.old_find_torrentfile(content_abspath)
