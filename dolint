@@ -8,11 +8,13 @@ for i in bin/* ; do
     RES="$(head -n 1 "$i" | grep -q python)"
     if [ $? -eq 0 ] ; then
         BINFILES="$BINFILES $i"
+    else
+        echo "Not linting: $i"
     fi
 done
 
 pyflakes $BINFILES lib/*
 
-pylint --rcfile=pylintrc -E $BINFILES
+pylint --rcfile=pylintrc $BINFILES
 (cd lib   && pylint --rcfile=../pylintrc -E *)
 (cd tests && pylint --rcfile=../pylintrc -E *)
