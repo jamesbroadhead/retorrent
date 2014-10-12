@@ -18,7 +18,7 @@ from retorrentlib import seededlib
 from retorrentlib.confparse import parse_retorrentconf
 from retorrentlib.find_tfile import gen_map, tfile_from_filename
 from retorrentlib.remreffer import remref
-
+# pylint: disable=too-many-locals
 def main(targets, skip_targets=False):
     config, _ = parse_retorrentconf()
     seeddir = config['seeddir']
@@ -40,8 +40,9 @@ def main(targets, skip_targets=False):
     seeded, unseeded = seededlib.is_seeded(remove_targets, seeddir=seeddir)
 
     files_tfiles = gen_map(seed_tfilesdir)
-    tfiles = [ tfile_from_filename(seedpath, files_tfiles)
-               for videopath, seedpath in seeded.items() ]
+    #pylint: disable=unused-variable
+    tfiles = [tfile_from_filename(seedpath, files_tfiles)
+              for videopath, seedpath in seeded.items()]
 
     # unseeded: list of args which are not seeded
     # tfiles: list of tfiles
@@ -52,7 +53,7 @@ def main(targets, skip_targets=False):
 
     to_skip = []
     if skip_targets:
-        to_skip = [ realpath(abspath(rt)) for rt in remove_targets ]
+        to_skip = [realpath(abspath(rt)) for rt in remove_targets]
 
     res = remref(to_delete, to_skip=to_skip)
 
@@ -62,11 +63,9 @@ def main(targets, skip_targets=False):
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
-    targets = arguments['TARGETS']
-    skip_targets = arguments['--skip-targets']
 
     try:
-        returncode = main(targets, skip_targets=skip_targets)
+        returncode = main(arguments['TARGETS'], skip_targets=arguments['--skip-targets'])
         sys.exit(returncode)
     except KeyboardInterrupt:
         pass

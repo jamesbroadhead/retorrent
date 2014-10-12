@@ -30,10 +30,12 @@ def debugprint(string, debuglevel=1):
     debuglevel = 1 - print if -d
     debuglevel = 2 - print if -dd
     """
-    if debuglevel <= debug :
+    if debuglevel <= debug:
         print string
 
-def main(smbsafe=False, debuglevel=0):
+# there sure are!
+#pylint: disable=too-many-branches,too-many-locals,too-many-statements
+def main(smbsafe=False):
     _, categories_conf = confparse.parse_retorrentconf()
 
     for_postprocessing = {}
@@ -120,9 +122,11 @@ def main(smbsafe=False, debuglevel=0):
                     not realpath(symlink_path) == \
                         realpath(content_abspath):
 
-                    debugprint('%s already exists, and there are two candidates, %s and %s' %
-                                (islink(symlink_path), realpath(symlink_path),
-                                 realpath(content_abspath)))
+                    debugprint(
+                        '%s already exists, and there are two candidates, %s and %s' %
+                        (islink(symlink_path),
+                         realpath(symlink_path),
+                         realpath(content_abspath)))
                     oldlink_realpath = realpath(symlink_path)
 
                     # they're both links to different directories
@@ -163,11 +167,12 @@ def main(smbsafe=False, debuglevel=0):
         if isdir(elem):
             #If dir is full of symlinks, and all symlinks are to the same dir,
             #    remove all symlinks, then symlink the dir
-            symlinkdir_contents_paths = [ pjoin(symlink_path, l)
-                                          for l in os.listdir(symlink_path) ]
+            symlinkdir_contents_paths = [pjoin(symlink_path, l)
+                                         for l in os.listdir(symlink_path)]
 
-            if all([islink(f) for f in symlinkdir_contents_paths]) and \
-                    all_symlinks_to_same_dir(content_abspath, symlinkdir_contents_paths):
+            if (all([islink(f) for f in symlinkdir_contents_paths]) and
+                    all_symlinks_to_same_dir(content_abspath, symlinkdir_contents_paths)):
+
                 for f in symlinkdir_contents_paths:
                     if islink(f):
                         os.remove(f)
@@ -189,9 +194,8 @@ def link_contents(content_path, linkdir_path):
 
         if not pexists(f_sympath):
             os.symlink(f_realpath, f_sympath)
-        elif pexists(f_sympath) and \
-                not sym_sametarget(f_sympath, f_realpath):
-            print 'Duplicate content found for ', f_sympath,' in'
+        elif pexists(f_sympath) and not sym_sametarget(f_sympath, f_realpath):
+            print 'Duplicate content found for %s in:' % (f_sympath,)
             print '==>', realpath(f_sympath)
             print '   ', realpath(f_realpath)
         else:

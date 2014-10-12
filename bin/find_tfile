@@ -23,11 +23,8 @@ def print_results(results):
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
-
     default_tfilesdir = abspath(expanduser('~/torrents/torrentfiles'))
 
-    tfilesdir = arguments['--tfilesdir'] or default_tfilesdir
-    targets = arguments['TARGETS']
-
-    results = main(targets, tfilesdir)
-    print_results(results)
+    results_ = main(arguments['TARGETS'],
+                    arguments['--tfilesdir'] or default_tfilesdir)
+    print_results(results_)

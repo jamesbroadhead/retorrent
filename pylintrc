@@ -33,7 +33,11 @@ load-plugins=
 # can either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
-#disable=
+
+# locally-disabled: rm warnings about #pylint:disable lines
+# fixme: this codebase has too many to enable this
+# invalid-name: over-strict variable name rules
+disable=broad-except,fixme,invalid-name,locally-disabled
 
 
 [REPORTS]

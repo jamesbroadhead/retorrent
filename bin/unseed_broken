@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """
+unseed_broken: Incomplete tool for post-deletion cleanup of seeddir
+
 Usage:
     unseed_broken
     unseed_broken FILEDIR
@@ -21,19 +23,24 @@ def main(filedir):
 
     broken_symlinks_gen = find_broken_symlinks(filedir)
     tfiles_for_broken_symlinks = set(find_tfiles(
-        [ sym for sym in broken_symlinks_gen], tfilesdir))
+        [sym for sym in broken_symlinks_gen], tfilesdir))
     # arguably, look up other symlinks which belong to this tfile as well
 
-    # TODO: ask
-    # TODO: delete files
-    # TODO: delete tfiles
-    # TODO: try to rmdir the dir that the files were in (if != filedir)
+    return do_deletions(tfiles_for_broken_symlinks)
+
+def do_deletions(tfiles_for_broken_symlinks):
+    """
+    TODO.
+    ask,
+    delete files,
+    delete tfiles,
+    try to rmdir the dir that the files were in (if != filedir)
+    """
     return tfiles_for_broken_symlinks
+
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
-
     default_filedir = abspath(expanduser('~/seed'))
-    filedir = arguments['--filedir'] or default_filedir
 
-    main(filedir)
+    main(arguments['--filedir'] or default_filedir)
