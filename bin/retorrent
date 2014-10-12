@@ -44,14 +44,14 @@ def main():
 def pretend_command_bundles(command_bundles):
     for bundle in command_bundles:
         for sub_cmd in bundle['commands']:
-            print '$ %s' % (sub_cmd,)
+            os.system('echo %s' % (sub_cmd.encode('utf-8'),))
 
 def execute_command_bundles(command_bundles):
     for bundle in command_bundles:
         failed = False
         for sub_cmd in bundle['commands']:
             try:
-                retval = os.system(sub_cmd)
+                retval = os.system(sub_cmd.encode('utf-8'))
             except Exception as e:
                 print e
                 retval = -1
