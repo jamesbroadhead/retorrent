@@ -6,11 +6,9 @@ export PYTHONPATH=""
 cd lib
 
 for d in * ; do
-    cd $d
-    for py in *.py ; do
-        python $py
-    done
-    cd ..
+  for py in $d/*.py ; do
+    python "$py"
+  done
 done
 cd ..
 

@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-from os import listdir
 from os.path import basename, expanduser, isdir, isfile
 from os.path import join as pjoin
 
+from os_utils.os_utils import listdir
 from torrentparse.torrentparse import TorrentParser as TP
 
+debug = True
 
 def find_tfiles(paths, tfilesdir):
     tfilesdir = expanduser(tfilesdir)
@@ -14,6 +15,18 @@ def find_tfiles(paths, tfilesdir):
     return [ tfile_from_filename(path, tfilesdir, files_tfiles)
              for path in paths ]
 
+def tfile_details(tfile_path):
+    files_tfile = {}
+    try:
+        files_sizes = {
+            k.decode('utf-8'): v
+            for k, v in TP(tfile_path).get_files_details()}
+
+        for filename, size in files_sizes.items():
+            files_tfile[filename] = tfile_path
+    except Exception:
+        pass
+    return files_tfile
 
 def gen_map(tfilesdir):
     tfiles = [ pjoin(tfilesdir, f)
@@ -22,12 +35,7 @@ def gen_map(tfilesdir):
 
     files_tfiles = {}
     for tfile in tfiles:
-        try:
-            files_details = TP(tfile).get_files_details()
-            for filename, size in files_details:
-                files_tfiles[filename] = tfile
-        except:
-            pass
+        files_tfiles.update(tfile_details(tfile))
     return files_tfiles
 
 def tfile_from_filename(filename, tfilesdir, files_tfiles=None):

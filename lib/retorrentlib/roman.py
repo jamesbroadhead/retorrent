@@ -1,31 +1,41 @@
-# This code originally from:
-# http://code.activestate.com/recipes/81611-roman-numerals/
-# Significantly patched by James Broadhead
+"""
+roman.py ... some roman number parsing
 
-# TODO: Replace all the below definitions with the dict
-numerals = ['M', 'D', 'C', 'L', 'X', 'V', 'I']
-values = [1000,500,100,50,10,5,1]
-numerals_asc = numerals[:]
+This code originally from:
+http://code.activestate.com/recipes/81611-roman-numerals/
+Rewritten by James Broadhead
+2014-10: Provably wrong in some places. I don't recommend that you use this.
+Not worth the effort fixing, will remove in next commit
+"""
+from copy import copy
+
+n_and_b = {'M' : 1000,
+           'CM': 900,
+           'D' : 500,
+           'CD': 400,
+           'C' : 100,
+           'XC': 90,
+           'L' : 50,
+           'XL': 40,
+           'X' : 10,
+           'IX': 9,
+           'V' : 5,
+           'IV': 4,
+           'I' : 1}
+n_and_b = { unicode(k): v for k, v in n_and_b.items() }
+
+tuples = n_and_b.items()
+tuples.sort(lambda a, b: cmp(a[1], b[1]), reverse=True)
+
+numerals         = [n for n, v in tuples if len(n) == 1]
+nums_and_bigrams = [n for n, v in tuples]
+values           = [v for n, v in tuples if len(n) == 1]
+ints_and_bigrams = [v for n, v in tuples]
+
+numerals_asc = copy(numerals)
 numerals_asc.reverse()
-nums_and_bigrams = ('M',  'CM', 'D', 'CD','C', 'XC','L','XL','X','IX','V','IV','I')
-ints_and_bigrams = (1000, 900,  500, 400, 100,  90, 50,  40, 10,  9,   5,  4,   1)
-# END TODO rm
 
-n_and_b = {'M':1000,\
-            'CM':900,\
-            'D'    : 500,\
-            'CD': 400,\
-            'C' : 100,\
-            'XC': 90,\
-            'L' : 50,\
-            'XL': 40,\
-            'X' : 10,\
-            'IX': 9,\
-            'V' : 5,\
-            'IV': 4,\
-            'I' : 1}
-
-# TODO: replace with generated results
+# TODO: generate these from the above
 roman_fives = ['D','L','V']
 
 def could_be_roman(number,debug=False):
@@ -56,23 +66,27 @@ def could_be_roman(number,debug=False):
 
     >>> could_be_roman('llv')
     False
-    """
-    number = number.upper()
 
-    for kindex,k in enumerate(number):
+    >>> could_be_roman(u'ixi')
+    False
+    """
+    number = unicode(number.upper())
+
+    for kindex, k in enumerate(number):
         if not k in numerals_asc:
             if debug: print 'Invalid Character!'
             return False
 
-        # must catch LL etc.
         if kindex > 0 and roman_to_int(k) >= roman_to_int(number[kindex-1]):
-
             # we have ix or similar
             # xix is ok, iix is not
             if is_roman_bigram(number[kindex-1:kindex+1]):
                 if debug: print 'Bigram: ',number[kindex-1:kindex+1]
+
                 if kindex >= 2:
+                    if debug: print 'comparing %s < %s' % (number[kindex-2], number[kindex])
                     if roman_to_int(number[kindex-2]) < roman_to_int(number[kindex]):
+                        if debug: print 'returning false'
                         return False
             else:
                 if debug :
@@ -95,13 +109,13 @@ def is_roman_bigram(bigram, debug=False):
     >>> is_roman_bigram('ii')
     True
     """
+    bigram = unicode(bigram.upper())
 
-    bigram = bigram.upper()
     # either is iv, xx but not vv
     if bigram in nums_and_bigrams:
         return True
     elif len(bigram) == 2:
-        if bigram[0] == bigram[1] and not is_roman_five(bigram[0]):
+        if bigram[0] == bigram[1] and not _is_roman_five(bigram[0]):
             return True
         # e.g. xi , lv
         elif n_and_b[bigram[0]] > n_and_b[bigram[1]]:
@@ -109,25 +123,25 @@ def is_roman_bigram(bigram, debug=False):
 
     return False
 
-def is_roman_five(character):
+def _is_roman_five(character):
     if character.upper() in roman_fives:
         return True
     return False
 
 def int_to_roman(input):
-   if type(input) != type(1):
+    if not isinstance(input, int):
       raise TypeError, "expected integer, got %s" % type(input)
-   if not 0 < input < 4000:
+    if not 0 < input < 4000:
       raise ValueError, "Argument must be between 1 and 3999"
-   result = ""
-   for i in range(len(ints_and_bigrams)):
-      count = int(input / ints_and_bigrams[i])
-      result += nums_and_bigrams[i] * count
-      input -= ints_and_bigrams[i] * count
-   return result
+    result = ""
+    for i in range(len(ints_and_bigrams)):
+        count = int(input / ints_and_bigrams[i])
+        result += nums_and_bigrams[i] * count
+        input -= ints_and_bigrams[i] * count
+    return result
 
 def roman_to_int(input):
-    input = input.upper()
+    input = unicode(input.upper())
     places = []
     for c in input:
         if not c in numerals:

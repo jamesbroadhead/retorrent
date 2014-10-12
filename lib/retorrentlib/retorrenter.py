@@ -1,9 +1,9 @@
 #!/usr/bin/env python
+from __future__ import unicode_literals
 
 from copy import deepcopy
 import logging
 import os
-from os import listdir
 from os.path import abspath, basename, expanduser, isdir, realpath
 from os.path import exists as pexists
 from os.path import join as pjoin
@@ -16,12 +16,14 @@ from retorrentlib.confparse import find_removelist, parse_divider_symbols, parse
 from retorrentlib.find_tfile import tfile_from_filename
 from redecorators.tracelogdecorator import tracelogdecorator
 from optionator import optionator, eqoptionator
-from os_utils.os_utils import enough_space, mkdir_p, myglob, str2utf8
+from os_utils.os_utils import enough_space, listdir, myglob, str2utf8
 from os_utils.textcontrols import bold
 
 RECALCULATE = '-'
 
 class retorrenter(object):
+    # self.expected_dirs exists for the case: ./retorrent a.e01.avi a.e02.avi
+    expected_dirs = []
 
     def __init__(self, configdir='', debug=False, feature_flags=None):
         self.configdir = configdir
@@ -99,6 +101,7 @@ class retorrenter(object):
         print "|\n|\n|\n|"
         print 'For: %s' % (content,)
 
+        content = content.decode('utf-8')
         content_abspath = abspath(content)
 
         # get a list of files to keep
@@ -215,7 +218,8 @@ class retorrenter(object):
                 for poss_series_folder in possible_series_foldernames:
                     possible_path = expanduser(pjoin(cat_folder, poss_series_folder))
                     self.debugprint('Looking for ' + possible_path)
-                    if os.path.exists(possible_path):
+                    if (os.path.exists(possible_path) or
+                            possible_path in self.expected_dirs):
                         self.dest_category = category
 
                         self.dest_series_folder = poss_series_folder
@@ -378,7 +382,7 @@ class retorrenter(object):
         else:
             orig_foldername = "" # it's a file, flat in ~/torrents
             if os.path.exists(content_abspath):
-                file_path = content_abspath
+                file_path = content_abspath.decode('utf-8')
                 file_paths = [os.path.abspath(file_path)]
                 file_names = [os.path.basename(file_path)]
                 intermeds = [""]*len(file_names)
@@ -461,9 +465,10 @@ class retorrenter(object):
         split_path = the_path.rsplit('/')
         arg_name = split_path[-1]
 
-        the_torrentfiles = [ f for f in
-                             os.listdir(self.global_conf['torrentfilesdir'])
-                             if not f == '.keep' ]
+        the_torrentfiles = [
+            f for f in
+            os.listdir(self.global_conf['torrentfilesdir'])
+            if not f == '.keep' ]
         exclude = [ c['torrentfile'] for c in self.commands ]
 
         tfiles = []
@@ -565,7 +570,7 @@ class retorrenter(object):
 
         ##### USER DECIDES BETWEEN RESULTS
         print
-        print 'Category Path: %s' % (self.dest_dirpath)
+        print 'Path: %s' % (self.dest_dirpath)
         print
         if not multiple:
             # the two methods produced the same results. Print them, ask y/n
@@ -638,11 +643,13 @@ class retorrenter(object):
         ##### LET'S BUILD SOME COMMANDS!
         commands = []
 
-        # make the dir immediately, for the case show*avi
-        mkdir_p(self.dest_dirpath)
+        self.expected_dirs.append(self.dest_dirpath)
 
-        commands.extend([ 'mv -nv "%s" "%s"' % (src, dst)
-                          for src, dst in rename_map.items() ])
+        commands.extend(['mkdir -p "%s"' % (self.dest_dirpath,)])
+
+        rename_map_keys = sorted(rename_map.keys() )
+        commands.extend(['mv -nv "%s" "%s"' % (k, rename_map[k])
+                         for k in rename_map_keys ])
 
         do_seed = optionator("Should these be seeded?" , ['yes', 'no' , '<cancel>'] )
         torrentfile = ''
@@ -662,8 +669,13 @@ class retorrenter(object):
             dud_files_remaining = num_discarded_files > 0
             only_ever_one_file_in_dir = (os.path.isdir(content_abspath) and
                                          len(orig_paths) == 1)
-            dir_is_now_empty = ( isdir(content_abspath) and
-                                 (len(listdir(content_abspath)) - len(orig_paths)) == 0)
+
+            if isdir(content_abspath):
+                num_remaining_files = (
+                    len(listdir(content_abspath)) - len(orig_paths))
+                dir_is_now_empty = (num_remaining_files == 0)
+            else:
+                dir_is_now_empty = False
 
             # delete the source if there are remaining dud files / the dir is empty,
             # provided that it's not also the dest
@@ -705,10 +717,11 @@ class retorrenter(object):
                               intermeds, filename)
                         for orig_path, intermeds, filename
                         in zip(orig_paths, orig_intermeds, orig_filenames) }
+        seeddir_paths_keys = sorted(seeddir_paths.keys())
 
         commands.extend(['ln -s "%s" "%s"' % (rename_map[orig_path],
                                               seeddir_paths[orig_path])
-                         for orig_path in seeddir_paths])
+                         for orig_path in seeddir_paths_keys])
 
         # link arg to .torrent via optionator
         if self.feature_flags.get('old_torrentfile_detection', False):

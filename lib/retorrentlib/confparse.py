@@ -2,8 +2,8 @@
 """
 Parses retorrentconf.py and other files in ~/.retorrent
 """
+from __future__ import print_function, unicode_literals
 
-from __future__ import print_function
 from ast import literal_eval
 from ConfigParser import SafeConfigParser
 from collections import OrderedDict
@@ -57,9 +57,10 @@ def parse_retorrentconf(extra_configdir=''):
     global_conf.update(config['global'])
 
     for k, v in global_conf.items():
-        if type(v) == str:
+
+        if isinstance(v, basestring):
             global_conf[k] = abspath(expanduser(v))
-        elif type(v) == list:
+        elif isinstance(v, list):
             global_conf[k] = [ abspath(expanduser(i)) for i in v ]
         else:
             print('Unknown value type under global/%s' % (k,))

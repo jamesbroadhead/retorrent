@@ -15,7 +15,6 @@ setup(name='retorrent',
                      'conf/fileext_details.json',
                      'conf/retorrentconf.py_skel'])],
     scripts=[
-        'bin/drivecheck',
         'bin/find_tfile',
         'bin/is_seeded',
         'bin/remreffer',

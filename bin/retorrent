@@ -35,22 +35,34 @@ def main():
     # get args (folders / files which are 100% downloaded.
     command_bundles = r.handle_args(argv)
 
-    if command_bundles:
-        for bundle in command_bundles:
-            failed = False
-            for sub_cmd in bundle['commands']:
-                try:
-                    retval = os.system(sub_cmd)
-                except Exception as e:
-                    print e
-                    retval = -1
-                bundle['commands_run'].append(sub_cmd)
-                if not retval == 0:
-                    failed = True
-                    break
+    if options.pretend:
+        pretend_command_bundles(command_bundles)
+    else:
+        execute_command_bundles(command_bundles)
 
-            if not check_result(bundle, failed) or failed:
+
+def pretend_command_bundles(command_bundles):
+    for bundle in command_bundles:
+        for sub_cmd in bundle['commands']:
+            print '$ %s' % (sub_cmd,)
+
+def execute_command_bundles(command_bundles):
+    for bundle in command_bundles:
+        failed = False
+        for sub_cmd in bundle['commands']:
+            try:
+                retval = os.system(sub_cmd)
+            except Exception as e:
+                print e
+                retval = -1
+            bundle['commands_run'].append(sub_cmd)
+            if not retval == 0:
+                failed = True
                 break
+
+        if not check_result(bundle, failed) or failed:
+            break
+    if command_bundles:
         os.system('symlinker')
 
 def parse_args():
@@ -70,6 +82,13 @@ def parse_args():
         default=False)
 
     parser.add_option(
+        '-p', '--pretend',
+        help='Build commands, but do not run them',
+        action='store_true',
+        dest='pretend',
+        default=False)
+
+    parser.add_option(
         '-t', '--old-torrentfile-detection',
         help='Use old, not new torrentfile behaviour',
         action='store_true',
@@ -77,7 +96,6 @@ def parse_args():
         default=False)
 
     options, args = parser.parse_args()
-
     return options, args
 
 def print_optionstructions():

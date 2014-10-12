@@ -3,6 +3,8 @@
 Various tools to expand upon functionality in the 'os' module.
 
 """
+from __future__ import unicode_literals
+
 import ctypes
 import errno
 import platform
@@ -156,7 +158,11 @@ def myglob(arg):
     if not pexists(dir_):
         dir_ = abspath(dirname(dir_))
 
-    for f in os.listdir(dir_):
+    for f in listdir(dir_):
         if f.startswith(partial_fn):
             paths.append(os.path.join(dirname(arg),f))
     return paths
+
+def listdir(dirname):
+    """ os.listdir will return unicode if a unicode string is passed """
+    return os.listdir(unicode(dirname))

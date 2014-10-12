@@ -1,5 +1,3 @@
-import roman
-
 import logging
 from os_utils.textcontrols import bold
 
@@ -351,14 +349,6 @@ class Episoder:
         else:
             logging.info(letter + ' is not an episode number')
 
-            # A single letter may also trip the roman numeral code.
-            # Add this letter to an roman.ignore list
-            if roman.could_be_roman(letter):
-                self.known_romans[letter] = False
-                logging.info('If so, will ignore ' +letter + ' as a roman numeral')
-
-
-
     def set_nextitem_if_exists(self, split_fn, currindex):
         if len(split_fn) > currindex + 1:
             nextitem = split_fn[currindex+1]
@@ -381,7 +371,6 @@ class Episoder:
     def is_raw_epno(self, epno, whole_item=''):
         if (self.is_eng_number(epno)
                 or self.is_in_alphabet(epno)
-                or self.is_roman_numeral(epno, whole_item)
                 or epno.isdigit()):
             return True
         else:
@@ -394,8 +383,6 @@ class Episoder:
     def nice_epno_from_raw(self, epno, whole_item=''):
         if self.is_eng_number(epno):
             epno = self.conv_eng_number(epno)
-        elif self.is_roman_numeral(epno, whole_item):
-            epno = self.conv_from_roman(epno)
         elif self.is_in_alphabet(epno):
             epno = self.conv_from_alphabet(epno)
         elif epno.isdigit():
@@ -445,38 +432,9 @@ class Episoder:
         # It's a single letter, and we're accepting those
         return self.single_letter_is_epno
 
-    @tracelogdecorator
-    def is_roman_numeral(self, substring, whole_item=""):
-        """
-        This would be a good candidate for memoize_if_interactive
-        """
-        if not substring:
-            return False
-
-        if substring in self.known_romans:
-            return self.known_romans[substring]
-
-        if not roman.could_be_roman(substring):
-            return False
-
-        # testing shows that high numbers are probably just letters
-        if roman.roman_to_int(substring) > 30:
-            return False
-
-        whole_item_text = ', from %s' % (whole_item,) if whole_item else ''
-        is_roman = booloptionator('Is "%s"%s a roman numeral?' % (
-                                    substring, whole_item_text),
-                                yesno=True, default_false=True)
-        self.known_romans[substring] = is_roman
-        return is_roman
-
-
     def conv_from_alphabet(self, letter):
         ordinal = self.alphabet.index(letter) + 1
         return str(ordinal)
-
-    def conv_from_roman(self, string):
-        return str(roman.roman_to_int(string))
 
     def replace_doubleitem(self, split_fn, index, new_string):
         split_fn[index] = new_string
