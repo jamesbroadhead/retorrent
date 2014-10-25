@@ -19,8 +19,11 @@ def find(top_dir, pattern=None, filters=None):
         filters = []
 
     for path, dirlist, filelist in os.walk(top_dir):
+        if all([f(path) for f in filters]):
+            yield path
+
         for name in fnmatch.filter(filelist, pattern):
-            full_path = os.path.join(path,name)
+            full_path = os.path.join(path, name)
             if all([f(full_path) for f in filters]):
                 yield full_path
 
