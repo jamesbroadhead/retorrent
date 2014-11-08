@@ -1,9 +1,11 @@
+""" tests for retorrentlib.braced """
+
 from datetime import datetime
 import unittest
 
 from retorrentlib.braced import extract_checksum, is_checksum, is_year, remove_braces
 
-class TestBraced(unittest.TestCase):
+class TestBraced(unittest.TestCase): # pylint: disable=too-many-public-methods
     def test_remove_braces(self):
         self.assertEqual(remove_braces('foo.bar.(what).zamf'), 'foo.bar.zamf')
         self.assertEqual(remove_braces('foo.bar.(w(h)at).zamf'), 'foo.bar.zamf')
@@ -14,13 +16,13 @@ class TestBraced(unittest.TestCase):
     def test_remove_braces_BROKEN(self):
         self.assertEqual(remove_braces('Able Baker [1981].mkv'), 'Able.Baker.1981.mkv')
         self.assertEqual(
-                remove_braces('[able].baker.charlie.S2...01.[720p.H264][AAAAAAAA].mkv'),
-                'baker.charlie.S2.01.[AAAAAAAA].mkv')
+            remove_braces('[able].baker.charlie.S2...01.[720p.H264][AAAAAAAA].mkv'),
+            'baker.charlie.S2.01.[AAAAAAAA].mkv')
 
         self.assertEqual(
-                remove_braces('[able].baker.charlie.S2...01.[720p.H264][AAAAAAAA].mkv',
-                              preserve_checksum=False),
-                'baker.charlie.S2.01.mkv')
+            remove_braces('[able].baker.charlie.S2...01.[720p.H264][AAAAAAAA].mkv',
+                          preserve_checksum=False),
+            'baker.charlie.S2.01.mkv')
 
     def test_extract_checksum(self):
         self.assertEqual(extract_checksum('[AAAAAAAA]'), '[AAAAAAAA]')

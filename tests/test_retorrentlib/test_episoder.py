@@ -1,8 +1,10 @@
+""" tests for retorrentlib.episoder """
+
 import unittest
 
 from retorrentlib.episoder import Episoder
 
-class TestEpisoder(unittest.TestCase):
+class TestEpisoder(unittest.TestCase): # pylint: disable=too-many-public-methods
 
     def test_is_good_epno(self):
         self.assertTrue(Episoder.is_good_epno('s01e01'))
