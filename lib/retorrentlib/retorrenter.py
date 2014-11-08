@@ -29,7 +29,7 @@ class retorrenter(object):
         self.configdir = configdir
 
         self.debug = debug
-        self.debugprinter = debugprinter(self.debug)
+        self.debugprinter = debugprinter()
 
         self.feature_flags = feature_flags
         if feature_flags is None:

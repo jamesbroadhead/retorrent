@@ -1,3 +1,5 @@
+""" retorrentlib.optionator """
+
 # returns both the item and the index
 def boptionator(text, option_list):
     for option in option_list:
@@ -5,8 +7,8 @@ def boptionator(text, option_list):
             option_list[option_list.index(option)] = "<blank>"
 
     print text
-    for index,item in enumerate(option_list):
-        print "\t",index+1,"./ \t", item
+    for index, item in enumerate(option_list):
+        print "\t%s./ \t %s" % (index+1, item)
     user_input = raw_input(">>")
 
     if user_input == '':
@@ -14,7 +16,7 @@ def boptionator(text, option_list):
         user_input = "1"
     # We've got text that's not an entry on the list
     if not user_input.isdigit():
-        return (-1,user_input)
+        return (-1, user_input)
     elif int(user_input) > len(option_list):
         print 'Bad input!!'
         return boptionator(text, option_list)
@@ -34,10 +36,7 @@ def optionator(text, option_list):
 
 # returns the index
 def ioptionator(text, option_list):
-    index = boptionator(text,option_list)[0]
-
-    return index
-
+    return boptionator(text, option_list)[0]
 
 # optionator, but removes duplicates
 # TODO: Remove second dup, not first

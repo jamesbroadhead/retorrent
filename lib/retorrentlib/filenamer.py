@@ -13,7 +13,7 @@ from retorrentlib.relist import lowercase_non_checksums, remove_nonfinal_element
 
 class filenamer:
     def __init__(self, divider_list, filetype_definitions,
-                 the_debugprinter=debugprinter(False)):
+                 the_debugprinter=debugprinter()):
 
         self.remove_set = removeset.read_from_file()
         self.tmp_remove_set = set()

@@ -30,6 +30,7 @@ config_filename = 'retorrentconf.py'
 
 @tracelogdecorator
 def parse_retorrentconf(extra_configdir=''):
+    #pylint: disable=too-many-branches,too-many-locals
     config = {}
     for cp in [extra_configdir] + config_paths:
         path = pjoin(cp, config_filename)
@@ -61,7 +62,7 @@ def parse_retorrentconf(extra_configdir=''):
         if isinstance(v, basestring):
             global_conf[k] = abspath(expanduser(v))
         elif isinstance(v, list):
-            global_conf[k] = [ abspath(expanduser(i)) for i in v ]
+            global_conf[k] = [abspath(expanduser(i)) for i in v]
         else:
             print('Unknown value type under global/%s' % (k,))
 
@@ -72,7 +73,7 @@ def parse_retorrentconf(extra_configdir=''):
         'treat_as'            : 'tv',
         'should_rename'       : 'True'
     }
-    treat_as_options = [ 'movies', 'tv', 'files' ]
+    treat_as_options = ['movies', 'tv', 'files']
 
     categories = config['categories']
 
@@ -132,8 +133,8 @@ def write_default_config():
                   'and rename it to '+config_filename)
     else:
         print('Cannot find '+config_filename+' or a valid skeleton '+config_filename+'.')
-        print('Please create and configure %s or check your installation. '
-                % (pjoin(confdir, config_filename)))
+        print('Please create and configure %s or check your installation. ' % (
+            pjoin(confdir, config_filename)))
 
 
 def validate_config(config):
@@ -175,22 +176,22 @@ def parse_fileext_details(extra_configdir=''):
         content = dict(json.loads(fh.read()))
 
     default_filetypes_goodsizes = {
-            'movie'     : 5120,
-            'binaryfile':  100,
-            'plaintext' :    4
+        'movie'     : 5120,
+        'binaryfile':  100,
+        'plaintext' :    4
     }
 
-    for fileext, conf in content.items():
+    # mutates parsed `content` to inject defaults. urgh.
+    for _, conf in content.items():
         if not 'filetype' in conf:
             conf['filetype'] = 'movie'
 
         if not conf['filetype'] in default_filetypes_goodsizes:
             raise EnvironmentError('"filetype" in %r stanzas must be one of %r. Got: %r' % (
-                                    filename, default_filetypes_goodsizes.keys(),
-                                    conf['filetype']))
+                filename, default_filetypes_goodsizes.keys(), conf['filetype']))
 
         if not 'ignore_if_in_filename' in conf:
-            conf['filetype'] = [ 'sample' ]
+            conf['filetype'] = ['sample']
 
         if not 'goodsize' in conf:
             conf['goodsize'] = default_filetypes_goodsizes[conf['filetype']]
@@ -204,16 +205,16 @@ def parse_divider_symbols(extra_configdir=''):
         config_paths.insert(0, extra_configdir)
 
     filename = 'divider_symbols.conf'
-    defaultoptions =  { 'symbols' : ' +-_@,' }
+    defaultoptions = {'symbols' : ' +-_@,'}
     symbols = []
     config = SafeConfigParser(defaultoptions)
-    config.read([ pjoin(p, filename) for p in config_paths])
+    config.read([pjoin(p, filename) for p in config_paths])
 
     for sect in config.sections():
         if sect == 'symbols':
-            symb_string = config.get(sect,'symbols')
+            symb_string = config.get(sect, 'symbols')
             # NOT stripsymbols
-            symbols = [ char for char in symb_string.strip("'") ]
+            symbols = [char for char in symb_string.strip("'")]
         else:
             print('CONFIG_WARNING: '+filename+' contains the unknown section ['+sect+']')
 

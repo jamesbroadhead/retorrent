@@ -1,13 +1,16 @@
+""" retorrentlib.debugprinter """
 import logging
 
-class debugprinter:
+class debugprinter(object):
 
-    def __init__(self, debug):
-        self.debug = debug
+    def __init__(self):
         logging.info('Initing a debugprinter')
 
-    def debugprint(self, string, lists=[]):
-        logging.info(string)
+    @staticmethod
+    def debugprint(string, lists=None):
+        if lists is None:
+            lists = []
 
+        logging.info(string)
         for l in lists:
             logging.info(l)

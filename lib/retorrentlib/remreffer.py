@@ -1,3 +1,5 @@
+"""" retorrentlib.remreffer """
+
 import os
 from subprocess import Popen
 
@@ -12,8 +14,8 @@ def remref(to_delete, to_skip=None):
     for item in paths:
         pathlist.extend(add_item(item))
 
-    skipping = set([ p for p in pathlist if p in to_skip ])
-    deleting = [ p for p in pathlist if not p in skipping ]
+    skipping = set([p for p in pathlist if p in to_skip])
+    deleting = [p for p in pathlist if not p in skipping]
 
     if skipping:
         print 'Skipping:'
@@ -31,7 +33,7 @@ def remref(to_delete, to_skip=None):
     return do_delete(deleting)
 
 def do_delete(deleting):
-    command = ['rm','-Irv']
+    command = ['rm', '-Irv']
     command.extend(deleting)
 
     p = Popen(command)
@@ -53,14 +55,14 @@ def add_item(item):
     # isdir(symlink) == True
     if os.path.isdir(item):
         for subitem in os.listdir(item):
-            pathlist.extend(add_item(os.path.join(item,subitem)))
+            pathlist.extend(add_item(os.path.join(item, subitem)))
 
     pathlist.reverse()
 
     return pathlist
 
 def trim_trailing_slashes(args):
-    return [ arg[0:-1] if arg[-1] == '/' else arg for arg in args  ]
+    return [arg[0:-1] if arg[-1] == '/' else arg for arg in args]
 
 def uniq(pathlist):
     """ preserving sort order, remove duplicates """

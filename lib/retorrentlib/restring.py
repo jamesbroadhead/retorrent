@@ -10,7 +10,7 @@ usually dealing with paths
 # Functions dealing with split filenames and .'s
 ###
 def dotjoin(*args):
-    stripped = [ a.strip('. ') for a in args if a]
+    stripped = [a.strip('. ') for a in args if a]
     return '.'.join(stripped)
 
 def endot(string):
@@ -58,10 +58,9 @@ def remove_zwsp(filename):
 
     ufilename = filename
     if not type(ufilename) == type(u'unicode'):
-        ufilename = unicode(filename,'utf-8', errors='ignore')
+        ufilename = unicode(filename, 'utf-8', errors='ignore')
 
     while zwsp in ufilename:
-    #    ufilename = ufilename[0:ufilename.find(zwsp)] + ufilename[ufilename.find(zwsp)+len(zwsp):]
         ufilename.replace(zwsp, '')
     return ufilename
 

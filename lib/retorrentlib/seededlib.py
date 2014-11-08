@@ -1,3 +1,5 @@
+""" retorrentlib.seededlib """
+
 import os
 
 from os.path import abspath, expanduser, isdir, realpath
@@ -5,14 +7,18 @@ from os.path import join as pjoin
 
 default_seeddir = expanduser('~/seed')
 def is_seeded(args, seeddir=default_seeddir):
-    seed_map = [ (root,dirs,files) for root, dirs, files in os.walk(seeddir, followlinks=True) ]
+    seed_map = [
+        (root, dirs, files)
+        for root, dirs, files in os.walk(seeddir, followlinks=True)]
 
     seed_filepaths = {}
 
-    for root, dir_, files in seed_map:
+    for root, _, files in seed_map:
         # build a flat list of the defeferenced symlinks.
         seed_filepaths[realpath(root)] = abspath(root)
-        seed_filepaths.update({ realpath(pjoin(root, file_)) : pjoin(root, file_) for file_ in files })
+        seed_filepaths.update({
+            realpath(pjoin(root, file_)) : pjoin(root, file_)
+            for file_ in files})
 
     seeded = {}
     unseeded = []
@@ -38,7 +44,7 @@ def is_seeded_singleitem(path, seed_filepaths):
     # let's now look at dir contents
     if isdir(the_path):
         for each_dir in os.listdir(the_path):
-            res = is_seeded_singleitem(pjoin(the_path, each_dir),seed_filepaths)
+            res = is_seeded_singleitem(pjoin(the_path, each_dir), seed_filepaths)
             if res:
                 return res
     return None

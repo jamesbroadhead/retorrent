@@ -5,7 +5,7 @@ A set of utility functions for dealing with lists in a retorrent-specific manner
 usually dealing with tokenised filenames
 """
 
-from braced import is_checksum
+from retorrentlib.braced import is_checksum
 
 def remove_nonfinal_elements_if_in_set(filename_split, remove_set):
     """
@@ -21,7 +21,7 @@ def remove_nonfinal_elements_if_in_set(filename_split, remove_set):
     >>> remove_nonfinal_elements_if_in_set(['foo', 'bar', 'baz'], set(['baz', 'foo', 'bar']))
     ['baz']
     """
-    output = [ item for item in filename_split[0:-1] if not item in remove_set ]
+    output = [item for item in filename_split[0:-1] if not item in remove_set]
     output.append(filename_split[-1])
     return output
 
@@ -44,9 +44,9 @@ def lowercase_non_checksums(filename_split):
     ['foo', '[AAAAAAAA]', 'baz']
     """
 
-    return [ item.lower()
-             if not is_checksum(item) else item
-             for item in filename_split ]
+    return [item.lower()
+            if not is_checksum(item) else item
+            for item in filename_split]
 
 
 if __name__ == '__main__':

@@ -22,8 +22,15 @@ done
 pyflakes "${PYTHON_BIN[@]}" ./lib/*
 
 pylint --rcfile=pylintrc "${PYTHON_BIN[@]}"
-(cd lib   && pylint --rcfile=../pylintrc coreutils os_utils redecorators)
+
+# remove once retorrentlib is covered
+PYLINT_PACKAGE_WHITELIST=( "coreutils" "os_utils" "redecorators" )
+# remove once retorrentlib is covered
+PYLINT_RETORRENT_WHITELIST=( "retorrentlib/__init__.py" "retorrentlib/braced.py" "retorrentlib/confparse.py" "retorrentlib/debugprinter.py" "retorrentlib/find_tfile.py" "retorrentlib/optionator.py" "retorrentlib/relist.py" "retorrentlib/removeset.py" "retorrentlib/remreffer.py" "retorrentlib/restring.py" "retorrentlib/seededlib.py" )
+(cd lib   && pylint --rcfile=../pylintrc "${PYLINT_PACKAGE_WHITELIST[@]}")
 (cd lib   && pylint --rcfile=../pylintrc -E ./retorrentlib)
+(cd lib   && pylint --rcfile=../pylintrc "${PYLINT_RETORRENT_WHITELIST[@]}")
+
 (cd tests && pylint --rcfile=../pylintrc ./*)
 
 command -v shellcheck >/dev/null 2>&1 || { echo >&2 "I require shellcheck to lint bash files but it's not installed.  Aborting."; exit 1; }

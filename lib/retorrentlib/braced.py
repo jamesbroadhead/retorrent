@@ -55,10 +55,11 @@ def remove_braces(filename, preserve_checksum=True, interactive=False):
     Optionally preserves content, removing braces
 
     """
+    #pylint: disable=too-many-branches
     brace_stack = Stack()
     content_stack = Stack()
     output = ''
-    for i, c in enumerate(filename):
+    for c in filename:
         # looking for an openbracket
         if c in braces:
             brace_stack.push(braces[c])
@@ -116,11 +117,14 @@ def is_year(item, interactive=True):
 
     return False
 
-class Stack:
+class Stack(object):
     """
     A stack, with some extra functions for matching-brackets without reversing
     """
     content = []
+
+    def __init__(self):
+        pass
 
     def __nonzero__(self):
         return bool(self.content)

@@ -30,4 +30,4 @@ Development:
   To lint the bash scripts in this repo (I'm sorry), you'll need to install
   shellcheck. It's not much, but it's something.
   https://github.com/koalaman/shellcheck
-  Supported version: 0.3.2
+  Supported version: 0.3.4

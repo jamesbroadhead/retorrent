@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+""" retorrentlib.find_tfile """
 
 from os.path import basename, expanduser, isdir, isfile
 from os.path import join as pjoin
@@ -12,8 +12,8 @@ def find_tfiles(paths, tfilesdir):
     tfilesdir = expanduser(tfilesdir)
     files_tfiles = gen_map(tfilesdir)
 
-    return [ tfile_from_filename(path, tfilesdir, files_tfiles)
-             for path in paths ]
+    return [tfile_from_filename(path, tfilesdir, files_tfiles)
+            for path in paths]
 
 def tfile_details(tfile_path):
     files_tfile = {}
@@ -22,16 +22,17 @@ def tfile_details(tfile_path):
             k.decode('utf-8'): v
             for k, v in TP(tfile_path).get_files_details()}
 
-        for filename, size in files_sizes.items():
+        for filename, _ in files_sizes.items():
             files_tfile[filename] = tfile_path
     except Exception:
         pass
     return files_tfile
 
 def gen_map(tfilesdir):
-    tfiles = [ pjoin(tfilesdir, f)
-               for f in listdir(tfilesdir)
-               if f.endswith('torrent')]
+    tfiles = [
+        pjoin(tfilesdir, f)
+        for f in listdir(tfilesdir)
+        if f.endswith('torrent')]
 
     files_tfiles = {}
     for tfile in tfiles:
