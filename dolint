@@ -25,7 +25,7 @@ pylint --rcfile=pylintrc "${PYTHON_BIN[@]}"
 
 # remove once retorrentlib is covered
 PYLINT_PACKAGE_WHITELIST=( "coreutils" "os_utils" "redecorators" )
-# remove once retorrentlib is covered
+# remove once retorrentlib is covered (this will reduce dolint runtime considerably!)
 PYLINT_RETORRENT_WHITELIST=( "retorrentlib/__init__.py" "retorrentlib/braced.py" "retorrentlib/confparse.py" "retorrentlib/debugprinter.py" "retorrentlib/find_tfile.py" "retorrentlib/optionator.py" "retorrentlib/relist.py" "retorrentlib/removeset.py" "retorrentlib/remreffer.py" "retorrentlib/restring.py" "retorrentlib/seededlib.py" )
 (cd lib   && pylint --rcfile=../pylintrc "${PYLINT_PACKAGE_WHITELIST[@]}")
 (cd lib   && pylint --rcfile=../pylintrc -E ./retorrentlib)
@@ -33,6 +33,26 @@ PYLINT_RETORRENT_WHITELIST=( "retorrentlib/__init__.py" "retorrentlib/braced.py"
 
 (cd tests && pylint --rcfile=../pylintrc ./*)
 
+# worst-possible way to ensure these are tracked & decrease
+# #better: if the whitelist was dynamically generated
+EPISODER=$(cd lib && pylint --rcfile=../pylintrc "retorrentlib/episoder.py" | wc -l)
+FILENAMER=$(cd lib && pylint --rcfile=../pylintrc "retorrentlib/filenamer.py" | wc -l)
+RETORRENTER=$(cd lib && pylint --rcfile=../pylintrc "retorrentlib/retorrenter.py" | wc -l)
+if ! [ "$EPISODER" = "216" ] ; then
+  echo "episoder has a different number of pylint exceptions! Please update the count in ./dolint!"
+  echo "Current count: $EPISODER"
+fi
+if ! [ "$FILENAMER" = "78" ] ; then
+  echo "filenamer has a different number of pylint exceptions! Please update the count in ./dolint!"
+  echo "Current count: $FILENAMER"
+fi
+if ! [ "$RETORRENTER" = "366" ] ; then
+  echo "retorrenter has a different number of pylint exceptions! Please update the count in ./dolint!"
+  echo "Current count: $RETORRENTER"
+fi
+
 command -v shellcheck >/dev/null 2>&1 || { echo >&2 "I require shellcheck to lint bash files but it's not installed.  Aborting."; exit 1; }
 
 shellcheck "${BASHFILES[@]}"
+
+
