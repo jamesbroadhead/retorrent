@@ -26,5 +26,7 @@ Removing a Torrent Workflow:
 	Determine if content file foo.mkv is seeded using is_seeded.py
 	If you still want to remove it, remove all the child symlinks using *remreffer*
 
-Non-pypi deps ( :-/ )
-    https://github.com/jamesbroadhead/torrentparse
+Development:
+  To lint the bash scripts in this repo (I'm sorry), you'll need to install
+  https://github.com/koalaman/shellcheck.
+  It's not much, but it's something.
