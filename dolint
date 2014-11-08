@@ -3,18 +3,28 @@
 # avoid getting retorrentlib from a system-wide install
 export PYTHONPATH="$(pwd)/lib"
 
-BINFILES=""
+BASHFILES=("dolint" "dotest")
+PYTHON_BIN=()
 for i in bin/* ; do
-    RES="$(head -n 1 "$i" | grep -q python)"
+    head -n 1 "$i" | grep -q python
     if [ $? -eq 0 ] ; then
-        BINFILES="$BINFILES $i"
+      PYTHON_BIN+=("$i")
     else
+      head -n 1 "$i" | grep -q bash
+      if [ $? -eq 0 ] ; then
+        BASHFILES+=("$i")
+      else
         echo "Not linting: $i"
+      fi
     fi
 done
 
-pyflakes $BINFILES lib/*
+pyflakes "${PYTHON_BIN[@]}" ./lib/*
 
-pylint --rcfile=pylintrc $BINFILES
-(cd lib   && pylint --rcfile=../pylintrc -E *)
-(cd tests && pylint --rcfile=../pylintrc -E *)
+pylint --rcfile=pylintrc "${PYTHON_BIN[@]}"
+(cd lib   && pylint --rcfile=../pylintrc -E ./*)
+(cd tests && pylint --rcfile=../pylintrc -E ./*)
+
+command -v shellcheck >/dev/null 2>&1 || { echo >&2 "I require shellcheck to lint bash files but it's not installed.  Aborting."; exit 1; }
+
+shellcheck "${BASHFILES[@]}"

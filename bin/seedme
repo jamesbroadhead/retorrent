@@ -27,10 +27,10 @@ elif [ -f "$goodpath" ] ; then
 	echo "$goodpath already exists"
 	md5dlfilename=$(md5sum "$dlfilename" | awk {'print $1'})
 	md5goodpath=$(md5sum "$goodpath" | awk {'print $1'})
-	if [ $md5dlfilename == $md5goodpath ] ; then
+	if [ "$md5dlfilename" == "$md5goodpath" ] ; then
 		echo "Same file - removing new version"
 		rm "$dlfilename"
-		if [ -f "$seedtfilepath" ] ; then
+	  if [ -f "$seedtfilepath" ] ; then
 			rm "$tfile"
 		else
 			echo "Downloaded file isn't seeded w. this tfile (seed it!)"
@@ -42,10 +42,10 @@ elif [ -f "$seedpath" ] ; then
 	echo "$seedpath exist"
 else
 	mv "$dlfilename" "$goodpath"
-	if [ ! -d $(dirname "$seedpath") ] ; then
+	if [ ! -d "$(dirname "$seedpath")" ] ; then
 	    # probably torrents/FOO/foo.mkv -> seed/FOO/foo.mkv
-        mkdir -p $(dirname "$seedpath")
-        rmdir $(dirname $dlfilename)
+        mkdir -p "$(dirname "$seedpath")"
+        rmdir "$(dirname "$dlfilename")"
     fi
 	ln -s "$goodpath" "$seedpath"
 	mv "$tfile" "$seedtfilepath"

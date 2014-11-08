@@ -28,5 +28,6 @@ Removing a Torrent Workflow:
 
 Development:
   To lint the bash scripts in this repo (I'm sorry), you'll need to install
-  https://github.com/koalaman/shellcheck.
-  It's not much, but it's something.
+  shellcheck. It's not much, but it's something.
+  https://github.com/koalaman/shellcheck
+  Supported version: 0.3.2
