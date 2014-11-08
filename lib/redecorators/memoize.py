@@ -1,3 +1,5 @@
+""" redecorators.memoize """
+
 import functools
 
 def memoize(obj):

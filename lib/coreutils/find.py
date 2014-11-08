@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+""" coreutils.find """
 
 import os
 from os.path import isfile, islink
@@ -18,7 +18,7 @@ def find(top_dir, pattern=None, filters=None):
     if filters is None:
         filters = []
 
-    for path, dirlist, filelist in os.walk(top_dir):
+    for path, _, filelist in os.walk(top_dir):
         if all([f(path) for f in filters]):
             yield path
 

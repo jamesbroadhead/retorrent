@@ -22,7 +22,8 @@ done
 pyflakes "${PYTHON_BIN[@]}" ./lib/*
 
 pylint --rcfile=pylintrc "${PYTHON_BIN[@]}"
-(cd lib   && pylint --rcfile=../pylintrc -E ./*)
+(cd lib   && pylint --rcfile=../pylintrc coreutils os_utils redecorators)
+(cd lib   && pylint --rcfile=../pylintrc -E ./retorrentlib)
 (cd tests && pylint --rcfile=../pylintrc ./*)
 
 command -v shellcheck >/dev/null 2>&1 || { echo >&2 "I require shellcheck to lint bash files but it's not installed.  Aborting."; exit 1; }

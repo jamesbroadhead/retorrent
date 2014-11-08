@@ -1,8 +1,8 @@
-#!/usr/bin/python
-"""
-Various tools to expand upon functionality in the 'os' module.
+""" os_utils.os_utils
 
+Monolithic module containing most of this package's functionality.
 """
+
 from __future__ import unicode_literals
 
 import ctypes
@@ -59,7 +59,7 @@ def enough_space(orig_paths, proposed_path):
 
     proposed_path = os.path.expanduser(proposed_path)
 
-    filesize_B = sum([os.path.getsize(orig_path) for orig_path in orig_paths ])
+    filesize_B = sum([os.path.getsize(orig_path) for orig_path in orig_paths])
     if not os.path.exists(proposed_path):
         proposed_path = dirname(proposed_path.rstrip('/'))
 
@@ -160,9 +160,9 @@ def myglob(arg):
 
     for f in listdir(dir_):
         if f.startswith(partial_fn):
-            paths.append(os.path.join(dirname(arg),f))
+            paths.append(os.path.join(dirname(arg), f))
     return paths
 
-def listdir(dirname):
+def listdir(dir_name):
     """ os.listdir will return unicode if a unicode string is passed """
-    return os.listdir(unicode(dirname))
+    return os.listdir(unicode(dir_name))

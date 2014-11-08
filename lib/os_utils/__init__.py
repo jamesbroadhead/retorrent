@@ -1,3 +1,4 @@
+""" os_utils
 
-BOLDTEXT = "\033[1m"
-RESETBOLD = "\033[0;0m"
+Various tools to expand upon functionality in the 'os' module.
+"""
