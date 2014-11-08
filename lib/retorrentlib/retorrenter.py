@@ -51,6 +51,9 @@ class retorrenter(object):
                                    the_debugprinter=self.debugprinter)
 
     def handle_args(self, arguments):
+        """
+        @return a list of command_bundles
+        """
         content = []
         for a in arguments:
             if pexists(a):
@@ -62,7 +65,7 @@ class retorrenter(object):
         content.sort()
         if not content:
             print 'No content found'
-            return
+            return []
 
         self.global_conf, self.categories = parse_retorrentconf( self.configdir)
         self.filetype_definitions = parse_fileext_details(self.configdir)
@@ -699,7 +702,6 @@ class retorrenter(object):
                                   in seeddir_paths.items() ],
                  'torrentfile': torrentfile,
                  'commands_run' : []}
-
 
     def build_torrentfile_commands(self, content_abspath, orig_foldername,
                                    orig_paths, rename_map,
