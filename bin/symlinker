@@ -110,8 +110,11 @@ def main(smbsafe=False):
                 if smbsafe:
                     symlink_path = abspath(pjoin(category_home, smbify(content)))
 
-                # link directly if symlink doesn't exist
+                # missing or broken symlink
                 if not pexists(symlink_path):
+                    if islink(symlink_path):
+                        os.remove(symlink_path)
+
                     os.symlink(content_abspath, symlink_path)
                     if content in removed:
                         print 'Replaced a broken symlink', content
@@ -124,7 +127,7 @@ def main(smbsafe=False):
 
                     debugprint(
                         '%s already exists, and there are two candidates, %s and %s' %
-                        (islink(symlink_path),
+                        (symlink_path,
                          realpath(symlink_path),
                          realpath(content_abspath)))
                     oldlink_realpath = realpath(symlink_path)
