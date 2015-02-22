@@ -20,7 +20,7 @@ def tfile_details(tfile_path):
     try:
         files_sizes = {
             k.decode('utf-8'): v
-            for k, v in TP(tfile_path).get_files_details()}
+            for k, v in TP(tfile_path, liberal=True).get_files_details()}
 
         for filename, _ in files_sizes.items():
             files_tfile[filename] = tfile_path

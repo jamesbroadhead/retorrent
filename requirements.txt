@@ -10,4 +10,4 @@ simplejson==3.6.5
 six==1.8.0
 wsgiref==0.1.2
 
--e git://github.com/jamesbroadhead/torrentparse.git@0.1.0#egg=torrentparse
+-e git://github.com/jamesbroadhead/torrentparse.git@0.1.1#egg=torrentparse
