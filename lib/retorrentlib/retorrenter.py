@@ -10,14 +10,16 @@ from os.path import join as pjoin
 
 from difflib import SequenceMatcher
 
-from debugprinter import debugprinter
-from retorrentlib.filenamer import filenamer
-from retorrentlib.confparse import find_removelist, parse_divider_symbols, parse_fileext_details, parse_retorrentconf
-from retorrentlib.find_tfile import tfile_from_filename
 from redecorators.tracelogdecorator import tracelogdecorator
 from optionator import optionator, eqoptionator
 from os_utils.os_utils import enough_space, listdir, myglob, str2utf8
 from os_utils.textcontrols import bold
+
+from .debugprinter import Debugprinter
+from .filenamer import Filenamer
+from .confparse import find_removelist, parse_divider_symbols, parse_fileext_details
+from .confparse import parse_retorrentconf
+from .find_tfile import tfile_from_filename
 
 RECALCULATE = '-'
 
@@ -29,7 +31,7 @@ class retorrenter(object):
         self.configdir = configdir
 
         self.debug = debug
-        self.debugprinter = debugprinter()
+        self.debugprinter = Debugprinter()
 
         self.feature_flags = feature_flags
         if feature_flags is None:
@@ -46,7 +48,7 @@ class retorrenter(object):
         # The series or movie-name folder
         self.dest_dirpath = ''
 
-        self.filenamer = filenamer(self.divider_symbols,
+        self.filenamer = Filenamer(self.divider_symbols,
                                    self.filetype_definitions,
                                    the_debugprinter=self.debugprinter)
 

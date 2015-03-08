@@ -3,13 +3,4 @@
 # avoid getting retorrentlib from a system-wide install
 export PYTHONPATH=""
 
-cd lib
-
-for d in * ; do
-  for py in $d/*.py ; do
-    python "$py"
-  done
-done
-cd ..
-
 nosetests tests

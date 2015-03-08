@@ -28,15 +28,6 @@ def endot(string):
 def remove_camelcase(filename):
     """
     Despite the name, remove internal camelCase only.
-
-    >>> remove_camelcase('')
-    ''
-
-    >>> remove_camelcase('foo')
-    'foo'
-
-    >>> remove_camelcase('fooBar')
-    'foo.bar'
     """
     if not filename:
         return filename
@@ -63,11 +54,3 @@ def remove_zwsp(filename):
     while zwsp in ufilename:
         ufilename.replace(zwsp, '')
     return ufilename
-
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-
-

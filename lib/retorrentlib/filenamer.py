@@ -3,20 +3,24 @@
 from os.path import dirname
 from os.path import join as pjoin
 
+from . import confparse, removeset
+from .braced import extract_checksum, is_checksum, remove_braces
+from .debugprinter import Debugprinter
+from .episoder import Episoder
+from .restring import dotjoin, endot, remove_camelcase, remove_zwsp
+from .relist import lowercase_non_checksums
 
-from braced import extract_checksum, is_checksum, remove_braces
-from debugprinter import debugprinter
-from episoder import Episoder
-from retorrentlib import removeset
-from retorrentlib.restring import dotjoin, endot, remove_camelcase, remove_zwsp
-from retorrentlib.relist import lowercase_non_checksums, remove_nonfinal_elements_if_in_set
-
-class filenamer:
+class Filenamer(object):
     def __init__(self, divider_list, filetype_definitions,
-                 the_debugprinter=debugprinter()):
+                 the_debugprinter=Debugprinter()):
 
-        self.remove_set = removeset.read_from_file()
-        self.tmp_remove_set = set()
+        # items to be filtered out of the pre-tokenized filename
+        self.pretokenized_removeset = removeset.read_from_file(
+                confparse.find_pretokenized_removelist())
+
+        # items to be removed from the tokenized filename
+        self.removeset = removeset.read_from_file(confparse.find_removelist())
+        self.tmp_removeset = set()
 
         self.divider_list = divider_list
         self.fileext_list = [ fileext for fileext in filetype_definitions ]
@@ -30,10 +34,10 @@ class filenamer:
         self.debugprinter.debugprint(str,listol)
 
     def add_to_removeset(self, item):
-        self.remove_set = removeset.add_and_sync(self.remove_set, item)
+        self.removeset = removeset.add_and_sync(self.removeset, item)
 
     def add_to_tmp_removeset(self, item):
-        self.tmp_remove_set.add(item)
+        self.tmp_removeset.add(item)
 
     def set_num_interesting_files(self,num_interesting_files):
         self.the_episoder.set_num_interesting_files(num_interesting_files)
@@ -48,6 +52,10 @@ class filenamer:
         if filename == '':
             self.debugprint('Not converting blank filename!',[])
             return ''
+
+        for remove in self.pretokenized_removeset:
+            filename = filename.replace(remove, '')
+
         self.debugprint('filenamer.convert_filename(' + filename + ', is_foldername==' + str(is_foldername) + ')')
 
         filename = self.remove_divider_symbols(filename)
@@ -55,7 +63,7 @@ class filenamer:
         self.debugprint('filenamer.convert_filename, after self.remove_divider_symbols : ' + filename )
 
         # remove braces from anything that isn't a checksum or a year
-        filename = remove_braces(filename, preserve_checksum=not is_foldername,                                  interactive=interactive)
+        filename = remove_braces(filename, preserve_checksum=not is_foldername,                                      interactive=interactive)
 
         self.debugprint('filenamer.convert_filename, after self.sort_out_braces: ' + filename )
 
@@ -77,19 +85,11 @@ class filenamer:
 
         self.debugprint('filenamer.convert_filename, after filenamer.lowercase_non_checksums: ' + '[' + ', '.join(filename_split) + ']')
 
-        if not is_foldername:
-            # this is a filename ending in a file extension -- preserve the extension
-            filename_split = remove_nonfinal_elements_if_in_set(filename_split,
-                                                        self.remove_set | self.tmp_remove_set)
+        full_removeset = self.removeset.union(self.tmp_removeset)
+        filename_split = self.apply_removeset(filename_split, full_removeset,
+                                              is_foldername)
 
-        else:
-            # may prune the final element if it's in the removeset
-            filename_split = [ elem for elem in filename_split
-                               if not elem in self.remove_set | self.tmp_remove_set ]
-
-
-        # Detect and Convert episode numbers.
-        # NEW! Movies have cd01,cd02-so they go through episoder
+        # Detect and convert episode numbers.
         filename_split,epno_index = self.the_episoder.add_series_episode_details(filename_split,is_foldername)
 
         self.debugprint('filenamer.convert_filename, after episoder.add_series_episode_details: ' + '[' + ', '.join(filename_split) + ']')
@@ -161,6 +161,20 @@ class filenamer:
                 return i
         return ''
 
+    @staticmethod
+    def apply_removeset(filename_split, full_removeset, is_foldername):
+        final_element = filename_split[-1]
+        filename_split = [ elem for elem in filename_split[0:-1]
+                           if not elem in full_removeset ]
+        if not is_foldername:
+            # this is a filename ending in a file extension -- preserve the extension
+            filename_split = filename_split + [final_element]
+
+        else:
+            if not final_element in full_removeset:
+                filename_split = filename_split + [final_element]
+        return filename_split
+
     def remove_following_text(self, filename_split, epno_index, is_foldername):
         """
         removes the text following the epno_index except for checksums and the file extension
@@ -185,8 +199,3 @@ class filenamer:
             del filename_split[i]
 
         return filename_split
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

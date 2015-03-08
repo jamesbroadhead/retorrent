@@ -2,26 +2,24 @@
 
 import os
 
-from retorrentlib import confparse
+from . import confparse
 
-def read_from_file():
-    filepath = confparse.find_removelist()
-
-    stripsymbols = ' \n'
-
-    # don't catch - retorrent can't function without a removeset
-    with open(filepath) as f:
-        rmlist = set([elem.strip(stripsymbols) for elem in f.readlines()])
-
-    return rmlist
+def read_from_file(path):
+    with open(path) as fh:
+        return {elem.strip(' \n')
+                for elem in fh.readlines()
+                if elem.strip(' \n')}
 
 def write_to_file(removeset):
-    filepath = confparse.find_removelist()
+    path = confparse.find_removelist()
+    return _write_to_file(path, removeset)
 
-    rmlist_out = [i+'\n' for i in removeset]
+def _write_to_file(path, removeset):
+
+    rmlist_out = [i+'\n' for i in removeset if i]
     rmlist_out.sort()
 
-    with open(filepath, 'w') as f:
+    with open(path, 'w') as f:
         f.writelines(rmlist_out)
         os.fsync(f)
 

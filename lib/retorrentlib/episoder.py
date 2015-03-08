@@ -1,17 +1,15 @@
 import logging
-from os_utils.textcontrols import bold
-
 
 from optionator import booloptionator, optionator
+from os_utils.textcontrols import bold
 from redecorators.tracelogdecorator import tracelogdecorator
-from retorrentlib.braced import is_year
 
-
+from .braced import is_year
 
 # TODO: Find all assumptions about two-digit episode numbers + mark with ASSUME
 # TODO: Fix all ASSUMES about 2-digit epnummbers
 
-class Episoder:
+class Episoder(object):
 
     alphabet = "abcdefghijklmnopqrstuvwxyz"
     eng_numbers = ['one','two','three','four','five','six','seven','eight','nine','ten']

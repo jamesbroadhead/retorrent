@@ -223,20 +223,30 @@ def parse_divider_symbols(extra_configdir=''):
 
     return symbols
 
-def find_removelist(extra_configdir=''):
+def find_configfile(filename, extra_configdir=''):
+    default_path = pjoin(expanduser('~/.retorrent'), filename)
     if extra_configdir:
         config_paths.insert(0, extra_configdir)
 
-    removelist_filename = 'removestrings.list'
     for path in config_paths:
-        filepath = pjoin(path, removelist_filename)
+        filepath = pjoin(path, filename)
         if pexists(filepath):
             # check permissions?
             return filepath
 
-    default_path = pjoin(expanduser('~/.retorrent'), removelist_filename)
-
-    if not pexists(default_path):
-        open(default_path, 'w').close()
-
+    # nothing found - touch an empty config return that
+    touch_default(default_path)
     return default_path
+
+def touch_default(path):
+    if not pexists(path):
+        open(path, 'w').close()
+
+def find_removelist(extra_configdir=''):
+    return find_configfile('removestrings.list', extra_configdir)
+
+def find_pretokenized_removelist(extra_configdir=''):
+    return find_configfile('pretokenized_removestrings.list', extra_configdir)
+
+
+

@@ -7,8 +7,9 @@ from datetime import datetime
 
 from redecorators.memoize import memoize_record_interactive
 from redecorators.tracelogdecorator import tracelogdecorator
-from retorrentlib.optionator import booloptionator
-from retorrentlib.restring import dotjoin, endot
+
+from .optionator import booloptionator
+from .restring import dotjoin, endot
 
 braces = {
     '[' : ']',
