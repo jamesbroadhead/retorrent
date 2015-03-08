@@ -28,15 +28,27 @@ class TestConvertIfEpisodeNumber(unittest.TestCase):
 
     def setUp(self):
         self.e = Episoder()
+
+        # set interactive, but explode if we hit those branches
+        self.e.interactive = True
         self.e.booloptionator = raise_exception
+        self.e.optionator = raise_exception
 
     def test_single_file_movies_noninteractive(self):
-        self.e.interactive = True
         self.e.is_movie = True
         self.e.num_interesting_files = 1
 
         filename_split = [u'able', u'baker', u'charlie', u'1989', u'1', u'mkv']
-        expected = (filename_split, False)
 
-        self.assertEqual(self.e.convert_if_episode_number(filename_split, 1, True),
-                         expected)
+        expected = (filename_split, False)
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 1), expected)
+
+    def test_episode_conversion_with_literal_episode(self):
+        filename_split = [u'the', u'alpha', u'episode', u'3', u'mkv']
+        expected = ([u'the', u'alpha', u's01e03', 'mkv'], True)
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 2), expected)
+
+    def test_episode_conversion_with_literal_pilot(self):
+        filename_split = [u'the', u'alpha', u'pilot', u'mkv']
+        expected = ([u'the', u'alpha', u's00e00', 'mkv'], True)
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 2), expected)

@@ -1,18 +1,17 @@
-#!/usr/bin/ipython
-
+""" retorrentlib.filenamer """
 from os.path import dirname
 from os.path import join as pjoin
 
+from redecorators import tracelogdecorator
+
 from . import confparse, removeset
 from .braced import extract_checksum, is_checksum, remove_braces
-from .debugprinter import Debugprinter
 from .episoder import Episoder
 from .restring import dotjoin, endot, remove_camelcase, remove_zwsp
 from .relist import lowercase_non_checksums
 
 class Filenamer(object):
-    def __init__(self, divider_list, filetype_definitions,
-                 the_debugprinter=Debugprinter()):
+    def __init__(self, divider_list, filetype_definitions):
 
         # items to be filtered out of the pre-tokenized filename
         self.pretokenized_removeset = removeset.read_from_file(
@@ -26,12 +25,8 @@ class Filenamer(object):
         self.fileext_list = [ fileext for fileext in filetype_definitions ]
 
         self.the_episoder = Episoder()
-        self.debugprinter = the_debugprinter
 
         self.is_movie = False
-
-    def debugprint(self, str, listol=[]):
-        self.debugprinter.debugprint(str,listol)
 
     def add_to_removeset(self, item):
         self.removeset = removeset.add_and_sync(self.removeset, item)
@@ -46,71 +41,56 @@ class Filenamer(object):
         self.is_movie = is_movie
         self.the_episoder.set_movie(is_movie)
 
+    @tracelogdecorator
     def convert_filename(self, filename, is_foldername, interactive=True):
         self.the_episoder.interactive = interactive
 
         if filename == '':
-            self.debugprint('Not converting blank filename!',[])
             return ''
 
         for remove in self.pretokenized_removeset:
             filename = filename.replace(remove, '')
 
-        self.debugprint('filenamer.convert_filename(' + filename + ', is_foldername==' + str(is_foldername) + ')')
-
         filename = self.remove_divider_symbols(filename)
 
-        self.debugprint('filenamer.convert_filename, after self.remove_divider_symbols : ' + filename )
-
         # remove braces from anything that isn't a checksum or a year
-        filename = remove_braces(filename, preserve_checksum=not is_foldername,                                      interactive=interactive)
-
-        self.debugprint('filenamer.convert_filename, after self.sort_out_braces: ' + filename )
+        filename = remove_braces(filename, preserve_checksum=not is_foldername,
+                                 interactive=interactive)
 
         # Apparently, there are things called 'zero width spaces'. Remove them.
         filename = remove_zwsp(filename)
-        self.debugprint('filenamer.convert_filename, after remove_zwsp: ' + filename )
 
         # change CamelCase to Camel.Case
         filename = remove_camelcase(filename)
 
-        self.debugprint('filenamer.convert_filename, after remove_camelcase: ' + filename )
-
         filename = endot(filename)
-
-        self.debugprint('filenamer.convert_filename, after endot: ' + filename )
 
         filename_split = filename.split('.')
         filename_split = lowercase_non_checksums(filename_split)
 
-        self.debugprint('filenamer.convert_filename, after filenamer.lowercase_non_checksums: ' + '[' + ', '.join(filename_split) + ']')
-
         full_removeset = self.removeset.union(self.tmp_removeset)
+
         filename_split = self.apply_removeset(filename_split, full_removeset,
                                               is_foldername)
 
         # Detect and convert episode numbers.
-        filename_split,epno_index = self.the_episoder.add_series_episode_details(filename_split,is_foldername)
-
-        self.debugprint('filenamer.convert_filename, after episoder.add_series_episode_details: ' + '[' + ', '.join(filename_split) + ']')
+        filename_split, epno_index = self.the_episoder.add_series_episode_details(
+                filename_split)
 
         if is_foldername:
-
             # don't want file extensions in a folder name
             if filename_split[-1] in self.fileext_list:
                 filename_split = filename_split[:-1]
 
-            self.debugprint('filenamer.convert_filename, creating a folder name, so : after filenamer.remove_elements_based_on_list(file_extensions): ' + '[' + ', '.join(filename_split) + ']')
-
         if not self.is_movie:
-            filename_split = self.remove_following_text(filename_split, epno_index, is_foldername)
-            self.debugprint('filenamer.convert_filename, not a movie (no episode number) so: after filenamer.remove_following_text: ' + '[' + ', '.join(filename_split) + ']')
+            filename_split = self.remove_following_text(filename_split, epno_index,
+                                                        is_foldername)
 
         filename = dotjoin(*filename_split)
 
-        self.debugprint('filenamer.convert_filename RETURNING:' + filename)
         return filename
 
+    @tracelogdecorator
     def gen_final_filename_from_foldername(self, the_dirpath, filename):
         """
         Replace the title in the filename passed with that passed as the folder name
@@ -119,22 +99,17 @@ class Filenamer(object):
         # get EPNO,FILEEXT from filename  // What about the checksum?
         # Make: TITLE.EPNO.FILEEXT
         """
-        self.debugprint('filenamer.gen_final_filename_from_foldername(the_dirpath=%r, filename=%r)' % (the_dirpath, filename))
-
         title = self.convert_filename(the_dirpath, is_foldername=True)
 
         # GET EPNO from filename
         # run convert_filename on filename as a filename. Then pull epno
         generated_filename = self.convert_filename(filename, is_foldername=False)
-        epno = self.the_episoder.get_good_epno(filename)
+        epno = self.the_episoder.get_good_epno(generated_filename)
 
         checksum = extract_checksum(filename)
         # TODO: preserve year if in filename
 
         fileext = self.find_fileext(filename)
-
-        self.debugprint('filenamer.gen_final_filename_from_foldername:')
-        self.debugprint('Given filename={filename}, generated_filename={generated_filename}, title={title}, epno={epno}, checksum={checksum}, fileext={fileext}'.format(filename=filename, generated_filename=generated_filename, title=title, epno=epno, checksum=checksum, fileext=fileext))
 
         # join. We've lost the file ext ...
         filename_out = dotjoin(title, epno, checksum, fileext)
@@ -143,6 +118,7 @@ class Filenamer(object):
 
         return output
 
+    @tracelogdecorator
     def remove_divider_symbols(self, filename):
         for symbol in self.divider_list:
             if symbol in filename:
@@ -162,6 +138,7 @@ class Filenamer(object):
         return ''
 
     @staticmethod
+    @tracelogdecorator
     def apply_removeset(filename_split, full_removeset, is_foldername):
         final_element = filename_split[-1]
         filename_split = [ elem for elem in filename_split[0:-1]
@@ -175,6 +152,7 @@ class Filenamer(object):
                 filename_split = filename_split + [final_element]
         return filename_split
 
+    @tracelogdecorator
     def remove_following_text(self, filename_split, epno_index, is_foldername):
         """
         removes the text following the epno_index except for checksums and the file extension
@@ -185,8 +163,6 @@ class Filenamer(object):
 
         if not is_foldername:
             epno_index += 1
-
-        self.debugprint('filenamer.remove_following_text(' + str(filename_split) + ',' + str(epno_index) + ')')
 
         rmlist = []
         for index,elem in enumerate(filename_split[epno_index:]):

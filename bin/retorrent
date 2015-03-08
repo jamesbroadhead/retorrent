@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 retorrent - a media management tool
 
@@ -9,11 +9,10 @@ from optparse import OptionParser
 import os
 from os.path import expanduser
 
-from retorrentlib.retorrenter import check_result, retorrenter
+from retorrentlib.retorrenter import check_result, Retorrenter
 
 
 def main():
-
     options, argv = parse_args()
 
     logger = logging.getLogger()
@@ -22,15 +21,11 @@ def main():
     myhandler = logging.FileHandler(expanduser('~/.retorrent/retorrent.log'))
     logger.addHandler(myhandler)
 
-    if not options.debug:
-        # stdout
-        del logger.handlers[0]
-
     feature_flags = {
         'old_torrentfile_detection' : options.old_torrentfile_detection
     }
 
-    r = retorrenter(options.configdir, debug=options.debug, feature_flags=feature_flags)
+    r = Retorrenter(options.configdir, debug=options.debug, feature_flags=feature_flags)
 
     # get args (folders / files which are 100% downloaded.
     command_bundles = r.handle_args(argv)

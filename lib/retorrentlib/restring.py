@@ -5,6 +5,8 @@ retorrent.restring
 A set of utility functions for dealing with strings in a retorrent-specific manner,
 usually dealing with paths
 """
+from redecorators import tracelogdecorator
+
 alphabet = "abcdefghijklmnopqrstuvwxyz"
 eng_numbers = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
 
@@ -15,6 +17,7 @@ def dotjoin(*args):
     stripped = [a.strip('. ') for a in args if a]
     return '.'.join(stripped)
 
+@tracelogdecorator
 def endot(string):
     string = string.replace(' ', '.')
     string = string.replace('_', '.')
@@ -26,7 +29,7 @@ def endot(string):
 ###
 # Other functions
 ###
-
+@tracelogdecorator
 def remove_camelcase(filename):
     """
     Despite the name, remove internal camelCase only.
@@ -42,6 +45,7 @@ def remove_camelcase(filename):
         outfilename += curr
     return outfilename
 
+@tracelogdecorator
 def remove_zwsp(filename):
     """
     # removes Zero Width Spaces from a string.

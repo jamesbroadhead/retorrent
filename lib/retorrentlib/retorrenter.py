@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+""" retorrentlib.retorrenter """
+
 from __future__ import unicode_literals
 
 from copy import deepcopy
@@ -11,19 +12,26 @@ from os.path import join as pjoin
 from difflib import SequenceMatcher
 
 from redecorators.tracelogdecorator import tracelogdecorator
-from optionator import optionator, eqoptionator
 from os_utils.os_utils import enough_space, listdir, myglob, str2utf8
 from os_utils.textcontrols import bold
 
+from .confparse import parse_divider_symbols, parse_fileext_details, parse_retorrentconf
 from .debugprinter import Debugprinter
 from .filenamer import Filenamer
-from .confparse import find_removelist, parse_divider_symbols, parse_fileext_details
-from .confparse import parse_retorrentconf
 from .find_tfile import tfile_from_filename
+from .optionator import optionator, eqoptionator
 
 RECALCULATE = '-'
 
-class retorrenter(object):
+class Retorrenter(object):
+    #pylint:disable=too-many-instance-attributes,too-many-public-methods
+    commands = None
+    dest_dirpath = None
+    dest_folder = None
+    dest_category = None
+    dest_series_folder = None
+    filenamer = None
+
     # self.expected_dirs exists for the case: ./retorrent a.e01.avi a.e02.avi
     expected_dirs = []
 
@@ -36,9 +44,12 @@ class retorrenter(object):
         self.feature_flags = feature_flags
         if feature_flags is None:
             self.feature_flags = {}
+        self.global_conf, self.categories = parse_retorrentconf( self.configdir)
+        self.filetype_definitions = parse_fileext_details(self.configdir)
+        self.divider_symbols = parse_divider_symbols(self.configdir)
 
-    def debugprint(self,str,listol=[]):
-        self.debugprinter.debugprint(str,listol)
+    def debugprint(self, txt, listol=None):
+        self.debugprinter.debugprint(txt, listol)
 
     def reset_env(self):
         # The category folder (movies, tv ... )
@@ -48,9 +59,7 @@ class retorrenter(object):
         # The series or movie-name folder
         self.dest_dirpath = ''
 
-        self.filenamer = Filenamer(self.divider_symbols,
-                                   self.filetype_definitions,
-                                   the_debugprinter=self.debugprinter)
+        self.filenamer = Filenamer(self.divider_symbols, self.filetype_definitions)
 
     def handle_args(self, arguments):
         """
@@ -68,11 +77,6 @@ class retorrenter(object):
         if not content:
             print 'No content found'
             return []
-
-        self.global_conf, self.categories = parse_retorrentconf( self.configdir)
-        self.filetype_definitions = parse_fileext_details(self.configdir)
-        self.divider_symbols = parse_divider_symbols(self.configdir)
-        self.removelist_path = find_removelist(self.configdir)
 
         self.commands = []
         for c in content:
@@ -103,6 +107,7 @@ class retorrenter(object):
         ln -s <home>/<category>/<dest_dirname>/<filename> => <seeddir>/<original_filename>
         ln -s <home>/<category>/<dest_dirname>/<filename> => <seeddir>/<original_dirname>/...
         """
+        # pylint: disable=too-many-branches,too-many-return-statements
         print "|\n|\n|\n|"
         print 'For: %s' % (content,)
 
@@ -189,7 +194,7 @@ class retorrenter(object):
                            for p in orig_paths}
 
         # Check for existing files, abort if found
-        already_exists = [ dst for src, dst in rename_map.items()
+        already_exists = [ dst for _src, dst in rename_map.items()
                              if pexists(dst) ]
         if already_exists:
             print 'Some paths already exist, aborting.'
@@ -208,7 +213,7 @@ class retorrenter(object):
             category folder
         """
 
-        self.debugprint('retorrenter.autoset_dest_dirpath(' + ','.join(possible_series_foldernames)+')')
+        self.debugprint('retorrenter.autoset_dest_dirpath(%r)' % (possible_series_foldernames,))
 
         if self.dest_category:
             # the dest category is already set from somewhere else
@@ -256,7 +261,8 @@ class retorrenter(object):
 
                 if (os.path.exists(possible_path) and
                         enough_space(orig_paths, possible_path)):
-                    self.debugprint('Equivalent candidate exists already and has enough space: ' + possible_path)
+                    msg = 'Equivalent candidate exists already and has enough space: %s'
+                    self.debugprint(msg % (possible_path,))
 
                     self.dest_folder = cat_folder
                     self.dest_dirpath = possible_path
@@ -357,14 +363,16 @@ class retorrenter(object):
             self.filenamer.add_to_tmp_removeset(answer)
             return RECALCULATE
 
-    # For all files
-    # Needs to return:
-    #    Foldername (if arg is torrent/$FOLDER )
-    #        orig_foldername neither begins nor ends with slashes
-    #    Intermediate ( torrent/$FOLDER/$INTERMED/ )
-    #        elements of orig_intermeds elements have neither beginning nor ending slashes
-    #    Files ( torrent.$FOLDER/$INTERMED/$FILE )
     def find_files_to_keep(self, content_abspath):
+        """
+        For all files, needs to return:
+            Foldername (if arg is torrent/$FOLDER )
+                orig_foldername neither begins nor ends with slashes
+            Intermediate ( torrent/$FOLDER/$INTERMED/ )
+                elements of orig_intermeds elements have neither beginning nor ending slashes
+            Files ( torrent.$FOLDER/$INTERMED/$FILE )
+        """
+        # pylint: disable=too-many-locals
         file_paths = []
         file_names = []
         intermeds = []
@@ -373,9 +381,9 @@ class retorrenter(object):
 
             orig_foldername = os.path.basename(content_abspath)
 
-            for (path,dirs,files) in os.walk(content_abspath):
-                for file in files:
-                    file_path = path + "/" + file
+            for (path, _dirs, files) in os.walk(content_abspath):
+                for f in files:
+                    file_path = path + "/" + f
                     thisfile_intermed = path[len(content_abspath)+1:]
                     if os.path.exists(file_path) :
                         file_paths += [os.path.abspath(file_path)]
@@ -429,7 +437,7 @@ class retorrenter(object):
     @tracelogdecorator
     def is_of_interest(self, file_path, filename):
 
-        (path,extension) = os.path.splitext(file_path)
+        _path, extension = os.path.splitext(file_path)
         # trim the . from the extension for matching
         extension = extension[1:].lower()
 
@@ -454,8 +462,8 @@ class retorrenter(object):
             if disk_filesize_kB > details['goodsize']:
                 return True
             else:
-                logging.info('Size: %rkB < %rkB for: %r' % (disk_filesize_kB,
-                                                           details['goodsize'], file_path))
+                logging.info('Size: %rkB < %rkB for: %r', disk_filesize_kB,
+                             details['goodsize'], file_path)
         logging.info(filename + " didn't trigger any interest ...")
         return False
 
@@ -499,7 +507,8 @@ class retorrenter(object):
 
         return chosen_torrentfile
 
-    def compare_scored_tfiles(self, A, B):
+    @staticmethod
+    def compare_scored_tfiles(A, B):
         cmp_ = cmp(B['score'],A['score'])
 
         if not cmp_ == 0:
@@ -529,6 +538,7 @@ class retorrenter(object):
                                                                  converted_filename)
 
     def build_rename_map(self, content_details, possible_series_foldernames):
+        #pylint: disable=too-many-branches,too-many-locals,too-many-statements
         content_abspath = content_details['content_abspath']
         orig_paths = content_details['orig_paths']
 
@@ -599,7 +609,8 @@ class retorrenter(object):
                 print bold('%s\t|\t%s') % (multiple[k]['relpath_from_filename'],
                                            multiple[k]['relpath_from_foldername'])
 
-            question = "Filename-based and Foldername-based produced differences: Select which is better, or enter new term to remove"
+            question = ' '.join(['Filename-based and Foldername-based produced differences: ',
+                                 'Select which is better, or enter new term to remove'])
             options = ["filenames", "foldernames", "<cancel>"]
 
 
@@ -636,7 +647,7 @@ class retorrenter(object):
         return rename_map
 
     def build_command_bundle(self, content_details, rename_map):
-
+        #pylint: disable=too-many-locals
         # To avoid completely rewriting this ...
         content_abspath = content_details['content_abspath']
         num_discarded_files = content_details['num_discarded_files']
@@ -700,7 +711,7 @@ class retorrenter(object):
         # a command bundle
         return { 'commands'   : commands,
                  'symlinks'   : [ seeddir_paths_
-                                  for orig_path, seeddir_paths_
+                                  for _orig_path, seeddir_paths_
                                   in seeddir_paths.items() ],
                  'torrentfile': torrentfile,
                  'commands_run' : []}
@@ -708,6 +719,7 @@ class retorrenter(object):
     def build_torrentfile_commands(self, content_abspath, orig_foldername,
                                    orig_paths, rename_map,
                                    orig_intermeds, orig_filenames):
+        #pylint: disable=too-many-arguments
         commands = []
 
         if orig_foldername:

@@ -1,6 +1,3 @@
 #!/bin/bash
 
-# avoid getting retorrentlib from a system-wide install
-export PYTHONPATH=""
-
-nosetests tests
+PYTHONPATH="lib" nosetests -s tests

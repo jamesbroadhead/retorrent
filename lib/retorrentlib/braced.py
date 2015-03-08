@@ -5,8 +5,7 @@ Utility module for functions dealing with strings containing substrings inside b
 """
 from datetime import datetime
 
-from redecorators.memoize import memoize_record_interactive
-from redecorators.tracelogdecorator import tracelogdecorator
+from redecorators import memoize_record_interactive, tracelogdecorator
 
 from .optionator import booloptionator
 from .restring import dotjoin, endot
