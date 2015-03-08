@@ -5,15 +5,13 @@ from os_utils.textcontrols import bold
 from redecorators.tracelogdecorator import tracelogdecorator
 
 from .braced import is_year
+from .relist import replace_doubleitem
+from .restring import alphabet, conv_eng_number, conv_from_alphabet, eng_numbers
 
 # TODO: Find all assumptions about two-digit episode numbers + mark with ASSUME
 # TODO: Fix all ASSUMES about 2-digit epnummbers
 
 class Episoder(object):
-
-    alphabet = "abcdefghijklmnopqrstuvwxyz"
-    eng_numbers = ['one','two','three','four','five','six','seven','eight','nine','ten']
-
     identifiers = { 'start' : ['s', 'e', 'd','p',
                                 'ep', 'cd', 'pt' ,
                                 'part', 'side', 'series', 'episode' ],
@@ -22,11 +20,10 @@ class Episoder(object):
     numbers_to_ignore = [ '720', '264' ]
     pairs_to_ignore = [ ('5', '1') ]  # 5.1
 
-
     digits_in_epno = 0
 
-    isset_single_letter_is_epno = False
-    single_letter_is_epno = True
+    # for folders with many files, to avoid asking multiple times
+    treat_single_letters_as_epnos = None
 
     known_romans = {}
     known_eng_numbers = {}
@@ -34,18 +31,31 @@ class Episoder(object):
     num_interesting_files = 0
     is_movie = False
     interactive = False
+
     def __init__(self):
         self.preserve_years = set()
 
     def __repr__(self):
         return '<Episoder>'
 
+    def booloptionator(self, question, yesno=True, default_false=True):
+        return booloptionator(question, yesno=yesno, default_false=default_false)
+
+    def optionator(self, question, keys):
+        return optionator(question, keys)
+
+    def set_num_interesting_files(self,num_interesting_files):
+        self.num_interesting_files = num_interesting_files
+
+    def set_movie(self,is_movie):
+        self.is_movie = is_movie
+
     # TODO: need to sort out dirs that have 01-04 or similar
     # TODO: new episode numbering "episode 1", [01x01]
     # TODO: Rewrite this to incorporate is_raw_episode_details
     def add_series_episode_details(self, split_fn, is_foldername=False):
         for index,item in enumerate(split_fn):
-            nextitem = self.set_nextitem_if_exists(split_fn, index)
+            nextitem = self.nextitem_if_exists(split_fn, index)
 
             # agressive pre-parsing
             if item in self.numbers_to_ignore or (item, nextitem) in self.pairs_to_ignore:
@@ -62,7 +72,7 @@ class Episoder(object):
     @tracelogdecorator
     def convert_if_episode_number(self, split_fn, index, is_foldername=False):
         item = split_fn[index]
-        nextitem = self.set_nextitem_if_exists(split_fn, index)
+        nextitem = self.nextitem_if_exists(split_fn, index)
 
         # TODO: Would be nice to merge these two loops
         # eg. part, episode
@@ -125,8 +135,8 @@ class Episoder(object):
             if len(item) == 1:
                 #1\\01
                 if self.is_raw_epno(nextitem):
-                    split_fn = self.replace_doubleitem(split_fn, index,
-                                                       self.gen_full_epno_string(nextitem,item))
+                    split_fn = replace_doubleitem(split_fn, index,
+                                                  self.gen_full_epno_string(nextitem,item))
                 else:
                     logging.info('in single digit number')
                     # catch 5.1blah
@@ -214,19 +224,11 @@ class Episoder(object):
             split_fn[index] = self.gen_full_epno_string(item)
             return split_fn, True
 
-
-        ## This has been causing problems with folder names :(
-        # special case - only the series number is given (eg. in folder names)
-        #elif len(item) > 1 and item[0] == 's' and item[1:].isdigit():
-            # it's just the series number, return True but ''
-        #    return split_fn,True
-
-
         return split_fn, False
 
     # TODO: How many digits in series / epno length?
     @tracelogdecorator
-    def gen_full_epno_string(self,epno,series="", nextitem=''):
+    def gen_full_epno_string(self,epno, series="", nextitem=''):
         epno = self.nice_epno_from_raw(epno)
 
         if len(nextitem) > 0 and self.is_raw_epno(nextitem):
@@ -315,7 +317,7 @@ class Episoder(object):
         keys = options.keys()
         keys.sort(reverse=True)
 
-        answer = optionator(question, keys)
+        answer = self.optionator(question, keys)
 
         if answer == '':
             print "Bad input - taking 2-digit epno"
@@ -325,34 +327,12 @@ class Episoder(object):
 
         return
 
-    def ask_if_single_letter_is_epno(self,letter):
-
-        if not self.interactive:
-            # We're probably dealing with torrentfiles - no ep numbers usually(?)
-            # TODO [later] We definitely need episode numbers.
-            return False
-
-        # nice defaults
-        default_false = False
-        if not (letter == 'a' or letter == 'b'):
-            default_false = True
-        answer = booloptionator('Is %s an episode or part number?' % (bold(letter),),
-                                yesno=True, default_false=default_false)
-
-        self.single_letter_is_epno = answer
-        self.isset_single_letter_is_epno = True
-
-        if answer:
-            logging.info(letter + ' IS an episode number')
-        else:
-            logging.info(letter + ' is not an episode number')
-
-    def set_nextitem_if_exists(self, split_fn, currindex):
+    @staticmethod
+    def nextitem_if_exists(split_fn, currindex):
         if len(split_fn) > currindex + 1:
             nextitem = split_fn[currindex+1]
             return nextitem
         return ''
-
 
     def is_raw_serno(self, serno, whole_item=''):
         if len(serno) > 0 and serno.lower().startswith('s'):
@@ -368,7 +348,7 @@ class Episoder(object):
     @tracelogdecorator
     def is_raw_epno(self, epno, whole_item=''):
         if (self.is_eng_number(epno)
-                or self.is_in_alphabet(epno)
+                or self.is_alphabetic_part_number(epno)
                 or epno.isdigit()):
             return True
         else:
@@ -380,9 +360,9 @@ class Episoder(object):
 
     def nice_epno_from_raw(self, epno, whole_item=''):
         if self.is_eng_number(epno):
-            epno = self.conv_eng_number(epno)
-        elif self.is_in_alphabet(epno):
-            epno = self.conv_from_alphabet(epno)
+            epno = conv_eng_number(epno)
+        elif self.is_alphabetic_part_number(epno):
+            epno = conv_from_alphabet(epno)
         elif epno.isdigit():
             # cool
             pass
@@ -416,61 +396,52 @@ class Episoder(object):
         return outstring
 
     @tracelogdecorator
-    def is_in_alphabet(self,string):
+    def is_alphabetic_part_number(self, item):
         """
-        if:     Is a single letter
-        AND:     Single Letters are epnos
+        @param item: string
+
+        @return boolean: if the item was a single alphabetic character which should be treated
+            as a part number
         """
-        if not len(string) == 1 or not string.isalpha():
+        if not len(item) == 1 or not item in alphabet:
             return False
 
-        if not self.isset_single_letter_is_epno:
-            self.ask_if_single_letter_is_epno(string)
+        if self.treat_single_letters_as_epnos is not None:
+            return self.treat_single_letters_as_epnos
 
-        # It's a single letter, and we're accepting those
-        return self.single_letter_is_epno
+        if self.is_movie and self.num_interesting_files == 1:
+            return False
 
-    def conv_from_alphabet(self, letter):
-        ordinal = self.alphabet.index(letter) + 1
-        return str(ordinal)
+        if not self.interactive:
+            # We're probably dealing with torrentfiles - no ep numbers usually(?)
+            # TODO [later] We definitely need episode numbers.
+            return False
 
-    def replace_doubleitem(self, split_fn, index, new_string):
-        split_fn[index] = new_string
-        del split_fn[index+1]
-        return split_fn
-    def print_partialmatch_errmsg(self,string):
-        print 'Partial match; write more cases! // ', string
-        return
+        return self.ask_if_single_letter_is_epno(item)
+
+    def ask_if_single_letter_is_epno(self, letter):
+        # nice defaults
+        default_false = False
+        if not (letter == 'a' or letter == 'b'):
+            default_false = True
+
+        answer = self.booloptionator('Is %s an episode or part number?' % (bold(letter),),
+                                     yesno=True, default_false=default_false)
+        self.treat_single_letters_as_epnos = answer
+
+        logging.info('%s is %s an episode number' % (letter, '' if answer else 'not'))
+        return answer
 
     @tracelogdecorator
     def is_eng_number(self, substring, whole_item=''):
         if substring in self.known_eng_numbers:
             return self.known_eng_numbers[substring]
 
-        if substring in self.eng_numbers:
+        if substring in eng_numbers:
             whole_item_text = ', from %s' % (whole_item,) if whole_item else ''
-            treat_as_epno = booloptionator('Is "%s"%s a part number?' % (
+            treat_as_epno = self.booloptionator('Is "%s"%s a part number?' % (
                                            substring, whole_item_text),
                                            yesno=True, default_false=True)
             self.known_eng_numbers[substring] = treat_as_epno
             return treat_as_epno
         return False
-
-    def conv_eng_number(self, somestring):
-        ordinal = self.eng_numbers.index(somestring) + 1
-        return str(ordinal)
-
-
-    def number_is_episodenumber(self,split_fn,index):
-        print "episoder.number_is_episodenumber: assuming 2-digit is epno"
-        return True
-
-    # This receives a full part of the foldername ( eg. ep01)
-    def is_raw_episode_numbering_string(self,string):
-        return self.convert_if_episode_number([string], 0)[1]
-
-    def set_num_interesting_files(self,num_interesting_files):
-        self.num_interesting_files = num_interesting_files
-
-    def set_movie(self,is_movie):
-        self.is_movie = is_movie

@@ -16,6 +16,8 @@ def memoize(obj):
     return memoizer
 
 def memoize_record_interactive(obj):
+    """ memoize, but only if a kwarg:interactive=True is passed """
+
     cache = obj.cache = {}
 
     # preserve docstring and name for doctest

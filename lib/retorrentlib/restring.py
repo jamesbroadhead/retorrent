@@ -5,6 +5,8 @@ retorrent.restring
 A set of utility functions for dealing with strings in a retorrent-specific manner,
 usually dealing with paths
 """
+alphabet = "abcdefghijklmnopqrstuvwxyz"
+eng_numbers = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
 
 ###
 # Functions dealing with split filenames and .'s
@@ -54,3 +56,19 @@ def remove_zwsp(filename):
     while zwsp in ufilename:
         ufilename.replace(zwsp, '')
     return ufilename
+
+##
+# the alphabet
+##
+def conv_from_alphabet(letter):
+    """ eg. 'a' => '1' """
+    ordinal = alphabet.index(letter) + 1
+    return str(ordinal)
+
+##
+# english-language numbers
+##
+def conv_eng_number(somestring):
+    """ eg. "one" => '1' """
+    ordinal = eng_numbers.index(somestring) + 1
+    return str(ordinal)

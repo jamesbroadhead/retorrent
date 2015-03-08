@@ -37,7 +37,7 @@ load-plugins=
 # locally-disabled: rm warnings about #pylint:disable lines
 # fixme: this codebase has too many to enable this
 # invalid-name: over-strict variable name rules
-disable=broad-except,fixme,invalid-name,locally-disabled,too-few-public-methods
+disable=bad-continuation,bad-whitespace,broad-except,fixme,invalid-name,locally-disabled,too-few-public-methods
 
 
 [REPORTS]

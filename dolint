@@ -38,9 +38,9 @@ PYLINT_RETORRENT_WHITELIST=( "retorrentlib/__init__.py" "retorrentlib/braced.py"
 EPISODER=$(cd lib && pylint --rcfile=../pylintrc "retorrentlib/episoder.py" | wc -l)
 FILENAMER=$(cd lib && pylint --rcfile=../pylintrc "retorrentlib/filenamer.py" | wc -l)
 RETORRENTER=$(cd lib && pylint --rcfile=../pylintrc "retorrentlib/retorrenter.py" | wc -l)
-EXPECTED_EPISODER="215"
-EXPECTED_FILENAMER="75"
-EXPECTED_RETORRENTER="364"
+EXPECTED_EPISODER="17"
+EXPECTED_FILENAMER="18"
+EXPECTED_RETORRENTER="52"
 
 if ! [ "$EPISODER" = "$EXPECTED_EPISODER" ] ; then
   echo "episoder has a different number of pylint exceptions! Please update the count in ./dolint!"

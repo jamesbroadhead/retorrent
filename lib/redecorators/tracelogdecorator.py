@@ -6,13 +6,6 @@ http://stackoverflow.com/questions/862807/how-would-you-write-a-debuggable-decor
 import functools
 import logging
 
-def decor(f):
-    def wrapper(*args, **kw):
-        return f(*args, **kw)
-    wrapper.__doc__ = f.__doc__
-    wrapper.__name__ = f.__name__
-    return wrapper
-
 def tracelogdecorator(f):
     tracelogger = logging.getLogger("tracelog")
 

@@ -202,7 +202,6 @@ class retorrenter(object):
     def set_num_interesting_files(self, num_interesting_files):
         self.filenamer.set_num_interesting_files(num_interesting_files)
 
-
     def autoset_dest_dirpath(self, possible_series_foldernames, orig_paths):
         """
         dest_dirpath is the 'series name' or similar folder inside the
@@ -414,8 +413,10 @@ class retorrenter(object):
         filenames_to_keep = []
         num_discarded_files = 0
 
-        for filepath,intermed,filename in zip(list_of_filepaths,list_of_intermeds, list_of_filenames):
-            if self.is_of_interest(filepath,filename):
+        for filepath, intermed, filename in zip(
+                list_of_filepaths,list_of_intermeds, list_of_filenames):
+
+            if self.is_of_interest(filepath, filename):
                 filepaths_to_keep += [filepath]
                 intermeds_to_keep += [intermed]
                 filenames_to_keep += [filename]
@@ -423,7 +424,7 @@ class retorrenter(object):
                 #print "Skipping ",os.path.basename(filepath)
                 num_discarded_files += 1
 
-        return filepaths_to_keep,intermeds_to_keep,filenames_to_keep,num_discarded_files
+        return filepaths_to_keep, intermeds_to_keep, filenames_to_keep, num_discarded_files
 
     @tracelogdecorator
     def is_of_interest(self, file_path, filename):
@@ -444,7 +445,6 @@ class retorrenter(object):
                     # this file has a phrase which excludes it
                     self.debugprint(filename + ' contains a phrase which excludes it')
                     return False
-
 
             filestat = os.stat(file_path)
             # this will actually get the size of all the blocks, not the space used.
