@@ -61,9 +61,13 @@ class Episoder(object):
         for index, item in enumerate(split_fn):
             nextitem = self.nextitem_if_exists(split_fn, index)
 
-            # agressive pre-parsing
             if item in self.numbers_to_ignore or (item, nextitem) in self.pairs_to_ignore:
                 continue
+
+            # if split_fn is now shorter -- through replace_doubleitem
+            if index < len(split_fn):
+                break
+
             split_fn, is_epno = self.convert_if_episode_number(split_fn, index)
 
             # if this item in the split filename was detected as an episode number,
