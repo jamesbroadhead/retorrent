@@ -60,3 +60,7 @@ class TestBraced(unittest.TestCase): # pylint: disable=too-many-public-methods
         next_year = str(datetime.now().year + 1)
         self.assertEqual(is_year(this_year, interactive=False), True)
         self.assertEqual(is_year(next_year, interactive=False), False)
+
+    def test_is_year_two_digits(self):
+        self.assertEqual(is_year('14', interactive=False), False) # 1914
+        self.assertEqual(is_year('99', interactive=False), True) # 1999

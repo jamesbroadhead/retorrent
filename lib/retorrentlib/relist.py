@@ -14,8 +14,13 @@ def lowercase_non_checksums(filename_split):
             if not is_checksum(item) else item
             for item in filename_split]
 
+def _replace_items(split_fn, index, new_string, num_items=2):
+    return split_fn[0:index] + [new_string] + split_fn[index+num_items:]
+
+@tracelogdecorator
+def replace_singleitem(split_fn, index, new_string):
+    return _replace_items(split_fn, index, new_string, num_items=1)
+
 @tracelogdecorator
 def replace_doubleitem(split_fn, index, new_string):
-    return split_fn[0:index] + [new_string] + split_fn[index+2:]
-
-
+    return _replace_items(split_fn, index, new_string, num_items=2)

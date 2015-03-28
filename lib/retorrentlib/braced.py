@@ -99,22 +99,25 @@ def remove_braces(filename, preserve_checksum=True, interactive=False):
     output = endot(output)
     return output
 
-def ask_is_year(item):
-    if booloptionator('Does ' + item + ' represent a year?'):
-        return True
-    return False
-
+@tracelogdecorator
 @memoize_record_interactive
 def is_year(item, interactive=True):
+    """
+    Assumes that two-digit years are in the 19xx's... millenium bug.
+    """
     thisyear = datetime.now().year
+
+    if len(item) == 2:
+        # two digit years belong in the 19xx's ...?
+        item = '19%s' % (item,)
+
     if item.isdigit() and len(item) == 4 and int(item) <= thisyear:
         if not interactive:
             # let's take 1940+ as a year.
             if 1940 <= int(item) <= thisyear:
                 return True
             return False
-        return ask_is_year(item)
-
+        return booloptionator('Does ' + item + ' represent a year?')
     return False
 
 class Stack(object):

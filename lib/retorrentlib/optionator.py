@@ -61,6 +61,10 @@ def booloptionator(text, yesno=False, default_false=False):
     answer = optionator(text, option_list)
     answer = answer.lower()
 
-    if answer == 'true' or answer == 'yes':
+    if answer in { 'true', 'yes' }:
         return True
-    return False
+    elif answer in { 'false', 'no' }:
+        return False
+    elif default_false:
+        return False
+    return True

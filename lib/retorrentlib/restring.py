@@ -13,6 +13,7 @@ eng_numbers = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', '
 ###
 # Functions dealing with split filenames and .'s
 ###
+@tracelogdecorator
 def dotjoin(*args):
     stripped = [a.strip('. ') for a in args if a]
     return '.'.join(stripped)
@@ -48,8 +49,8 @@ def remove_camelcase(filename):
 @tracelogdecorator
 def remove_zwsp(filename):
     """
-    # removes Zero Width Spaces from a string.
-    # Returns in UTF-8. HERE BE DRAGONS
+    removes Zero Width Spaces from a string.
+    Returns in UTF-8. HERE BE DRAGONS
     """
     zwsp = u'\u200b'
 
