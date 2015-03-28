@@ -4,7 +4,7 @@ export PYTHONPATH=""
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
-BASHFILES=("dolint" "dotest")
+BASHFILES=("dolint" "dotest" "git_hooks/pre-push")
 PYTHON_BIN=()
 for i in bin/* ; do
     head -n 1 "$i" | grep -q python
