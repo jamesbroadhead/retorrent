@@ -8,6 +8,7 @@ import os
 from os.path import abspath, basename, expanduser, isdir, realpath
 from os.path import exists as pexists
 from os.path import join as pjoin
+import traceback
 
 from difflib import SequenceMatcher
 
@@ -22,6 +23,8 @@ from .find_tfile import tfile_from_filename
 from .optionator import optionator, eqoptionator
 
 RECALCULATE = '-'
+
+log = logging.getLogger("app")
 
 class Retorrenter(object):
     #pylint:disable=too-many-instance-attributes,too-many-public-methods
@@ -83,10 +86,15 @@ class Retorrenter(object):
             # TODO: Could really do with removing this ...
             self.reset_env()
 
-            commandset = self.handle_content(c)
-            if commandset:
-                self.commands.append(commandset)
-
+            try:
+                commandset = self.handle_content(c)
+                if commandset:
+                    self.commands.append(commandset)
+            except Exception as e:
+                # parsing one arg failed -- proceed with the rest
+                print e
+                print traceback.format_exc()
+                log.error(e)
         return self.commands
 
     def handle_content(self, content):

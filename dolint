@@ -22,7 +22,7 @@ done
 
 pyflakes "${PYTHON_BIN[@]}" ./lib/*
 
-(cd lib && pylint --rcfile=../pylintrc "${PYTHON_BIN[@]}" ./* ../tests/*)
+(cd lib && PYTHONPATH="../tests" pylint --rcfile=../pylintrc "${PYTHON_BIN[@]}" ./* ../tests/*)
 
 command -v shellcheck >/dev/null 2>&1 || { echo >&2 "I require shellcheck to lint bash files but it's not installed.  Aborting."; exit 1; }
 

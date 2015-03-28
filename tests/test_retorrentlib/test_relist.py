@@ -17,7 +17,7 @@ class TestLowerCasing(unittest.TestCase): # pylint: disable=too-many-public-meth
         self.assertEqual(lowercase_non_checksums(['foo', '[AAAAAAAA]', 'baz']),
                          ['foo', '[AAAAAAAA]', 'baz'])
 
-class TestReplacement(unittest.TestCase):
+class TestReplacement(unittest.TestCase): # pylint: disable=too-many-public-methods
     _input = [ str(i) for i in range(6) ]
 
     def test_replace_singleitem(self):
