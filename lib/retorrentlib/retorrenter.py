@@ -674,15 +674,23 @@ class Retorrenter(object):
         commands.extend(['mv -nv "%s" "%s"' % (k, rename_map[k])
                          for k in rename_map_keys ])
 
-        do_seed = optionator("Should these be seeded?" , ['yes', 'no' , '<cancel>'] )
-        torrentfile = ''
+        torrentfile = tfile_from_filename(content_abspath,
+                                          self.global_conf['torrentfilesdir'])
+
+        question = 'Should these be seeded?'
+        if torrentfile:
+            question = 'Seed using {f}?'.format(f=torrentfile)
+        do_seed = optionator(question, ['yes', 'no' , '<cancel>'] )
+
         seeddir_paths = {}
-        # this means '<cancel>'
-        if do_seed == "":
+        if do_seed == "": # this means '<cancel>'
             return
         elif do_seed  == "yes" :
+            if not torrentfile:
+                torrentfile = self.old_find_torrentfile(content_abspath)
+
             torrentfile_commands = self.build_torrentfile_commands(
-                    content_abspath, orig_foldername, orig_paths,
+                    torrentfile, content_abspath, orig_foldername, orig_paths,
                     rename_map, orig_intermeds, orig_filenames)
             commands.extend(torrentfile_commands)
         else:
@@ -723,9 +731,9 @@ class Retorrenter(object):
                  'torrentfile': torrentfile,
                  'commands_run' : []}
 
-    def build_torrentfile_commands(self, content_abspath, orig_foldername,
-                                   orig_paths, rename_map,
-                                   orig_intermeds, orig_filenames):
+    def build_torrentfile_commands(self, torrentfile, content_abspath,
+            orig_foldername, orig_paths, rename_map,
+            orig_intermeds, orig_filenames):
         #pylint: disable=too-many-arguments
         commands = []
 
@@ -745,17 +753,6 @@ class Retorrenter(object):
         commands.extend(['ln -s "%s" "%s"' % (rename_map[orig_path],
                                               seeddir_paths[orig_path])
                          for orig_path in seeddir_paths_keys])
-
-        # link arg to .torrent via optionator
-        if self.feature_flags.get('old_torrentfile_detection', False):
-            torrentfile = self.old_find_torrentfile(content_abspath)
-
-        else:
-            torrentfile = tfile_from_filename(content_abspath,
-                                self.global_conf['torrentfilesdir'])
-            if not torrentfile:
-                print 'Failed to find torrentfile'
-                torrentfile = self.old_find_torrentfile(content_abspath)
 
         if torrentfile:
             print 'Using torrentfile %r' % (torrentfile,)
