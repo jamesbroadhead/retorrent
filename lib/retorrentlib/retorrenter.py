@@ -480,7 +480,6 @@ class Retorrenter(object):
             return self.categories[self.dest_category]['treat_as'] == 'movies'
         return False
 
-    # TODO: episoder _must_ be able to return the epno - *use this*.
     def old_find_torrentfile(self, the_path):
         # get the file / foldername (not necc. the same as the arg itself
         split_path = the_path.rsplit('/')
@@ -511,7 +510,7 @@ class Retorrenter(object):
         tfiles = sorted(tfiles, self.compare_scored_tfiles)
 
         chosen_torrentfile = optionator('For: '+arg_name,
-                                        [t['filename'] for t in tfiles])
+                                        [t['filename'] for t in tfiles] + ['<cancel>'])
 
         return chosen_torrentfile
 
