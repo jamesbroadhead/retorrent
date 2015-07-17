@@ -6,6 +6,7 @@ A set of utility functions for dealing with strings in a retorrent-specific mann
 usually dealing with paths
 """
 from redecorators import tracelogdecorator
+from os_utils.os_utils import str2utf8
 
 alphabet = "abcdefghijklmnopqrstuvwxyz"
 eng_numbers = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
@@ -54,9 +55,7 @@ def remove_zwsp(filename):
     """
     zwsp = u'\u200b'
 
-    ufilename = filename
-    if not type(ufilename) == type(u'unicode'):
-        ufilename = unicode(filename, 'utf-8', errors='ignore')
+    ufilename = str2utf8(filename)
 
     while zwsp in ufilename:
         ufilename.replace(zwsp, '')

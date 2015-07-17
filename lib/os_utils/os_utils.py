@@ -112,7 +112,7 @@ def get_foldername(path):
     return basename(path.strip('/'))
 
 def str2utf8(string):
-    if type(string) == type(u'unicode'):
+    if isinstance(string, unicode):
         u = string
     else:
         u = unicode(string, 'utf-8', errors='ignore')
