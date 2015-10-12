@@ -25,8 +25,8 @@ elif ! [ -f "$dlfilename" ] || ! [ -f "$tfile" ] ; then
     fi
 elif [ -f "$goodpath" ] ; then
 	echo "$goodpath already exists"
-	md5dlfilename=$(md5sum "$dlfilename" | awk {'print $1'})
-	md5goodpath=$(md5sum "$goodpath" | awk {'print $1'})
+	md5dlfilename=$(md5sum "$dlfilename" | awk '{print $1}')
+	md5goodpath=$(md5sum "$goodpath" | awk '{print $1}')
 	if [ "$md5dlfilename" == "$md5goodpath" ] ; then
 		echo "Same file - removing new version"
 		rm "$dlfilename"
@@ -42,11 +42,35 @@ elif [ -f "$seedpath" ] ; then
 	echo "$seedpath exist"
 else
 	mv "$dlfilename" "$goodpath"
-	if [ ! -d "$(dirname "$seedpath")" ] ; then
-	    # probably torrents/FOO/foo.mkv -> seed/FOO/foo.mkv
-        mkdir -p "$(dirname "$seedpath")"
-        rmdir "$(dirname "$dlfilename")"
-    fi
-	ln -s "$goodpath" "$seedpath"
-	mv "$tfile" "$seedtfilepath"
+  mv_result="$?"
+
+
+  if [ ! -d "$(dirname "$seedpath")" ] ; then
+	  # probably torrents/FOO/foo.mkv -> seed/FOO/foo.mkv
+    mkdir -p "$(dirname "$seedpath")"
+    rmdir "$(dirname "$dlfilename")"
+  fi
+
+  if ! [ ${mv_result} -eq 0 ] ; then
+    echo "something went wrong during the mv. bailing."
+    echo "tried:"
+    echo "mv \"$dlfilename\" \"$goodpath\""
+    echo "would have: "
+    echo "ln -s \"$goodpath\" \"$seedpath\""
+	  echo "mv \"$tfile\" \"$seedtfilepath\""
+    exit 1
+  fi
+
+  ln -s "$goodpath" "$seedpath"
+  ln_result=$?
+  if ! [ ${ln_result} -eq 0 ] ; then
+    echo "something went wrong during the ln. bailing."
+    echo "tried:"
+    echo "mv \"$dlfilename\" \"$goodpath\""
+    echo "ln -s \"$goodpath\" \"$seedpath\""
+    echo "would have: "
+	  echo "mv \"$tfile\" \"$seedtfilepath\""
+    exit 1
+  fi
+  mv "$tfile" "$seedtfilepath"
 fi) &
