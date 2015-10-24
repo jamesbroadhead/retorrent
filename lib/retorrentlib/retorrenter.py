@@ -71,10 +71,10 @@ class Retorrenter(object):
         content = []
         for a in arguments:
             if pexists(a):
-                content.append(a)
+                content.append(a.decode('utf-8'))
             else:
                 paths = myglob(a)
-                content.extend([ p for p in paths if pexists(p) ])
+                content.extend([ p.decode('utf-8') for p in paths if pexists(p) ])
 
         content.sort()
         if not content:
@@ -119,7 +119,6 @@ class Retorrenter(object):
         print "|\n|\n|\n|"
         print 'For: %s' % (content,)
 
-        content = content.decode('utf-8')
         content_abspath = abspath(content)
 
         # get a list of files to keep
