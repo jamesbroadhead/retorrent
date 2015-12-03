@@ -19,10 +19,11 @@ def dotjoin(*args):
     stripped = [a.strip('. ') for a in args if a]
     return '.'.join(stripped)
 
+endottables = [' ', '_']
 @tracelogdecorator
 def endot(string):
-    string = string.replace(' ', '.')
-    string = string.replace('_', '.')
+    for e in endottables:
+        string = string.replace(e, '.')
     while '..' in string:
         string = string.replace('..', '.')
     string = string.strip('.')
