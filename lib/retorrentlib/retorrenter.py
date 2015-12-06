@@ -16,7 +16,8 @@ from redecorators.tracelogdecorator import tracelogdecorator
 from os_utils.os_utils import enough_space, listdir, myglob, str2utf8
 from os_utils.textcontrols import bold
 
-from .confparse import parse_divider_symbols, parse_fileext_details, parse_retorrentconf
+from .confparse import get_torrentfilesdir, parse_divider_symbols, parse_fileext_details
+from .confparse import parse_retorrentconf
 from .debugprinter import Debugprinter
 from .filenamer import Filenamer
 from .find_tfile import tfile_from_filename
@@ -486,7 +487,7 @@ class Retorrenter(object):
 
         the_torrentfiles = [
             f for f in
-            os.listdir(self.global_conf['torrentfilesdir'])
+            os.listdir(get_torrentfilesdir(self.global_conf))
             if not f == '.keep' ]
         exclude = [ c['torrentfile'] for c in self.commands ]
 
@@ -674,7 +675,7 @@ class Retorrenter(object):
                          for k in rename_map_keys ])
 
         torrentfile = tfile_from_filename(content_abspath,
-                                          self.global_conf['torrentfilesdir'])
+                                          get_torrentfilesdir(self.global_conf))
 
         question = 'Should these be seeded?'
         if torrentfile:
@@ -757,7 +758,7 @@ class Retorrenter(object):
             print 'Using torrentfile %r' % (torrentfile,)
             # move torrentfile to seeddir
             commands.append('mv -nv "%s" "%s"' % (
-                  pjoin(self.global_conf['torrentfilesdir'], torrentfile),
+                  pjoin(get_torrentfilesdir(self.global_conf), torrentfile),
                   self.global_conf['seedtorrentfilesdir']))
 
         return commands

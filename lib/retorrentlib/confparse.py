@@ -19,11 +19,11 @@ import simplejson as json
 from redecorators.tracelogdecorator import tracelogdecorator
 from os_utils.os_utils import mkdir_p
 
-# XXX: Use global symlink_path in retorrent somewhere ...
+home_config_dir = abspath(expanduser('~/.retorrent/'))
 
 config_paths = [
     abspath('./'),
-    abspath(expanduser('~/.retorrent/')),
+    home_config_dir,
     '/usr/share/retorrent/'
 ]
 config_filename = 'retorrentconf.py'
@@ -248,5 +248,7 @@ def find_removelist(extra_configdir=''):
 def find_pretokenized_removelist(extra_configdir=''):
     return find_configfile('pretokenized_removestrings.list', extra_configdir)
 
-
-
+def get_torrentfilesdir(global_conf=None):
+    if global_conf is None:
+        global_conf, _ = parse_retorrentconf()
+    return global_conf['torrentfilesdir']
