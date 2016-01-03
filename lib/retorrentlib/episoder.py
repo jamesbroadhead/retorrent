@@ -199,7 +199,7 @@ class Episoder(object):
                 split_fn[index] = self.gen_full_epno_string(item.split('of')[0])
                 return split_fn
 
-        ## END SPECIAL CASES
+                ## END SPECIAL CASES
 
         # just a number - treat as the episode number of season 1
         elif self.is_raw_epno(item):
@@ -210,7 +210,7 @@ class Episoder(object):
 
     # TODO: How many digits in series / epno length?
     @tracelogdecorator
-    def gen_full_epno_string(self,epno, series="", nextitem=''):
+    def gen_full_epno_string(self, epno, series="", nextitem=''):
         epno = self.nice_epno_from_raw(epno)
 
         if len(nextitem) > 0 and self.is_raw_epno(nextitem):
@@ -235,16 +235,22 @@ class Episoder(object):
 
     @tracelogdecorator
     def convert_number_divider_number(self, item):
-        """ <variable-length-number> + 'divider' + <variable_length_number> """
-        if len(item) >= 3:
-            # TODO: REEEEEGEX
-            for i in range(1,len(item)):
-                subitem = item[0:i]
-                divider = item[i]
-                supitem = item[i+1:]
-                if subitem.isdigit() and divider.isalpha() and supitem.isdigit():
-                    item = self.gen_full_epno_string(supitem, subitem)
-                    return item
+        """ <variable-length-number> + <divider symbol> + <variable_length_number> """
+        if not len(item) >= 3:
+            return
+
+        # TODO: REEEEEGEX
+        for i in range(1,len(item)):
+            subitem = item[0:i]
+            divider = item[i]
+            supitem = item[i+1:]
+            if subitem.isdigit() and divider.isalpha() and supitem.isdigit():
+                # special-case divider=='v' as a version (not an episode-indicator)
+                # eg. 1v1, 02v2 -> s01e01, s01e02
+                if divider == 'v':
+                    return self.gen_full_epno_string(subitem)
+                item = self.gen_full_epno_string(supitem, subitem)
+                return item
         return None
 
     def get_good_epno(self, filename):
