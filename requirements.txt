@@ -2,6 +2,7 @@
 # https://bitbucket.org/logilab/pylint/issue/118/pin-dependencies
 
 astroid==1.2.1
+beautifulsoup4==4.4.1
 docopt==0.6.2
 hypothesis==1.15.0
 logilab-common==0.63.0

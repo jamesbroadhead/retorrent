@@ -23,9 +23,20 @@ for i in bin/* ; do
 done
 
 pyflakes "${PYTHON_BIN[@]}" ./lib/*
+A=$?
 
-(cd lib && PYTHONPATH="../tests" pylint --rcfile=../pylintrc "${PYTHON_BIN[@]}" ./* ../tests/*)
+pushd lib &> /dev/null
+PYTHONPATH="../tests" pylint --rcfile=../pylintrc "${PYTHON_BIN[@]}" ./* ../tests/*
+B=$?
+popd &> /dev/null
 
 command -v shellcheck >/dev/null 2>&1 || { echo >&2 "I require shellcheck to lint bash files but it's not installed.  Aborting."; exit 1; }
 
 shellcheck "${BASHFILES[@]}"
+C=$?
+
+for i in $A $B $C ; do
+  if ! [ $i -eq 0 ] ; then
+    exit $i
+  fi
+done
