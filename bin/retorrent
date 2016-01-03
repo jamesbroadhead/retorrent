@@ -7,7 +7,8 @@ Author: James Broadhead jamesbroadhead@gmail.com
 import logging
 from optparse import OptionParser
 import os
-from os.path import expanduser
+from os.path import expanduser, isdir
+from os.path import join as pjoin
 
 from retorrentlib.retorrenter import check_result, Retorrenter
 
@@ -17,8 +18,10 @@ def main():
 
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-
-    myhandler = logging.FileHandler(expanduser('~/.retorrent/retorrent.log'))
+    logdir = expanduser('~/.retorrent')
+    if not isdir(logdir):
+        os.makedirs(logdir)
+    myhandler = logging.FileHandler(pjoin(logdir, 'retorrent.log'))
     logger.addHandler(myhandler)
 
     feature_flags = {

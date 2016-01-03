@@ -162,10 +162,12 @@ def parse_fileext_details(extra_configdir=''):
 
     filename = 'fileext_details.json'
 
+    filepath = None
     for prepath in config_paths:
         path = pjoin(prepath, filename)
         if pexists(path):
             filepath = path
+            break
 
     if not filepath:
         raise EnvironmentError('Could not locate or load %s and cannot operate' % (filename,) +
