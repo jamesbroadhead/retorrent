@@ -1,4 +1,6 @@
 """
+WIP - this is incomplete and non-functional
+
 Usage:
     documentary.py FILES...
 """
@@ -21,7 +23,7 @@ class EpInfo(object):
 
 def get_tfiles_map(filenames):
     files = [ f for f in filenames if os.path.isfile(f) ]
-    tfiles = find_tfiles(files, get_torrentfilesdir)
+    tfiles = find_tfiles(files, get_torrentfilesdir())
     return { f: t for f, t in zip(files, tfiles) }
 
 def get_web_content(shortname):

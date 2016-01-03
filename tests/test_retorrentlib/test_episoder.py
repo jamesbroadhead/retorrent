@@ -68,3 +68,10 @@ class TestConvertIfEpisodeNumber(EpisoderTestMixin, unittest.TestCase):
         filename_split = [u'9x03']
         expected = ([u's09e03'])
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
+
+    def test_episodenumber_with_version(self):
+        filename_split = [u'03v2']
+        expected = ([u's01e03'])
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
+
+

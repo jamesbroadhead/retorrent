@@ -3,3 +3,5 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "${DIR}" || exit 1
 
 PYTHONPATH="lib" nosetests -s tests
+
+exit "$?"
