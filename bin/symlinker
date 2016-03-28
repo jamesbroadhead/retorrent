@@ -83,7 +83,8 @@ def main(smbsafe=False):
         for content_dir in category['content_paths']:
             debugprint('Looking at: %r' % (content_dir,))
             if not pexists(content_dir):
-                os.makedirs(content_dir)
+                # dir doesn't exist, no need to create it & check it
+                continue
 
             for content in os.listdir(content_dir):
                 content = content.decode('utf-8')
@@ -91,7 +92,6 @@ def main(smbsafe=False):
                 debugprint('Examining: %s' % (content_path,), 2)
 
                 # empty dir in content dir
-                #print content_path
                 if isdir(content_path) and not len(os.listdir(content_path)):
                     os.rmdir(content_path)
                     print '%s: removed empty content dir' % (content_path,)
