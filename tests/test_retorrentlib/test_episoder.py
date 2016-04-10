@@ -2,9 +2,12 @@
 
 import unittest
 
-from retorrentlib.episoder import Episoder
-# pylint: disable=too-many-public-methods
+from mock import Mock
 
+from retorrentlib.episoder import Episoder
+
+
+# pylint: disable=too-many-public-methods
 class TestException(Exception):
     pass
 
@@ -72,6 +75,27 @@ class TestConvertIfEpisodeNumber(EpisoderTestMixin, unittest.TestCase):
     def test_episodenumber_with_version(self):
         filename_split = [u'03v2']
         expected = ([u's01e03'])
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
+
+    def test_triple_digit_with_2_digit_epno(self):
+        self.e.ask_for_digits_in_epno = Mock(return_value=2)
+
+        filename_split = ['501']
+        expected = ([u's05e01'])
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
+
+    def test_triple_digit_with_3_digit_epno(self):
+        self.e.ask_for_digits_in_epno = Mock(return_value=3)
+
+        filename_split = ['501']
+        expected = ([u's01e501'])
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
+
+    def test_triple_digit_with_non_epno_sentinel(self):
+        self.e.ask_for_digits_in_epno = Mock(return_value=self.e.NOT_AN_EPNO_SENTINEL)
+
+        filename_split = ['501']
+        expected = (None)
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
 
 

@@ -22,7 +22,9 @@ class Episoder(object):
     numbers_to_ignore = [ '720', '264' ]
     pairs_to_ignore = [ ('5', '1') ]  # 5.1
 
-    digits_in_epno = 0
+    UNSET_SENTINEL = object()
+    NOT_AN_EPNO_SENTINEL = object()
+    digits_in_epno = UNSET_SENTINEL
 
     # for folders with many files, to avoid asking multiple times
     treat_single_letters_as_epnos = None
@@ -132,7 +134,7 @@ class Episoder(object):
                 split_fn = replace_doubleitem(split_fn, index, epno)
                 return split_fn
 
-        if item.isdigit() and item not in self.numbers_to_ignore:
+        if item.isdigit():
             # eg. 1  or 2
             if len(item) == 1:
                 # 1.01 => s01e01
@@ -154,7 +156,7 @@ class Episoder(object):
             # eg. 302
             elif len(item) == 3:
                 die = self.get_digits_in_epno(split_fn, item)
-                if die == 0:
+                if die == self.NOT_AN_EPNO_SENTINEL:
                     # the user indicated that the item wasn't an epno
                     return None
                 elif die == 2:
@@ -208,7 +210,6 @@ class Episoder(object):
 
         return None
 
-    # TODO: How many digits in series / epno length?
     @tracelogdecorator
     def gen_full_epno_string(self, epno, series="", nextitem=''):
         epno = self.nice_epno_from_raw(epno)
@@ -279,13 +280,13 @@ class Episoder(object):
     def gen_n_digit_epno(self, N, epno,series="", nextitem=''):
         tmp = self.digits_in_epno
         self.digits_in_epno = N
-        output = self.gen_full_epno_string(epno,series,nextitem)
+        output = self.gen_full_epno_string(epno, series, nextitem)
         self.digits_in_epno = tmp
         return output
 
     def get_digits_in_epno(self, split_fn, item):
-        if self.digits_in_epno is None:
-            self.ask_for_digits_in_epno(split_fn,item)
+        if self.digits_in_epno is self.UNSET_SENTINEL:
+            self.digits_in_epno = self.ask_for_digits_in_epno(split_fn,item)
         return self.digits_in_epno
 
     def ask_for_digits_in_epno(self, split_fn, item):
@@ -293,7 +294,7 @@ class Episoder(object):
 
         options = { self.gen_n_digit_epno(2,item[1:3], item[0]) : 2,
                     self.gen_n_digit_epno(3,item)               : 3,
-                    'Not an episode number!' : 0}
+                    'Not an episode number!' : self.NOT_AN_EPNO_SENTINEL}
 
         keys = options.keys()
         keys.sort(reverse=True)
@@ -302,9 +303,8 @@ class Episoder(object):
 
         if answer == '':
             print "Bad input - taking 2-digit epno"
-            self.digits_in_epno = 2
-        else:
-            self.digits_in_epno = options[answer]
+            return 2
+        return options[answer]
 
     @staticmethod
     def nextitem_if_exists(split_fn, currindex):
@@ -360,8 +360,9 @@ class Episoder(object):
     # eg. diference between s01e02 and s01e002 ( or ep002)
     # ASSUME: no epno > 4 digits
     def pad_episode_number(self, somestring):
-
         die = self.digits_in_epno
+        if die == self.UNSET_SENTINEL:
+            die = 0
 
         min_length = 2
 
