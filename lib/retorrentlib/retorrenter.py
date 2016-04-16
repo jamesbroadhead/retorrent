@@ -206,8 +206,8 @@ class Retorrenter(object):
                              if pexists(dst) ]
         if already_exists:
             print 'Some paths already exist, aborting.'
-            for ae in already_exists:
-                print '%r' % (ae,)
+            for ae in sorted(already_exists):
+                print '%s' % (ae,)
             return
 
         return self.build_command_bundle(content_details, rename_map)

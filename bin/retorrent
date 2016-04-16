@@ -4,6 +4,8 @@ retorrent - a media management tool
 
 Author: James Broadhead jamesbroadhead@gmail.com
 """
+from __future__ import print_function
+
 import logging
 from optparse import OptionParser
 import os
@@ -51,7 +53,7 @@ def execute_command_bundles(command_bundles):
             try:
                 retval = os.system(sub_cmd.encode('utf-8'))
             except Exception as e:
-                print e
+                print(e)
                 retval = -1
             bundle['commands_run'].append(sub_cmd)
             if not retval == 0:
@@ -97,11 +99,10 @@ def parse_args():
     return options, args
 
 def print_optionstructions():
-    print
-    print '<WORD> will remove WORD this time only'
-    print '"-<WORD> will add WORD to the REMOVE_LIST'
-    print '"+<WORD>" will set the dir to be WORD'
-    print
+    print('\n'.join([
+        '<WORD> will remove WORD this time only',
+        '-<WORD> will add WORD to the REMOVE_LIST',
+        '"+<WORD>" will set the dir to be WORD']))
 
 if __name__ == "__main__":
     try:
