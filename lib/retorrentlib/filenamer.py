@@ -10,19 +10,21 @@ from .episoder import Episoder
 from .restring import dotjoin, endot, remove_camelcase, remove_zwsp
 from .relist import lowercase_non_checksums
 
+
 class Filenamer(object):
+
     def __init__(self, divider_list, filetype_definitions):
 
         # items to be filtered out of the pre-tokenized filename
         self.pretokenized_removeset = removeset.read_from_file(
-                confparse.find_pretokenized_removelist())
+            confparse.find_pretokenized_removelist())
 
         # items to be removed from the tokenized filename
         self.removeset = removeset.read_from_file(confparse.find_removelist())
         self.tmp_removeset = set()
 
         self.divider_list = divider_list
-        self.fileext_list = [ fileext for fileext in filetype_definitions ]
+        self.fileext_list = [fileext for fileext in filetype_definitions]
 
         self.the_episoder = Episoder()
 
@@ -34,7 +36,7 @@ class Filenamer(object):
     def add_to_tmp_removeset(self, item):
         self.tmp_removeset.add(item)
 
-    def set_num_interesting_files(self,num_interesting_files):
+    def set_num_interesting_files(self, num_interesting_files):
         self.the_episoder.set_num_interesting_files(num_interesting_files)
 
     def set_movie(self, is_movie):
@@ -54,7 +56,8 @@ class Filenamer(object):
         filename = self.remove_divider_symbols(filename)
 
         # remove braces from anything that isn't a checksum or a year
-        filename = remove_braces(filename, preserve_checksum=not is_foldername,
+        filename = remove_braces(filename,
+                                 preserve_checksum=not is_foldername,
                                  interactive=interactive)
 
         # Apparently, there are things called 'zero width spaces'. Remove them.
@@ -70,12 +73,10 @@ class Filenamer(object):
 
         full_removeset = self.removeset.union(self.tmp_removeset)
 
-        filename_split = self.apply_removeset(filename_split, full_removeset,
-                                              is_foldername)
+        filename_split = self.apply_removeset(filename_split, full_removeset, is_foldername)
 
         # Detect and convert episode numbers.
-        filename_split, epno_index = self.the_episoder.add_series_episode_details(
-                filename_split)
+        filename_split, epno_index = self.the_episoder.add_series_episode_details(filename_split)
 
         if is_foldername:
             # don't want file extensions in a folder name
@@ -83,8 +84,7 @@ class Filenamer(object):
                 filename_split = filename_split[:-1]
 
         if not self.is_movie:
-            filename_split = self.remove_following_text(filename_split, epno_index,
-                                                        is_foldername)
+            filename_split = self.remove_following_text(filename_split, epno_index, is_foldername)
 
         filename = dotjoin(*filename_split)
 
@@ -114,7 +114,7 @@ class Filenamer(object):
         # join. We've lost the file ext ...
         filename_out = dotjoin(title, epno, checksum, fileext)
 
-        output = pjoin(dirname(the_dirpath.strip('/')),filename_out)
+        output = pjoin(dirname(the_dirpath.strip('/')), filename_out)
 
         return output
 
@@ -122,7 +122,7 @@ class Filenamer(object):
     def remove_divider_symbols(self, filename):
         for symbol in self.divider_list:
             if symbol in filename:
-                filename = filename.replace(symbol,".")
+                filename = filename.replace(symbol, ".")
         return filename
 
     # does this list contain '.mkv' or 'mkv' ?
@@ -141,8 +141,7 @@ class Filenamer(object):
     @tracelogdecorator
     def apply_removeset(filename_split, full_removeset, is_foldername):
         final_element = filename_split[-1]
-        filename_split = [ elem for elem in filename_split[0:-1]
-                           if not elem in full_removeset ]
+        filename_split = [elem for elem in filename_split[0:-1] if not elem in full_removeset]
         if not is_foldername:
             # this is a filename ending in a file extension -- preserve the extension
             filename_split = filename_split + [final_element]
@@ -165,9 +164,9 @@ class Filenamer(object):
             epno_index += 1
 
         rmlist = []
-        for index,elem in enumerate(filename_split[epno_index:]):
+        for index, elem in enumerate(filename_split[epno_index:]):
             if not is_checksum(elem) and not self.is_fileext(elem):
-                rmlist += [index+epno_index]
+                rmlist += [index + epno_index]
 
         rmlist.sort(reverse=True)
 

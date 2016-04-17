@@ -3,6 +3,7 @@
 import os
 from subprocess import Popen
 
+
 def remref(to_delete, to_skip=None):
     if to_skip is None:
         to_skip = []
@@ -32,6 +33,7 @@ def remref(to_delete, to_skip=None):
 
     return do_delete(deleting)
 
+
 def do_delete(deleting):
     command = ['rm', '-Irv']
     command.extend(deleting)
@@ -39,6 +41,7 @@ def do_delete(deleting):
     p = Popen(command)
     sts = os.waitpid(p.pid, 0)[1]
     return sts
+
 
 def add_item(item):
     pathlist = []
@@ -61,8 +64,10 @@ def add_item(item):
 
     return pathlist
 
+
 def trim_trailing_slashes(args):
     return [arg[0:-1] if arg[-1] == '/' else arg for arg in args]
+
 
 def uniq(pathlist):
     """ preserving sort order, remove duplicates """

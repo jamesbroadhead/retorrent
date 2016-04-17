@@ -14,6 +14,7 @@ from os.path import exists as pexists
 
 from redecorators.tracelogdecorator import tracelogdecorator
 
+
 def freespace(path, si_prefix=''):
     """
     Returns the number of free bytes on the drive that ``p`` is on
@@ -28,9 +29,8 @@ def freespace(path, si_prefix=''):
     # http://stackoverflow.com/questions/51658/cross-platform-space-remaining-on-volume-using-python
     if platform.system() == 'Windows':
         free_bytes = ctypes.c_ulonglong(0)
-        ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(path),
-                                                   None, None,
-                                                   ctypes.pointer(free_bytes))
+        ctypes.windll.kernel32.GetDiskFreeSpaceExW(
+            ctypes.c_wchar_p(path), None, None, ctypes.pointer(free_bytes))
         space = free_bytes.value
     else:
         s = os.statvfs(path)
@@ -50,6 +50,7 @@ def freespace(path, si_prefix=''):
 
     return space
 
+
 @tracelogdecorator
 def enough_space(orig_paths, proposed_path):
     proposed_path = os.path.expanduser(proposed_path)
@@ -67,6 +68,7 @@ def enough_space(orig_paths, proposed_path):
         return True
     return False
 
+
 @tracelogdecorator
 def same_volume(orig_paths, proposed_path):
     pp = proposed_path
@@ -82,9 +84,11 @@ def same_volume(orig_paths, proposed_path):
             return False
     return True
 
+
 @tracelogdecorator
 def device_number(path):
     return os.stat(os.path.expanduser(path)).st_dev
+
 
 def hostname():
     return os.uname()[1]
@@ -105,11 +109,13 @@ def mkdir_p(path):
             # some error other than dir already exists
             raise
 
+
 def get_foldername(path):
     if len(path) == 0:
         return ''
 
     return basename(path.strip('/'))
+
 
 def str2utf8(string):
     if isinstance(string, unicode):
@@ -118,20 +124,23 @@ def str2utf8(string):
         u = unicode(string, 'utf-8', errors='ignore')
     return u
 
+
 def diskspace_used(path, si='kiB'):
 
     filestat = os.stat(path)
     disk_filesize_b = filestat.st_blocks * filestat.st_blksize
 
     if si == 'kiB':
-        return disk_filesize_b / (8*1024)
+        return disk_filesize_b / (8 * 1024)
     elif si == 'B':
         return disk_filesize_b / (8)
-    else: # kiB
-        return disk_filesize_b / (8*1024)
+    else:  # kiB
+        return disk_filesize_b / (8 * 1024)
+
 
 def sym_sametarget(a, b):
     return os.path.realpath(a) == os.path.realpath(b)
+
 
 def smbify(path):
     """
@@ -162,6 +171,7 @@ def myglob(arg):
         if f.startswith(partial_fn):
             paths.append(os.path.join(dirname(arg), f))
     return paths
+
 
 def listdir(dir_name):
     """ os.listdir will return unicode if a unicode string is passed """

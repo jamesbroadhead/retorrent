@@ -2,6 +2,7 @@
 
 import functools
 
+
 def memoize(obj):
     cache = obj.cache = {}
 
@@ -13,7 +14,9 @@ def memoize(obj):
         if key not in cache:
             cache[key] = obj(*args, **kwargs)
         return cache[key]
+
     return memoizer
+
 
 def memoize_record_interactive(obj):
     """ memoize, but only if a kwarg:interactive=True is passed """

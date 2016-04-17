@@ -12,19 +12,21 @@ from docopt import docopt
 
 from retorrentlib.find_tfile import find_tfiles
 
+
 def main(targets, tfilesdir):
     tfilesdir = expanduser(tfilesdir)
     return find_tfiles(targets, tfilesdir)
+
 
 def print_results(results):
     for r in results:
         if r:
             print r
 
+
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     default_tfilesdir = abspath(expanduser('~/torrents/torrentfiles'))
 
-    results_ = main(arguments['TARGETS'],
-                    arguments['--tfilesdir'] or default_tfilesdir)
+    results_ = main(arguments['TARGETS'], arguments['--tfilesdir'] or default_tfilesdir)
     print_results(results_)

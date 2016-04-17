@@ -15,6 +15,7 @@ from docopt import docopt
 from coreutils import find_broken_symlinks
 from retorrentlib.find_tfile import find_tfiles
 
+
 def main(filedir):
     tfilesdir = pjoin(filedir, 'torrentfiles')
     if not isdir(filedir) or not isdir(tfilesdir):
@@ -22,11 +23,11 @@ def main(filedir):
         sys.exit(1)
 
     broken_symlinks_gen = find_broken_symlinks(filedir)
-    tfiles_for_broken_symlinks = set(find_tfiles(
-        [sym for sym in broken_symlinks_gen], tfilesdir))
+    tfiles_for_broken_symlinks = set(find_tfiles([sym for sym in broken_symlinks_gen], tfilesdir))
     # arguably, look up other symlinks which belong to this tfile as well
 
     return do_deletions(tfiles_for_broken_symlinks)
+
 
 def do_deletions(tfiles_for_broken_symlinks):
     """

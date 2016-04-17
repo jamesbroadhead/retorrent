@@ -10,19 +10,15 @@ from redecorators import memoize_record_interactive, tracelogdecorator
 from .optionator import booloptionator
 from .restring import dotjoin, endot
 
-braces = {
-    '[' : ']',
-    '{' : '}',
-    '(' : ')'
-}
+braces = {'[': ']', '{': '}', '(': ')'}
 hexdigits = '0123456789abcdefABCDEF' + u'0123456789abcdefABCDEF'
+
 
 @tracelogdecorator
 def is_checksum(item):
     # 8-digit checksum + braces
     if len(item) == 10:
-        if (not item[0] in braces or
-                not item[-1] == braces.get(item[0], None)):
+        if not item[0] in braces or not item[-1] == braces.get(item[0], None):
             return False
         item = item[1:-1]
 
@@ -46,6 +42,7 @@ def extract_checksum(filename):
                 segment = '[%s]' % (segment)
             return segment.upper()
     return ''
+
 
 @tracelogdecorator
 def remove_braces(filename, preserve_checksum=True, interactive=False):
@@ -99,6 +96,7 @@ def remove_braces(filename, preserve_checksum=True, interactive=False):
     output = endot(output)
     return output
 
+
 @tracelogdecorator
 @memoize_record_interactive
 def is_year(item, interactive=True):
@@ -119,6 +117,7 @@ def is_year(item, interactive=True):
             return False
         return booloptionator('Does ' + item + ' represent a year?')
     return False
+
 
 class Stack(object):
     """

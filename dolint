@@ -1,6 +1,6 @@
 #!/bin/bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "${DIR}" || exit 1
+REPO_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "${REPO_ROOT}" || exit 1
 
 export PYTHONPATH=""
 
@@ -22,20 +22,23 @@ for i in bin/* ; do
     fi
 done
 
-pyflakes "${PYTHON_BIN[@]}" ./lib/*
+yapf -i -r --style="./style.yapf" "${PYTHON_BIN[@]}" ./lib/*
 A=$?
+
+pyflakes "${PYTHON_BIN[@]}" ./lib/*
+B=$?
 
 pushd lib &> /dev/null
 PYTHONPATH="../tests" pylint --rcfile=../pylintrc "${PYTHON_BIN[@]}" ./* ../tests/*
-B=$?
+C=$?
 popd &> /dev/null
 
 command -v shellcheck >/dev/null 2>&1 || { echo >&2 "I require shellcheck to lint bash files but it's not installed.  Aborting."; exit 1; }
 
 shellcheck "${BASHFILES[@]}"
-C=$?
+D=$?
 
-for i in $A $B $C ; do
+for i in $A $B $C $D ; do
   if ! [ $i -eq 0 ] ; then
     exit $i
   fi

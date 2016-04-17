@@ -8,19 +8,22 @@ from torrentparse.torrentparse import TorrentParser as TP
 
 debug = True
 
+
 def find_tfiles(paths, tfilesdir):
     tfilesdir = expanduser(tfilesdir)
     files_tfiles = gen_map(tfilesdir)
 
-    return [tfile_from_filename(path, tfilesdir, files_tfiles)
-            for path in paths]
+    return [tfile_from_filename(path, tfilesdir, files_tfiles) for path in paths]
+
 
 def tfile_details(tfile_path):
     files_tfile = {}
     try:
         files_sizes = {
             k.decode('utf-8'): v
-            for k, v in TP(tfile_path, liberal=True).get_files_details()}
+            for k, v in TP(tfile_path,
+                           liberal=True).get_files_details()
+        }
 
         for filename, _ in files_sizes.items():
             files_tfile[filename] = tfile_path
@@ -28,16 +31,15 @@ def tfile_details(tfile_path):
         pass
     return files_tfile
 
+
 def gen_map(tfilesdir):
-    tfiles = [
-        pjoin(tfilesdir, f)
-        for f in listdir(tfilesdir)
-        if f.endswith('torrent')]
+    tfiles = [pjoin(tfilesdir, f) for f in listdir(tfilesdir) if f.endswith('torrent')]
 
     files_tfiles = {}
     for tfile in tfiles:
         files_tfiles.update(tfile_details(tfile))
     return files_tfiles
+
 
 def tfile_from_filename(filename, tfilesdir, files_tfiles=None):
     """
@@ -52,6 +54,7 @@ def tfile_from_filename(filename, tfilesdir, files_tfiles=None):
 
     filename = basename(filename)
     return files_tfiles.get(filename, '')
+
 
 def pick_file(dirpath):
     dircontent = listdir(dirpath)

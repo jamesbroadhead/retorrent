@@ -31,9 +31,7 @@ def main():
         stdout_handler = logging.StreamHandler(sys.stdout)
         logger.addHandler(stdout_handler)
 
-    feature_flags = {
-        'old_torrentfile_detection' : options.old_torrentfile_detection
-    }
+    feature_flags = {'old_torrentfile_detection': options.old_torrentfile_detection}
 
     r = Retorrenter(options.configdir, debug=options.debug, feature_flags=feature_flags)
 
@@ -50,6 +48,7 @@ def pretend_command_bundles(command_bundles):
     for bundle in command_bundles:
         for sub_cmd in bundle['commands']:
             os.system('echo %s' % (sub_cmd.encode('utf-8'),))
+
 
 def execute_command_bundles(command_bundles):
     for bundle in command_bundles:
@@ -70,44 +69,47 @@ def execute_command_bundles(command_bundles):
     if command_bundles:
         os.system('symlinker')
 
+
 def parse_args():
     parser = OptionParser()
 
-    parser.add_option(
-        '-c', '--config-dir',
-        help='Specify alternate config dir',
-        dest='configdir',
-        default='')
+    parser.add_option('-c',
+                      '--config-dir',
+                      help='Specify alternate config dir',
+                      dest='configdir',
+                      default='')
 
-    parser.add_option(
-        '-d', '--debug',
-        help='Print debug messages (where implemented)',
-        action='store_true',
-        dest='debug',
-        default=False)
+    parser.add_option('-d',
+                      '--debug',
+                      help='Print debug messages (where implemented)',
+                      action='store_true',
+                      dest='debug',
+                      default=False)
 
-    parser.add_option(
-        '-p', '--pretend',
-        help='Build commands, but do not run them',
-        action='store_true',
-        dest='pretend',
-        default=False)
+    parser.add_option('-p',
+                      '--pretend',
+                      help='Build commands, but do not run them',
+                      action='store_true',
+                      dest='pretend',
+                      default=False)
 
-    parser.add_option(
-        '-t', '--old-torrentfile-detection',
-        help='Use old, not new torrentfile behaviour',
-        action='store_true',
-        dest='old_torrentfile_detection',
-        default=False)
+    parser.add_option('-t',
+                      '--old-torrentfile-detection',
+                      help='Use old, not new torrentfile behaviour',
+                      action='store_true',
+                      dest='old_torrentfile_detection',
+                      default=False)
 
     options, args = parser.parse_args()
     return options, args
 
+
 def print_optionstructions():
     print('\n'.join([
-        '<WORD> will remove WORD this time only',
-        '-<WORD> will add WORD to the REMOVE_LIST',
-        '"+<WORD>" will set the dir to be WORD']))
+        '<WORD> will remove WORD this time only', '-<WORD> will add WORD to the REMOVE_LIST',
+        '"+<WORD>" will set the dir to be WORD'
+    ]))
+
 
 if __name__ == "__main__":
     try:

@@ -18,6 +18,8 @@ from retorrentlib import seededlib
 from retorrentlib.confparse import parse_retorrentconf
 from retorrentlib.find_tfile import gen_map, tfile_from_filename
 from retorrentlib.remreffer import remref
+
+
 # pylint: disable=too-many-locals
 def main(targets, skip_targets=False):
     config, _ = parse_retorrentconf()
@@ -41,8 +43,7 @@ def main(targets, skip_targets=False):
 
     files_tfiles = gen_map(seed_tfilesdir)
     #pylint: disable=unused-variable
-    tfiles = [tfile_from_filename(seedpath, files_tfiles)
-              for videopath, seedpath in seeded.items()]
+    tfiles = [tfile_from_filename(seedpath, files_tfiles) for videopath, seedpath in seeded.items()]
 
     # unseeded: list of args which are not seeded
     # tfiles: list of tfiles
@@ -60,6 +61,7 @@ def main(targets, skip_targets=False):
     print 'Remember: if there were dirs in seed/, they will remain!'
 
     return res
+
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)

@@ -27,6 +27,7 @@ RECALCULATE = '-'
 
 log = logging.getLogger("app")
 
+
 class Retorrenter(object):
     #pylint:disable=too-many-instance-attributes,too-many-public-methods
     commands = None
@@ -48,7 +49,7 @@ class Retorrenter(object):
         self.feature_flags = feature_flags
         if feature_flags is None:
             self.feature_flags = {}
-        self.global_conf, self.categories = parse_retorrentconf( self.configdir)
+        self.global_conf, self.categories = parse_retorrentconf(self.configdir)
         self.filetype_definitions = parse_fileext_details(self.configdir)
         self.divider_symbols = parse_divider_symbols(self.configdir)
 
@@ -59,7 +60,7 @@ class Retorrenter(object):
         # The category folder (movies, tv ... )
         self.dest_category = ''
         self.dest_folder = ''
-        self.dest_series_folder=''
+        self.dest_series_folder = ''
         # The series or movie-name folder
         self.dest_dirpath = ''
 
@@ -75,7 +76,7 @@ class Retorrenter(object):
                 content.append(a.decode('utf-8'))
             else:
                 paths = myglob(a)
-                content.extend([ p.decode('utf-8') for p in paths if pexists(p) ])
+                content.extend([p.decode('utf-8') for p in paths if pexists(p)])
 
         content.sort()
         if not content:
@@ -138,11 +139,13 @@ class Retorrenter(object):
         self.debugprint("Dirpath before autoset: " + self.dest_dirpath)
 
         possible_series_foldernames = [
-                self.filenamer.convert_filename(basename(orig_paths[0]), True),
-                self.filenamer.convert_filename(orig_foldername,   True) ]
-        possible_series_foldernames = [ i for i in possible_series_foldernames if i ]
+            self.filenamer.convert_filename(
+                basename(orig_paths[0]),
+                True), self.filenamer.convert_filename(orig_foldername, True)
+        ]
+        possible_series_foldernames = [i for i in possible_series_foldernames if i]
 
-        self.autoset_dest_dirpath(possible_series_foldernames,orig_paths)
+        self.autoset_dest_dirpath(possible_series_foldernames, orig_paths)
         self.debugprint('DestFolder after autoset: ' + self.dest_folder)
         self.debugprint("Dirpath after autoset: " + self.dest_dirpath)
 
@@ -172,11 +175,10 @@ class Retorrenter(object):
         # 2013-04: ... but what is in each of them ... :(
         # single movie -> both are <path>/movies
 
-        self.debugprint('About to generate dest_dirpath; '+self.dest_dirpath)
+        self.debugprint('About to generate dest_dirpath; ' + self.dest_dirpath)
         if self.categories[self.dest_category]['should_rename']:
             if not self.dest_dirpath:
-                self.manually_set_dest_dirpath(len(orig_paths),
-                                               possible_series_foldernames)
+                self.manually_set_dest_dirpath(len(orig_paths), possible_series_foldernames)
                 if not self.dest_dirpath:
                     print "Didn't set a directory - failing"
                     return
@@ -198,12 +200,10 @@ class Retorrenter(object):
         else:
             print "Not renaming files"
 
-            rename_map = { p : pjoin(self.dest_dirpath, basename(p))
-                           for p in orig_paths}
+            rename_map = {p: pjoin(self.dest_dirpath, basename(p)) for p in orig_paths}
 
         # Check for existing files, abort if found
-        already_exists = [ dst for _src, dst in rename_map.items()
-                             if pexists(dst) ]
+        already_exists = [dst for _src, dst in rename_map.items() if pexists(dst)]
         if already_exists:
             print 'Some paths already exist, aborting.'
             for ae in sorted(already_exists):
@@ -225,8 +225,7 @@ class Retorrenter(object):
 
         if self.dest_category:
             # the dest category is already set from somewhere else
-            categories = [ (self.dest_category,
-                            self.categories[self.dest_category]) ]
+            categories = [(self.dest_category, self.categories[self.dest_category])]
         else:
             categories = self.categories.items()
 
@@ -235,8 +234,7 @@ class Retorrenter(object):
                 for poss_series_folder in possible_series_foldernames:
                     possible_path = expanduser(pjoin(cat_folder, poss_series_folder))
                     self.debugprint('Looking for ' + possible_path)
-                    if (os.path.exists(possible_path) or
-                            possible_path in self.expected_dirs):
+                    if os.path.exists(possible_path) or possible_path in self.expected_dirs:
                         self.dest_category = category
 
                         self.dest_series_folder = poss_series_folder
@@ -257,18 +255,17 @@ class Retorrenter(object):
 
     def autoset_equivalent_dest_folder(self, orig_paths):
         self.debugprint('Trying to create an eqivalent dest_folder for %s' %
-                (pjoin(self.dest_category, self.dest_series_folder)))
+                        (pjoin(self.dest_category, self.dest_series_folder)))
 
         if self.dest_category and not self.dest_series_folder == "":
             # let's create an equivalent dir on a different drive
             for cat_folder in self.dest_category_paths():
-                possible_path = pjoin(cat_folder,self.dest_series_folder)
+                possible_path = pjoin(cat_folder, self.dest_series_folder)
 
                 self.debugprint('Checking:' + possible_path)
                 self.debugprint('Equivalent candidate: ' + possible_path)
 
-                if (os.path.exists(possible_path) and
-                        enough_space(orig_paths, possible_path)):
+                if os.path.exists(possible_path) and enough_space(orig_paths, possible_path):
                     msg = 'Equivalent candidate exists already and has enough space: %s'
                     self.debugprint(msg % (possible_path,))
 
@@ -278,7 +275,7 @@ class Retorrenter(object):
 
             for cat_folder in self.dest_category_paths():
                 self.debugprint('Equivalent candidate has enough space: ' + possible_path)
-                possible_path = pjoin(cat_folder,self.dest_series_folder)
+                possible_path = pjoin(cat_folder, self.dest_series_folder)
 
                 if enough_space(orig_paths, possible_path):
                     self.dest_folder = cat_folder
@@ -292,11 +289,9 @@ class Retorrenter(object):
             # we don't have enough info to make the dir on a different drive
             pass
 
-
     def manually_set_category(self, argument, orig_paths):
         question = "Destination for " + argument
-        dest_category_name = optionator(question,
-                                        self.categories.keys() + ["<cancel>"] )
+        dest_category_name = optionator(question, self.categories.keys() + ["<cancel>"])
 
         if dest_category_name in self.categories:
             self.dest_category = dest_category_name
@@ -307,18 +302,17 @@ class Retorrenter(object):
             return ''
         else:
             print 'Error -- category was unrecognised!'
-            self.manually_set_category(argument,orig_paths)
+            self.manually_set_category(argument, orig_paths)
 
     @tracelogdecorator
-    def autoset_dest_folder_from_dest_category(self,orig_paths):
+    def autoset_dest_folder_from_dest_category(self, orig_paths):
         if self.dest_category:
             for path in self.categories[self.dest_category]['content_paths']:
                 self.debugprint('Possible path: ' + path)
                 if not os.path.exists(path):
-                    print "Warning: Config contains a path that doesn't exist: %s"%(
-                                path,)
-                elif enough_space(orig_paths,path):
-                    self.debugprint('Setting dest_folder to: '+path)
+                    print "Warning: Config contains a path that doesn't exist: %s" % (path,)
+                elif enough_space(orig_paths, path):
+                    self.debugprint('Setting dest_folder to: ' + path)
                     self.dest_folder = path
                     return
 
@@ -337,28 +331,28 @@ class Retorrenter(object):
                 dirpath_q = "What foldername should we use?"
                 dirpath_q_opts = possible_series_foldernames
             else:
-                dirpath_q =    "Is this a series? If so, use what folder name?"
-                dirpath_q_opts = possible_series_foldernames + [ "" ]
+                dirpath_q = "Is this a series? If so, use what folder name?"
+                dirpath_q_opts = possible_series_foldernames + [""]
 
             dirpath_ans = self.pose_question(dirpath_q, dirpath_q_opts)
 
             if not dirpath_ans == RECALCULATE:
-                self.dest_dirpath = pjoin(self.dest_folder,dirpath_ans)
+                self.dest_dirpath = pjoin(self.dest_folder, dirpath_ans)
             else:
                 # a new removeitem has been added - regenerate psf
 
                 possible_series_foldernames = [
-                    self.filenamer.convert_filename(item,True)
-                    for item in possible_series_foldernames ]
+                    self.filenamer.convert_filename(item, True)
+                    for item in possible_series_foldernames
+                ]
 
-                self.manually_set_dest_dirpath(num_interesting_files,
-                        possible_series_foldernames)
+                self.manually_set_dest_dirpath(num_interesting_files, possible_series_foldernames)
                 return
 
-    def pose_question(self,question,options):
+    def pose_question(self, question, options):
         # Note: returns RECALCULATE ('-') if a recurse is needed
 
-        answer = eqoptionator(question,options)
+        answer = eqoptionator(question, options)
 
         if answer in options or answer == '':
             return answer
@@ -392,45 +386,44 @@ class Retorrenter(object):
             for (path, _dirs, files) in os.walk(content_abspath):
                 for f in files:
                     file_path = path + "/" + f
-                    thisfile_intermed = path[len(content_abspath)+1:]
-                    if os.path.exists(file_path) :
+                    thisfile_intermed = path[len(content_abspath) + 1:]
+                    if os.path.exists(file_path):
                         file_paths += [os.path.abspath(file_path)]
                         file_names += [os.path.basename(file_path)]
                         intermeds += [thisfile_intermed]
                     else:
                         print "Internal error - built a path, then file didn't exist(?)"
         else:
-            orig_foldername = "" # it's a file, flat in ~/torrents
+            orig_foldername = ""  # it's a file, flat in ~/torrents
             if os.path.exists(content_abspath):
                 file_path = content_abspath.decode('utf-8')
                 file_paths = [os.path.abspath(file_path)]
                 file_names = [os.path.basename(file_path)]
-                intermeds = [""]*len(file_names)
+                intermeds = [""] * len(file_names)
 
         # remove files that aren't of interest
         (filepaths_to_keep, intermeds_to_keep, filenames_to_keep,
-                num_discarded_files) = self.get_movies_and_extras(file_paths,intermeds,
-                                                                  file_names)
+         num_discarded_files) = self.get_movies_and_extras(file_paths, intermeds, file_names)
 
-        content_details = { 'content_abspath'     : content_abspath,
-                            'orig_paths'          : filepaths_to_keep,
-                            'orig_foldername'     : orig_foldername,
-                            'orig_intermeds'      : intermeds_to_keep,
-                            'orig_filenames'      : filenames_to_keep,
-                            'num_discarded_files' : num_discarded_files }
+        content_details = {'content_abspath': content_abspath,
+                           'orig_paths': filepaths_to_keep,
+                           'orig_foldername': orig_foldername,
+                           'orig_intermeds': intermeds_to_keep,
+                           'orig_filenames': filenames_to_keep,
+                           'num_discarded_files': num_discarded_files}
 
         return content_details
 
     # strip uninteresting files from the lists
-    def get_movies_and_extras(self,list_of_filepaths, list_of_intermeds, list_of_filenames):
+    def get_movies_and_extras(self, list_of_filepaths, list_of_intermeds, list_of_filenames):
 
         filepaths_to_keep = []
         intermeds_to_keep = []
         filenames_to_keep = []
         num_discarded_files = 0
 
-        for filepath, intermed, filename in zip(
-                list_of_filepaths,list_of_intermeds, list_of_filenames):
+        for filepath, intermed, filename in zip(list_of_filepaths, list_of_intermeds,
+                                                list_of_filenames):
 
             if self.is_of_interest(filepath, filename):
                 filepaths_to_keep += [filepath]
@@ -465,13 +458,13 @@ class Retorrenter(object):
             filestat = os.stat(file_path)
             # this will actually get the size of all the blocks, not the space used.
             # Close enough ... :P
-            disk_filesize_kB = filestat.st_blocks*filestat.st_blksize/(8*1024)
+            disk_filesize_kB = filestat.st_blocks * filestat.st_blksize / (8 * 1024)
 
             if disk_filesize_kB > details['goodsize']:
                 return True
             else:
-                logging.info('Size: %rkB < %rkB for: %r', disk_filesize_kB,
-                             details['goodsize'], file_path)
+                logging.info('Size: %rkB < %rkB for: %r', disk_filesize_kB, details['goodsize'],
+                             file_path)
         logging.info(filename + " didn't trigger any interest ...")
         return False
 
@@ -486,43 +479,39 @@ class Retorrenter(object):
         arg_name = split_path[-1]
 
         the_torrentfiles = [
-            f for f in
-            os.listdir(get_torrentfilesdir(self.global_conf))
-            if not f == '.keep' ]
-        exclude = [ c['torrentfile'] for c in self.commands ]
+            f for f in os.listdir(get_torrentfilesdir(self.global_conf)) if not f == '.keep'
+        ]
+        exclude = [c['torrentfile'] for c in self.commands]
 
         tfiles = []
         for tfile in the_torrentfiles:
             if tfile in exclude:
                 continue
             cf = self.filenamer.convert_filename(
-                        tfile.rstrip('torrent').rstrip('.'),
-                        True,
-                        interactive=False)
+                tfile.rstrip('torrent').rstrip('.'),
+                True,
+                interactive=False)
 
-            score = SequenceMatcher('',
-                                    str2utf8(arg_name),
-                                    str2utf8(cf)).ratio()
+            score = SequenceMatcher('', str2utf8(arg_name), str2utf8(cf)).ratio()
 
-            tfiles += [{'filename':tfile, 'conv_filename':cf, 'score':score } ]
-
+            tfiles += [{'filename': tfile, 'conv_filename': cf, 'score': score}]
 
         tfiles = sorted(tfiles, self.compare_scored_tfiles)
 
-        chosen_torrentfile = optionator('For: '+arg_name,
-                                        [t['filename'] for t in tfiles] + ['<cancel>'])
+        chosen_torrentfile = optionator('For: ' + arg_name, [t['filename']
+                                                             for t in tfiles] + ['<cancel>'])
 
         return chosen_torrentfile
 
     @staticmethod
     def compare_scored_tfiles(A, B):
-        cmp_ = cmp(B['score'],A['score'])
+        cmp_ = cmp(B['score'], A['score'])
 
         if not cmp_ == 0:
             return cmp_
         return cmp(A['filename'], B['filename'])
 
-    def filename_from_foldername(self, possible_series_foldernames, converted_filename) :
+    def filename_from_foldername(self, possible_series_foldernames, converted_filename):
         """
         @param filename : An already-converted filename,
                             to extract epno, checksum and fileext from
@@ -541,8 +530,7 @@ class Retorrenter(object):
         else:
             src_foldername = ''
 
-        return self.filenamer.gen_final_filename_from_foldername(src_foldername,
-                                                                 converted_filename)
+        return self.filenamer.gen_final_filename_from_foldername(src_foldername, converted_filename)
 
     def build_rename_map(self, content_details, possible_series_foldernames):
         #pylint: disable=too-many-branches,too-many-locals,too-many-statements
@@ -550,7 +538,7 @@ class Retorrenter(object):
         orig_paths = content_details['orig_paths']
 
         # At this point, self.dest_dirpath contains the full folder path
-        self.debugprint('Final dest_dirpath=' +self.dest_dirpath)
+        self.debugprint('Final dest_dirpath=' + self.dest_dirpath)
         ##################################
         ## Now to rename the filenames
         ##################################
@@ -563,31 +551,29 @@ class Retorrenter(object):
         for path in orig_paths:
             src_filename = basename(path)
             filename_from_filename = self.filenamer.convert_filename(src_filename, False)
-            relpath_from_filename  = pjoin(basename(self.dest_dirpath), filename_from_filename)
-            path_from_filename     = pjoin(self.dest_dirpath, filename_from_filename)
+            relpath_from_filename = pjoin(basename(self.dest_dirpath), filename_from_filename)
+            path_from_filename = pjoin(self.dest_dirpath, filename_from_filename)
             self.debugprint('path_from_filename = %s' % self.dest_dirpath)
 
             path_from_foldername = ''
             if isdir(content_abspath):
                 filename_from_foldername = self.filename_from_foldername(
-                                                possible_series_foldernames,
-                                                basename(path_from_filename))
-                relpath_from_foldername  = pjoin(basename(self.dest_dirpath),
-                                                 filename_from_foldername)
-                path_from_foldername     = pjoin(self.dest_dirpath,
-                                                 filename_from_foldername)
+                    possible_series_foldernames, basename(path_from_filename))
+                relpath_from_foldername = pjoin(
+                    basename(self.dest_dirpath), filename_from_foldername)
+                path_from_foldername = pjoin(self.dest_dirpath, filename_from_foldername)
 
             if not path_from_foldername or (path_from_filename == path_from_foldername):
                 mutual[path] = path_from_filename
             else:
                 multiple[path] = {
-                    'path_from_filename'     : path_from_filename,
-                    'path_from_foldername'   : path_from_foldername,
-                    'relpath_from_filename'  : relpath_from_filename,
+                    'path_from_filename': path_from_filename,
+                    'path_from_foldername': path_from_foldername,
+                    'relpath_from_filename': relpath_from_filename,
                     'relpath_from_foldername': relpath_from_foldername
                 }
 
-        mutual_output_paths = [ v for k, v in mutual.items() ]
+        mutual_output_paths = [v for k, v in mutual.items()]
         mutual_output_paths.sort()
 
         ##### USER DECIDES BETWEEN RESULTS
@@ -620,7 +606,6 @@ class Retorrenter(object):
                                  'Select which is better, or enter new term to remove'])
             options = ["filenames", "foldernames", "<cancel>"]
 
-
         rename_map = {}
 
         # Possibilities: RECALCULATE, an option, '', foo (from +foo)
@@ -628,12 +613,11 @@ class Retorrenter(object):
 
         if answer == "filenames":
             rename_map = deepcopy(mutual)
-            rename_map.update({ p : fns['path_from_filename'] for p, fns in multiple.items() })
+            rename_map.update({p: fns['path_from_filename'] for p, fns in multiple.items()})
 
         elif answer == "foldernames":
             rename_map = deepcopy(mutual)
-            rename_map.update({ p : fns['path_from_foldername']
-                                    for p, fns in multiple.items() })
+            rename_map.update({p: fns['path_from_foldername'] for p, fns in multiple.items()})
         elif answer == RECALCULATE:
             return RECALCULATE
         elif answer and len(orig_paths) == 1:
@@ -641,7 +625,7 @@ class Retorrenter(object):
             print 'You ignored our suggestion; supplying: %r' % (answer,)
             result = pjoin(self.dest_folder, self.dest_dirpath, answer)
             print 'Result: %r' % (result,)
-            rename_map = { orig_paths[0] : result }
+            rename_map = {orig_paths[0]: result}
 
         elif answer and len(orig_paths) > 1:
             # more than one file
@@ -659,8 +643,8 @@ class Retorrenter(object):
         content_abspath = content_details['content_abspath']
         num_discarded_files = content_details['num_discarded_files']
         orig_foldername = content_details['orig_foldername']
-        orig_intermeds  = content_details['orig_intermeds']
-        orig_filenames  = content_details['orig_filenames']
+        orig_intermeds = content_details['orig_intermeds']
+        orig_filenames = content_details['orig_filenames']
         orig_paths = content_details['orig_paths']
 
         ##### LET'S BUILD SOME COMMANDS!
@@ -670,50 +654,44 @@ class Retorrenter(object):
 
         commands.extend(['mkdir -p "%s"' % (self.dest_dirpath,)])
 
-        rename_map_keys = sorted(rename_map.keys() )
-        commands.extend(['mv -nv "%s" "%s"' % (k, rename_map[k])
-                         for k in rename_map_keys ])
+        rename_map_keys = sorted(rename_map.keys())
+        commands.extend(['mv -nv "%s" "%s"' % (k, rename_map[k]) for k in rename_map_keys])
 
-        torrentfile = tfile_from_filename(content_abspath,
-                                          get_torrentfilesdir(self.global_conf))
+        torrentfile = tfile_from_filename(content_abspath, get_torrentfilesdir(self.global_conf))
 
         question = 'Should these be seeded?'
         if torrentfile:
             question = 'Seed using {f}?'.format(f=torrentfile)
-        do_seed = optionator(question, ['yes', 'no' , '<cancel>'] )
+        do_seed = optionator(question, ['yes', 'no', '<cancel>'])
 
         seeddir_paths = {}
-        if do_seed == "": # this means '<cancel>'
+        if do_seed == "":  # this means '<cancel>'
             return
-        elif do_seed  == "yes" :
+        elif do_seed == "yes":
             if not torrentfile:
                 torrentfile = self.old_find_torrentfile(content_abspath)
 
             torrentfile_commands = self.build_torrentfile_commands(
-                    torrentfile, content_abspath, orig_foldername, orig_paths,
-                    rename_map, orig_intermeds, orig_filenames)
+                torrentfile, content_abspath, orig_foldername, orig_paths, rename_map,
+                orig_intermeds, orig_filenames)
             commands.extend(torrentfile_commands)
         else:
             # delete remainder of files in torrentdir
             # Don't delete the arg dir if it's the same as the target dir
             # (renaming files in-place)
             dud_files_remaining = num_discarded_files > 0
-            only_ever_one_file_in_dir = (os.path.isdir(content_abspath) and
-                                         len(orig_paths) == 1)
+            only_ever_one_file_in_dir = (os.path.isdir(content_abspath) and len(orig_paths) == 1)
 
             if isdir(content_abspath):
-                num_remaining_files = (
-                    len(listdir(content_abspath)) - len(orig_paths))
+                num_remaining_files = (len(listdir(content_abspath)) - len(orig_paths))
                 dir_is_now_empty = (num_remaining_files == 0)
             else:
                 dir_is_now_empty = False
 
             # delete the source if there are remaining dud files / the dir is empty,
             # provided that it's not also the dest
-            if ( ( dud_files_remaining or
-                   only_ever_one_file_in_dir or
-                   dir_is_now_empty)
-                 and (realpath(content_abspath) != realpath(self.dest_dirpath))):
+            if ((dud_files_remaining or only_ever_one_file_in_dir or dir_is_now_empty) and
+                (realpath(content_abspath) != realpath(self.dest_dirpath))):
 
                 if dir_is_now_empty:
                     commands.append('rmdir "%s"' % (content_abspath,))
@@ -724,49 +702,44 @@ class Retorrenter(object):
                     commands.append('rm -Irv "%s"' % (content_abspath,))
 
         # a command bundle
-        return { 'commands'   : commands,
-                 'symlinks'   : [ seeddir_paths_
-                                  for _orig_path, seeddir_paths_
-                                  in seeddir_paths.items() ],
-                 'torrentfile': torrentfile,
-                 'commands_run' : []}
+        return {'commands': commands,
+                'symlinks': [seeddir_paths_
+                             for _orig_path, seeddir_paths_ in seeddir_paths.items()],
+                'torrentfile': torrentfile,
+                'commands_run': []}
 
-    def build_torrentfile_commands(self, torrentfile, content_abspath,
-            orig_foldername, orig_paths, rename_map,
-            orig_intermeds, orig_filenames):
+    def build_torrentfile_commands(self, torrentfile, content_abspath, orig_foldername, orig_paths,
+                                   rename_map, orig_intermeds, orig_filenames):
         #pylint: disable=too-many-arguments
         commands = []
 
         if orig_foldername:
-            commands.append('mv -nv "%s" "%s"' % (content_abspath,
-                                                  self.global_conf['seeddir']))
+            commands.append('mv -nv "%s" "%s"' % (content_abspath, self.global_conf['seeddir']))
 
         # TODO: this should be a src -> dst dict
         # TODO: this should be inside the rename_map
         seeddir_paths = {
-            orig_path : pjoin(self.global_conf['seeddir'], orig_foldername,
-                              intermeds, filename)
-                        for orig_path, intermeds, filename
-                        in zip(orig_paths, orig_intermeds, orig_filenames) }
+            orig_path: pjoin(self.global_conf['seeddir'], orig_foldername, intermeds, filename)
+            for orig_path, intermeds, filename in zip(orig_paths, orig_intermeds, orig_filenames)
+        }
         seeddir_paths_keys = sorted(seeddir_paths.keys())
 
-        commands.extend(['ln -s "%s" "%s"' % (rename_map[orig_path],
-                                              seeddir_paths[orig_path])
+        commands.extend(['ln -s "%s" "%s"' % (rename_map[orig_path], seeddir_paths[orig_path])
                          for orig_path in seeddir_paths_keys])
 
         if torrentfile:
             print 'Using torrentfile %r' % (torrentfile,)
             # move torrentfile to seeddir
-            commands.append('mv -nv "%s" "%s"' % (
-                  pjoin(get_torrentfilesdir(self.global_conf), torrentfile),
-                  self.global_conf['seedtorrentfilesdir']))
+            commands.append('mv -nv "%s" "%s"' % (pjoin(
+                get_torrentfilesdir(self.global_conf), torrentfile),
+                                                  self.global_conf['seedtorrentfilesdir']))
 
         return commands
 
+
 def check_result(command_bundle, failed):
 
-    broken_syms = [ s for s in command_bundle.get('symlinks', [])
-                    if not pexists(s) ]
+    broken_syms = [s for s in command_bundle.get('symlinks', []) if not pexists(s)]
 
     if failed or broken_syms:
         print "Broken symlinks - fix them then start the torrentfile"

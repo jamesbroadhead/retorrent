@@ -11,6 +11,7 @@ from os_utils.os_utils import str2utf8
 alphabet = "abcdefghijklmnopqrstuvwxyz"
 eng_numbers = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
 
+
 ###
 # Functions dealing with split filenames and .'s
 ###
@@ -19,7 +20,10 @@ def dotjoin(*args):
     stripped = [a.strip('. ') for a in args if a]
     return '.'.join(stripped)
 
+
 endottables = [' ', '_']
+
+
 @tracelogdecorator
 def endot(string):
     for e in endottables:
@@ -28,6 +32,7 @@ def endot(string):
         string = string.replace('..', '.')
     string = string.strip('.')
     return string
+
 
 ###
 # Other functions
@@ -48,6 +53,7 @@ def remove_camelcase(filename):
         outfilename += curr
     return outfilename
 
+
 @tracelogdecorator
 def remove_zwsp(filename):
     """
@@ -62,6 +68,7 @@ def remove_zwsp(filename):
         ufilename.replace(zwsp, '')
     return ufilename
 
+
 ##
 # the alphabet
 ##
@@ -69,6 +76,7 @@ def conv_from_alphabet(letter):
     """ eg. 'a' => '1' """
     ordinal = alphabet.index(letter) + 1
     return str(ordinal)
+
 
 ##
 # english-language numbers

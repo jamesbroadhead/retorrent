@@ -27,9 +27,7 @@ def find(top_dir, pattern=None, filters=None):
             if all([f(full_path) for f in filters]):
                 yield full_path
 
+
 def find_broken_symlinks(top_dir):
-    filters = [
-        lambda f: not isfile(f),
-        islink
-    ]
+    filters = [lambda f: not isfile(f), islink]
     return find(top_dir, pattern=None, filters=filters)

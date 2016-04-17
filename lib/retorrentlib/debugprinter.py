@@ -1,6 +1,7 @@
 """ retorrentlib.debugprinter """
 import logging
 
+
 class Debugprinter(object):
 
     def __init__(self):

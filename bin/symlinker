@@ -24,6 +24,8 @@ from os_utils.os_utils import mkdir_p, smbify, sym_sametarget
 from retorrentlib import confparse
 
 debug = False
+
+
 def debugprint(string, debuglevel=1):
     """
     debuglevel = 0 - always print
@@ -32,6 +34,7 @@ def debugprint(string, debuglevel=1):
     """
     if debuglevel <= debug:
         print string
+
 
 # there sure are!
 #pylint: disable=too-many-branches,too-many-locals,too-many-statements
@@ -64,7 +67,7 @@ def main(smbsafe=False):
                         fpath = pjoin(elem_path, f)
                         if not islink(fpath):
                             print 'Non-symlinked file detected in folder %s in %s' % (
-                                    basename(fpath), elem_path)
+                                basename(fpath), elem_path)
                             print '\t Non-symlinked folders should only contain symlinks'
                         elif not isfile(fpath):
                             # broken symlink
@@ -127,11 +130,8 @@ def main(smbsafe=False):
                     not realpath(symlink_path) == \
                         realpath(content_abspath):
 
-                    debugprint(
-                        '%s already exists, and there are two candidates, %s and %s' %
-                        (symlink_path,
-                         realpath(symlink_path),
-                         realpath(content_abspath)))
+                    debugprint('%s already exists, and there are two candidates, %s and %s' %
+                               (symlink_path, realpath(symlink_path), realpath(content_abspath)))
                     oldlink_realpath = realpath(symlink_path)
 
                     # they're both links to different directories
@@ -172,8 +172,7 @@ def main(smbsafe=False):
         if isdir(elem):
             #If dir is full of symlinks, and all symlinks are to the same dir,
             #    remove all symlinks, then symlink the dir
-            symlinkdir_contents_paths = [pjoin(symlink_path, l)
-                                         for l in os.listdir(symlink_path)]
+            symlinkdir_contents_paths = [pjoin(symlink_path, l) for l in os.listdir(symlink_path)]
 
             if (all([islink(f) for f in symlinkdir_contents_paths]) and
                     all_symlinks_to_same_dir(content_abspath, symlinkdir_contents_paths)):
@@ -207,12 +206,14 @@ def link_contents(content_path, linkdir_path):
             # symlink exists, but points to same location.
             pass
 
+
 def all_symlinks_to_same_dir(d, symlinks):
     print d
     for s in symlinks:
         if not abspath(dirname(realpath(s))) == abspath(d):
             return False
     return True
+
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)

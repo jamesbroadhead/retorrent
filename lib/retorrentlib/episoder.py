@@ -12,15 +12,14 @@ from .restring import alphabet, conv_eng_number, conv_from_alphabet, eng_numbers
 # TODO: Find all assumptions about two-digit episode numbers + mark with ASSUME
 # TODO: Fix all ASSUMES about 2-digit epnummbers
 
+
 class Episoder(object):
     #pylint: disable=too-many-public-methods
-    identifiers = { 'start' : ['s', 'e', 'd','p',
-                                'ep', 'cd', 'pt' ,
-                                'part', 'side', 'series', 'episode' ],
-                    'start_special' : [ 'op', 'ed' ]
-    }
-    numbers_to_ignore = [ '720', '264' ]
-    pairs_to_ignore = [ ('5', '1') ]  # 5.1
+    identifiers = {'start': ['s', 'e', 'd', 'p', 'ep', 'cd', 'pt', 'part', 'side', 'series',
+                             'episode'],
+                   'start_special': ['op', 'ed']}
+    numbers_to_ignore = ['720', '264']
+    pairs_to_ignore = [('5', '1')]  # 5.1
 
     UNSET_SENTINEL = object()
     NOT_AN_EPNO_SENTINEL = object()
@@ -50,10 +49,10 @@ class Episoder(object):
     def optionator(question, keys):
         return optionator(question, keys)
 
-    def set_num_interesting_files(self,num_interesting_files):
+    def set_num_interesting_files(self, num_interesting_files):
         self.num_interesting_files = num_interesting_files
 
-    def set_movie(self,is_movie):
+    def set_movie(self, is_movie):
         self.is_movie = is_movie
 
     # TODO: need to sort out dirs that have 01-04 or similar
@@ -103,7 +102,7 @@ class Episoder(object):
                         # check the next item before committing
                         if self.is_raw_serno(item) and self.is_raw_epno(nextitem):
                             split_fn = replace_doubleitem(
-                                    split_fn, index, self.gen_full_epno_string(nextitem, remainder))
+                                split_fn, index, self.gen_full_epno_string(nextitem, remainder))
                             return split_fn
 
                         else:
@@ -121,19 +120,16 @@ class Episoder(object):
                 elif remainder.isalnum() and 'e' in remainder:
                     maybe_serno = remainder.split('e')[0]
                     maybe_epno = remainder.split('e')[1]
-                    if (self.is_raw_serno(maybe_serno) and
-                            self.is_raw_epno(maybe_epno)):
-                        split_fn[index] = self.gen_full_epno_string(maybe_epno,maybe_serno)
+                    if self.is_raw_serno(maybe_serno) and self.is_raw_epno(maybe_epno):
+                        split_fn[index] = self.gen_full_epno_string(maybe_epno, maybe_serno)
                         return split_fn
-
 
             # // eg. s04.e05
             elif self.is_raw_serno(remainder) and self.is_raw_epno(nextitem):
                 if start_ident in self.identifiers['start']:
-                    split_fn[index] = self.gen_full_epno_string(nextitem,remainder)
-                    split_fn[index+1] = ''
+                    split_fn[index] = self.gen_full_epno_string(nextitem, remainder)
+                    split_fn[index + 1] = ''
                     return split_fn
-
 
             elif len(item) == len(subitem) and self.is_raw_epno(nextitem):
                 if start_ident in self.identifiers['start']:
@@ -153,8 +149,8 @@ class Episoder(object):
                 # 1.01 => s01e01
                 if self.is_raw_epno(nextitem):
                     split_fn = replace_doubleitem(split_fn, index,
-                                                  self.gen_full_epno_string(nextitem,item))
-                else: # 1 => s01e01
+                                                  self.gen_full_epno_string(nextitem, item))
+                else:  # 1 => s01e01
                     split_fn[index] = self.gen_full_epno_string(item)
                 return split_fn
 
@@ -162,10 +158,9 @@ class Episoder(object):
             elif len(item) == 2:
                 if self.is_raw_epno(nextitem):
                     return replace_doubleitem(split_fn, index,
-                                                  self.gen_full_epno_string(nextitem, item))
+                                              self.gen_full_epno_string(nextitem, item))
                 else:
-                    return replace_singleitem(split_fn, index,
-                                                  self.gen_full_epno_string(item))
+                    return replace_singleitem(split_fn, index, self.gen_full_epno_string(item))
             # eg. 302
             elif len(item) == 3:
                 die = self.get_digits_in_epno(split_fn, item)
@@ -210,14 +205,13 @@ class Episoder(object):
 
         # eg. 1of5, 01of05
         elif 'of' in item:
-            if (self.is_raw_epno(item.split('of')[0]) and
-                    self.is_raw_epno(item.split('of')[1])):
+            if self.is_raw_epno(item.split('of')[0]) and self.is_raw_epno(item.split('of')[1]):
                 split_fn[index] = self.gen_full_epno_string(item.split('of')[0])
                 return split_fn
 
                 ## END SPECIAL CASES
 
-        # just a number - treat as the episode number of season 1
+                # just a number - treat as the episode number of season 1
         elif self.is_raw_epno(item):
             split_fn[index] = self.gen_full_epno_string(item)
             return split_fn
@@ -263,10 +257,10 @@ class Episoder(object):
             return
 
         # TODO: REEEEEGEX
-        for i in range(1,len(item)):
+        for i in range(1, len(item)):
             subitem = item[0:i]
             divider = item[i]
-            supitem = item[i+1:]
+            supitem = item[i + 1:]
             if subitem.isdigit() and divider.isalpha() and supitem.isdigit():
                 # special-case divider=='v' as a version (not an episode-indicator)
                 # eg. 1v1, 02v2 -> s01e01, s01e02
@@ -299,7 +293,7 @@ class Episoder(object):
                 return True
         return False
 
-    def gen_n_digit_epno(self, N, epno,series="", nextitem=''):
+    def gen_n_digit_epno(self, N, epno, series="", nextitem=''):
         tmp = self.digits_in_epno
         self.digits_in_epno = N
         output = self.gen_full_epno_string(epno, series, nextitem)
@@ -308,15 +302,15 @@ class Episoder(object):
 
     def get_digits_in_epno(self, split_fn, item):
         if self.digits_in_epno is self.UNSET_SENTINEL:
-            self.digits_in_epno = self.ask_for_digits_in_epno(split_fn,item)
+            self.digits_in_epno = self.ask_for_digits_in_epno(split_fn, item)
         return self.digits_in_epno
 
     def ask_for_digits_in_epno(self, split_fn, item):
         question = 'In: "' + '.'.join(split_fn) + '", ' + item + ' means:'
 
-        options = { self.gen_n_digit_epno(2,item[1:3], item[0]) : 2,
-                    self.gen_n_digit_epno(3,item)               : 3,
-                    'Not an episode number!' : self.NOT_AN_EPNO_SENTINEL}
+        options = {self.gen_n_digit_epno(2, item[1:3], item[0]): 2,
+                   self.gen_n_digit_epno(3, item): 3,
+                   'Not an episode number!': self.NOT_AN_EPNO_SENTINEL}
 
         keys = options.keys()
         keys.sort(reverse=True)
@@ -331,7 +325,7 @@ class Episoder(object):
     @staticmethod
     def nextitem_if_exists(split_fn, currindex):
         if len(split_fn) > currindex + 1:
-            nextitem = split_fn[currindex+1]
+            nextitem = split_fn[currindex + 1]
             return nextitem
         return ''
 
@@ -349,9 +343,7 @@ class Episoder(object):
         This receives a number string (eg. ep01 --> 01)
         It also now accepts e01 etc.
         """
-        if (self.is_eng_number(epno)
-                or self.is_alphabetic_part_number(epno)
-                or epno.isdigit()):
+        if self.is_eng_number(epno) or self.is_alphabetic_part_number(epno) or epno.isdigit():
             return True
         else:
             if epno.lower().endswith('v2'):
@@ -392,7 +384,7 @@ class Episoder(object):
             die = min_length
 
         if len(somestring) < die:
-            outstring = '0'*(die-len(somestring)) + somestring
+            outstring = '0' * (die - len(somestring)) + somestring
         else:
             outstring = somestring
 
@@ -410,7 +402,9 @@ class Episoder(object):
             return False
 
         if self.treat_single_letters_as_epnos is not None:
-            logging.info('is_alphabetic_part_number: skipping check, already have a default answer of: %r', self.treat_single_letters_as_epnos)
+            logging.info(
+                'is_alphabetic_part_number: skipping check, already have a default answer of: %r',
+                self.treat_single_letters_as_epnos)
 
             return self.treat_single_letters_as_epnos
 
@@ -431,7 +425,8 @@ class Episoder(object):
             default_false = True
 
         answer = self.booloptionator('Is %s an episode or part number?' % (bold(letter),),
-                                     yesno=True, default_false=default_false)
+                                     yesno=True,
+                                     default_false=default_false)
         self.treat_single_letters_as_epnos = answer
 
         logging.info('%s is %s an episode number', letter, '' if answer else 'not')
@@ -444,9 +439,10 @@ class Episoder(object):
 
         if substring in eng_numbers:
             whole_item_text = ', from %s' % (whole_item,) if whole_item else ''
-            treat_as_epno = self.booloptionator('Is "%s"%s a part number?' % (
-                                           substring, whole_item_text),
-                                           yesno=True, default_false=True)
+            treat_as_epno = self.booloptionator('Is "%s"%s a part number?' % (substring,
+                                                                              whole_item_text),
+                                                yesno=True,
+                                                default_false=True)
             self.known_eng_numbers[substring] = treat_as_epno
             return treat_as_epno
         return False

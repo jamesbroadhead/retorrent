@@ -1,5 +1,6 @@
 """ retorrentlib.optionator """
 
+
 # returns both the item and the index
 def boptionator(text, option_list):
     for option in option_list:
@@ -8,7 +9,7 @@ def boptionator(text, option_list):
 
     print text
     for index, item in enumerate(option_list):
-        print "\t%s./ \t %s" % (index+1, item)
+        print "\t%s./ \t %s" % (index + 1, item)
     user_input = raw_input(">>")
 
     if user_input == '':
@@ -23,9 +24,10 @@ def boptionator(text, option_list):
 
     # get back to an index
     user_input_int = int(user_input)
-    the_index = user_input_int -1
+    the_index = user_input_int - 1
     # maybe some input checking here??
     return (the_index, option_list[the_index])
+
 
 # returns the item
 def optionator(text, option_list):
@@ -34,9 +36,11 @@ def optionator(text, option_list):
         return ''
     return answer
 
+
 # returns the index
 def ioptionator(text, option_list):
     return boptionator(text, option_list)[0]
+
 
 # optionator, but removes duplicates
 # TODO: Remove second dup, not first
@@ -50,6 +54,7 @@ def eqoptionator(text, option_list):
     answer = optionator(text, newlist)
     return answer
 
+
 def booloptionator(text, yesno=False, default_false=False):
     option_list = ['True', 'False']
     if yesno:
@@ -61,9 +66,9 @@ def booloptionator(text, yesno=False, default_false=False):
     answer = optionator(text, option_list)
     answer = answer.lower()
 
-    if answer in { 'true', 'yes' }:
+    if answer in {'true', 'yes'}:
         return True
-    elif answer in { 'false', 'no' }:
+    elif answer in {'false', 'no'}:
         return False
     elif default_false:
         return False

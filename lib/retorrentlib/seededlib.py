@@ -6,19 +6,17 @@ from os.path import abspath, expanduser, isdir, realpath
 from os.path import join as pjoin
 
 default_seeddir = expanduser('~/seed')
+
+
 def is_seeded(args, seeddir=default_seeddir):
-    seed_map = [
-        (root, dirs, files)
-        for root, dirs, files in os.walk(seeddir, followlinks=True)]
+    seed_map = [(root, dirs, files) for root, dirs, files in os.walk(seeddir, followlinks=True)]
 
     seed_filepaths = {}
 
     for root, _, files in seed_map:
         # build a flat list of the defeferenced symlinks.
         seed_filepaths[realpath(root)] = abspath(root)
-        seed_filepaths.update({
-            realpath(pjoin(root, file_)) : pjoin(root, file_)
-            for file_ in files})
+        seed_filepaths.update({realpath(pjoin(root, file_)): pjoin(root, file_) for file_ in files})
 
     seeded = {}
     unseeded = []
@@ -30,6 +28,7 @@ def is_seeded(args, seeddir=default_seeddir):
             unseeded.append(arg)
 
     return seeded, unseeded
+
 
 # Passed a file -> Somewhere in seed is a symlink to that file
 # Passed a dir ->     1./ Somewhere in seed is a symlink to that dir
@@ -48,4 +47,3 @@ def is_seeded_singleitem(path, seed_filepaths):
             if res:
                 return res
     return None
-
