@@ -178,7 +178,8 @@ class Retorrenter(object):
         self.debugprint('About to generate dest_dirpath; ' + self.dest_dirpath)
         if self.categories[self.dest_category]['should_rename']:
             if not self.dest_dirpath:
-                self.dest_dirpath = self.ask_for_dest_dirpath(len(orig_paths), possible_series_foldernames)
+                self.dest_dirpath = self.ask_for_dest_dirpath(
+                    len(orig_paths), possible_series_foldernames)
                 if not self.dest_dirpath:
                     print "Didn't set a directory - failing"
                     return
