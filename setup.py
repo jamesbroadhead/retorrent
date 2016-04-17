@@ -17,6 +17,7 @@ setup(name='retorrent',
     scripts=[
         'bin/find_tfile',
         'bin/is_seeded',
+        'bin/print_tfile',
         'bin/remreffer',
         'bin/retorrent',
         'bin/rm_seeded',

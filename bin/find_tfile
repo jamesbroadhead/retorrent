@@ -8,6 +8,8 @@ Options:
     -t, --tfilesdir The .torrent dir to search within
 """
 from os.path import abspath, expanduser
+from pprint import pprint
+
 from docopt import docopt
 
 from retorrentlib.find_tfile import find_tfiles
@@ -15,13 +17,7 @@ from retorrentlib.find_tfile import find_tfiles
 
 def main(targets, tfilesdir):
     tfilesdir = expanduser(tfilesdir)
-    return find_tfiles(targets, tfilesdir)
-
-
-def print_results(results):
-    for r in results:
-        if r:
-            print r
+    return [i for i in find_tfiles(targets, tfilesdir) if i is not None]
 
 
 if __name__ == '__main__':
@@ -29,4 +25,4 @@ if __name__ == '__main__':
     default_tfilesdir = abspath(expanduser('~/torrents/torrentfiles'))
 
     results_ = main(arguments['TARGETS'], arguments['--tfilesdir'] or default_tfilesdir)
-    print_results(results_)
+    pprint(results_)

@@ -1,6 +1,6 @@
 """ retorrentlib.find_tfile """
 
-from os.path import basename, expanduser, isdir, isfile
+from os.path import basename, isdir, isfile
 from os.path import join as pjoin
 
 from os_utils.os_utils import listdir
@@ -10,7 +10,6 @@ debug = True
 
 
 def find_tfiles(paths, tfilesdir):
-    tfilesdir = expanduser(tfilesdir)
     files_tfiles = gen_map(tfilesdir)
 
     return [tfile_from_filename(path, tfilesdir, files_tfiles) for path in paths]

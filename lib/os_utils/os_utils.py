@@ -9,8 +9,9 @@ import ctypes
 import errno
 import platform
 import os
-from os.path import abspath, basename, dirname
+from os.path import abspath, basename, dirname, expanduser, realpath
 from os.path import exists as pexists
+from os.path import join as pjoin
 
 from redecorators.tracelogdecorator import tracelogdecorator
 
@@ -53,15 +54,15 @@ def freespace(path, si_prefix=''):
 
 @tracelogdecorator
 def enough_space(orig_paths, proposed_path):
-    proposed_path = os.path.expanduser(proposed_path)
+    proposed_path = expanduser(proposed_path)
     # first check if they're on the same volume
     if same_volume(orig_paths, proposed_path):
         return True
 
-    proposed_path = os.path.expanduser(proposed_path)
+    proposed_path = expanduser(proposed_path)
 
     filesize_B = sum([os.path.getsize(orig_path) for orig_path in orig_paths])
-    if not os.path.exists(proposed_path):
+    if not pexists(proposed_path):
         proposed_path = dirname(proposed_path.rstrip('/'))
 
     if filesize_B < freespace(proposed_path):
@@ -75,7 +76,7 @@ def same_volume(orig_paths, proposed_path):
 
     # Should only be one loop
     #    (eg. video/tv/foo -> video/tv)
-    while not os.path.exists(pp):
+    while not pexists(pp):
         pp = dirname(pp)
     prop_dev = device_number(pp)
 
@@ -87,7 +88,7 @@ def same_volume(orig_paths, proposed_path):
 
 @tracelogdecorator
 def device_number(path):
-    return os.stat(os.path.expanduser(path)).st_dev
+    return os.stat(expanduser(path)).st_dev
 
 
 def hostname():
@@ -139,7 +140,7 @@ def diskspace_used(path, si='kiB'):
 
 
 def sym_sametarget(a, b):
-    return os.path.realpath(a) == os.path.realpath(b)
+    return realpath(a) == realpath(b)
 
 
 def smbify(path):
@@ -169,10 +170,12 @@ def myglob(arg):
 
     for f in listdir(dir_):
         if f.startswith(partial_fn):
-            paths.append(os.path.join(dirname(arg), f))
+            paths.append(pjoin(dirname(arg), f))
     return paths
 
 
 def listdir(dir_name):
-    """ os.listdir will return unicode if a unicode string is passed """
-    return os.listdir(unicode(dir_name))
+    """ Ensure that a unicode path is always passed to the 'os' module so that the return value
+    is also unicode
+    """
+    return os.listdir(unicode(expanduser(dir_name)))
