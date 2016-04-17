@@ -425,7 +425,7 @@ class Retorrenter(object):
         for filepath, intermed, filename in zip(list_of_filepaths, list_of_intermeds,
                                                 list_of_filenames):
 
-            if self.is_of_interest(filepath, filename):
+            if self.is_of_interest(filepath, intermed, filename):
                 filepaths_to_keep += [filepath]
                 intermeds_to_keep += [intermed]
                 filenames_to_keep += [filename]
@@ -436,7 +436,19 @@ class Retorrenter(object):
         return filepaths_to_keep, intermeds_to_keep, filenames_to_keep, num_discarded_files
 
     @tracelogdecorator
-    def is_of_interest(self, file_path, filename):
+    def is_of_interest(self, file_path, intermeds, filename):
+        """
+        @param intermeds: a string containing the intermediate path between the target passed to
+        the cli and this particular file. abspath(pjoin(intermeds, filename) == file_path
+        """
+        logging.info('is_of_interest: %s', self.global_conf['ignore_if_in_path'])
+
+        for ignore_if_in_path in self.global_conf['ignore_if_in_path']:
+            if ignore_if_in_path.lower() in intermeds.lower():
+                logging.info(
+                    'is_of_interest: ignoring because its intermediate path contains an excluded substring (%s, %s, %s)',
+                    file_path, intermeds, filename)
+                return False
 
         _path, extension = os.path.splitext(file_path)
         # trim the . from the extension for matching

@@ -40,13 +40,17 @@ def parse_retorrentconf(extra_configdir=''):
         sys.exit(1)
 
     global_defaults = {
-        'torrentfilesdir': '~/torrents/torrentfiles',
+        'content_root_paths': [],
+        'ignore_if_in_path': [],
         'seeddir': '~/seed',
         'seedtorrentfilesdir': '~/seed/torrentfiles',
-        'content_root_paths': [],
+        'smbsafe_symlink_path': '~/smbsafevideo',
         'symlink_path': '~/video',
-        'smbsafe_symlink_path': '~/smbsafevideo'
+        'torrentfilesdir': '~/torrents/torrentfiles',
     }
+
+    expand_these = ['content_root_paths', 'seeddir', 'seedtorrentfilesdir', 'smbsafe_symlink_path',
+                    'symlink_path', 'torrentfilesdir']
 
     if not validate_config(config):
         sys.exit(1)
@@ -54,8 +58,8 @@ def parse_retorrentconf(extra_configdir=''):
     global_conf = deepcopy(global_defaults)
     global_conf.update(config['global'])
 
-    for k, v in global_conf.items():
-
+    for k in expand_these:
+        v = global_conf[k]
         if isinstance(v, basestring):
             global_conf[k] = abspath(expanduser(v))
         elif isinstance(v, list):

@@ -2,7 +2,10 @@
     'global': {
         'content_root_paths' : [
             # Insert paths to content directories here
-        ]
+        ],
+        'ignore_if_in_path': [
+            # If these strings appear in the path to a target, ignore that file. Case insensitive.
+        ],
     },
 
     'categories' : {

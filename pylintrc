@@ -38,7 +38,8 @@ load-plugins=
 # invalid-name: over-strict variable name rules
 # line-too-long: let's autoformat instead
 # locally-disabled: rm warnings about #pylint:disable lines
-disable=bad-continuation,bad-whitespace,broad-except,fixme,invalid-name,line-too-long,locally-disabled,star-args,too-few-public-methods
+# missing-docstring: just leads to empty or redundant docstrings
+disable=bad-continuation,bad-whitespace,broad-except,fixme,invalid-name,line-too-long,locally-disabled,missing-docstring,star-args,too-few-public-methods
 
 
 [REPORTS]
