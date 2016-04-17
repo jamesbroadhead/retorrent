@@ -178,7 +178,7 @@ class Retorrenter(object):
         self.debugprint('About to generate dest_dirpath; ' + self.dest_dirpath)
         if self.categories[self.dest_category]['should_rename']:
             if not self.dest_dirpath:
-                self.manually_set_dest_dirpath(len(orig_paths), possible_series_foldernames)
+                self.dest_dirpath = self.ask_for_dest_dirpath(len(orig_paths), possible_series_foldernames)
                 if not self.dest_dirpath:
                     print "Didn't set a directory - failing"
                     return
@@ -316,38 +316,36 @@ class Retorrenter(object):
                     self.dest_folder = path
                     return
 
-    def manually_set_dest_dirpath(self, num_interesting_files, possible_series_foldernames):
+    def ask_for_dest_dirpath(self, num_interesting_files, possible_series_foldernames):
 
-        self.debugprint('retorrenter.manually_set_dest_dirpath()')
+        self.debugprint('retorrenter.ask_for_dest_dirpath()')
         # gen dest paths from these foldernames
 
         # if a movie has +1 files, need a folder. All else might need a folder
         if self.is_movie() and num_interesting_files == 1:
-            self.debugprint('manually_set_dest_dirpath: This is a movie, no need for a folder')
-            self.dest_dirpath = self.dest_folder
+            self.debugprint('ask_for_dest_dirpath: This is a movie, no need for a folder')
+            return self.dest_folder
         else:
 
             if self.is_movie() or num_interesting_files > 1:
                 dirpath_q = "What foldername should we use?"
-                dirpath_q_opts = possible_series_foldernames
+                dirpath_q_opts = possible_series_foldernames + ["<cancel>"]
             else:
                 dirpath_q = "Is this a series? If so, use what folder name?"
-                dirpath_q_opts = possible_series_foldernames + [""]
+                dirpath_q_opts = possible_series_foldernames + ["<cancel>"]
 
             dirpath_ans = self.pose_question(dirpath_q, dirpath_q_opts)
 
             if not dirpath_ans == RECALCULATE:
-                self.dest_dirpath = pjoin(self.dest_folder, dirpath_ans)
+                return pjoin(self.dest_folder, dirpath_ans)
             else:
                 # a new removeitem has been added - regenerate psf
-
                 possible_series_foldernames = [
                     self.filenamer.convert_filename(item, True)
                     for item in possible_series_foldernames
                 ]
 
-                self.manually_set_dest_dirpath(num_interesting_files, possible_series_foldernames)
-                return
+                return self.ask_for_dest_dirpath(num_interesting_files, possible_series_foldernames)
 
     def pose_question(self, question, options):
         # Note: returns RECALCULATE ('-') if a recurse is needed
