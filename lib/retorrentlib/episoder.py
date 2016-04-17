@@ -89,6 +89,7 @@ class Episoder(object):
 
         # eg. part, episode
         for start_ident in self.identifiers['start'] + self.identifiers['start_special']:
+            logging.info('convert_if_episode_number: checking start_ident=%r', start_ident)
             subitem = item[0:len(start_ident)]
             remainder = item[len(subitem):]
 
@@ -96,18 +97,27 @@ class Episoder(object):
                 continue
 
             elif len(item) > len(start_ident):
-                # TODO : for s01e10, this now passes 01e10 to is_raw_epno. disaster!
                 if self.is_raw_epno(remainder):
+
                     if start_ident in self.identifiers['start']:
                         # check the next item before committing
                         if self.is_raw_serno(item) and self.is_raw_epno(nextitem):
-                            split_fn[index] = self.gen_full_epno_string(nextitem,remainder)
+                            split_fn = replace_doubleitem(
+                                    split_fn, index, self.gen_full_epno_string(nextitem, remainder))
+                            return split_fn
+
                         else:
                             split_fn[index] = self.gen_full_epno_string(remainder)
-                    else: # special case
+                            return split_fn
+
+                    elif start_ident in self.identifiers['start_special']:
                         epno = self.nice_epno_from_raw(remainder)
                         split_fn[index] = subitem + epno
-                    return split_fn
+                        return split_fn
+
+                    else:
+                        raise Exception('Bad start_ident in loop: %r' % (start_ident,))
+
                 elif remainder.isalnum() and 'e' in remainder:
                     maybe_serno = remainder.split('e')[0]
                     maybe_epno = remainder.split('e')[1]
@@ -134,7 +144,10 @@ class Episoder(object):
                 split_fn = replace_doubleitem(split_fn, index, epno)
                 return split_fn
 
+        logging.info('convert_if_episode_number: finished checking start_ident for %r', item)
+
         if item.isdigit():
+            logging.info('convert_if_episode_number: checking numerals for %r', item)
             # eg. 1  or 2
             if len(item) == 1:
                 # 1.01 => s01e01
@@ -181,6 +194,7 @@ class Episoder(object):
             # it's a >5 digit number ... boring
             return None
 
+        logging.info('convert_if_episode_number: finished checking numerals for %r', item)
 
         # 1x1 / 1x02 / 1x001 / 1e3
         ndn = self.convert_number_divider_number(item)
@@ -208,22 +222,23 @@ class Episoder(object):
             split_fn[index] = self.gen_full_epno_string(item)
             return split_fn
 
+        logging.info('convert_if_episode_number: default fallthrough on %r', item)
+
         return None
 
     @tracelogdecorator
-    def gen_full_epno_string(self, epno, series="", nextitem=''):
-        epno = self.nice_epno_from_raw(epno)
+    def gen_full_epno_string(self, epno_raw, series_raw=None, nextitem=''):
+        """
+        @param epno: a raw string representing the episode number
+        @param series: if set, a formatted string representing the series number
+        """
+        epno = self.nice_epno_from_raw(epno_raw)
 
         if len(nextitem) > 0 and self.is_raw_epno(nextitem):
             # this is a range of episodes. horrible
             epno += self.nice_epno_from_raw(nextitem)
 
-        if not series == "":
-            if len(series) < 2:
-                series = "0" + series
-
-            return 's' + series + 'e' + epno
-        else:
+        if series_raw is None:
             # movies don't come in series
             if self.is_movie and self.num_interesting_files == 1:
                 # Only one file, getting here is a mistake
@@ -233,6 +248,13 @@ class Episoder(object):
                 return 'cd' + epno
             else:
                 return 's01' + 'e' + epno
+
+        series = self.nice_epno_from_raw(series_raw)
+
+        if len(series) < 2:
+            series = "0" + series
+
+        return 's' + series + 'e' + epno
 
     @tracelogdecorator
     def convert_number_divider_number(self, item):
@@ -388,6 +410,8 @@ class Episoder(object):
             return False
 
         if self.treat_single_letters_as_epnos is not None:
+            logging.info('is_alphabetic_part_number: skipping check, already have a default answer of: %r', self.treat_single_letters_as_epnos)
+
             return self.treat_single_letters_as_epnos
 
         if self.is_movie and self.num_interesting_files == 1:

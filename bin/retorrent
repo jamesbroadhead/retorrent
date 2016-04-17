@@ -11,6 +11,7 @@ from optparse import OptionParser
 import os
 from os.path import expanduser, isdir
 from os.path import join as pjoin
+import sys
 
 from retorrentlib.retorrenter import check_result, Retorrenter
 
@@ -23,8 +24,12 @@ def main():
     logdir = expanduser('~/.retorrent')
     if not isdir(logdir):
         os.makedirs(logdir)
-    myhandler = logging.FileHandler(pjoin(logdir, 'retorrent.log'))
-    logger.addHandler(myhandler)
+    logfile_handler = logging.FileHandler(pjoin(logdir, 'retorrent.log'))
+    logger.addHandler(logfile_handler)
+
+    if options.debug:
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        logger.addHandler(stdout_handler)
 
     feature_flags = {
         'old_torrentfile_detection' : options.old_torrentfile_detection

@@ -34,10 +34,11 @@ load-plugins=
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
 
-# locally-disabled: rm warnings about #pylint:disable lines
 # fixme: this codebase has too many to enable this
 # invalid-name: over-strict variable name rules
-disable=bad-continuation,bad-whitespace,broad-except,fixme,invalid-name,locally-disabled,star-args,too-few-public-methods
+# line-too-long: let's autoformat instead
+# locally-disabled: rm warnings about #pylint:disable lines
+disable=bad-continuation,bad-whitespace,broad-except,fixme,invalid-name,line-too-long,locally-disabled,star-args,too-few-public-methods
 
 
 [REPORTS]

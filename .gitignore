@@ -2,4 +2,5 @@ build/
 dist/
 *.egg-info
 .hypothesis
+lib/retorrent.egg-info
 MANIFEST

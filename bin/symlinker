@@ -63,7 +63,8 @@ def main(smbsafe=False):
                     for f in os.listdir(elem_path):
                         fpath = pjoin(elem_path, f)
                         if not islink(fpath):
-                            print 'Non-symlinked file detected in folder %s in %s' % (basename(fpath), elem_path)
+                            print 'Non-symlinked file detected in folder %s in %s' % (
+                                    basename(fpath), elem_path)
                             print '\t Non-symlinked folders should only contain symlinks'
                         elif not isfile(fpath):
                             # broken symlink

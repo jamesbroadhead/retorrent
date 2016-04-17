@@ -98,4 +98,29 @@ class TestConvertIfEpisodeNumber(EpisoderTestMixin, unittest.TestCase):
         expected = (None)
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
 
+    def test_letters_as_episode_numbers(self):
+        self.e.ask_if_single_letter_is_epno = Mock(return_value=True)
+        filename_split = ['sb']
+        expected = (['s01e02'])
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
 
+    def test_letters_which_are_not_episode_numbers(self):
+        self.e.ask_if_single_letter_is_epno = Mock(return_value=False)
+        filename_split = ['sb']
+        expected = (None)
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
+
+    def test_start_ident_single_item(self):
+        filename_split = ['s01']
+        expected = (['s01e01'])
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
+
+    def test_start_ident_doubleitem(self):
+        filename_split = ['s01', 'e02']
+        expected = (['s01e02'])
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
+
+    def test_start_ident_start_special(self):
+        filename_split = ['op01']
+        expected = (['op01'])
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
