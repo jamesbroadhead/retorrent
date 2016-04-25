@@ -1,4 +1,9 @@
 #!/bin/bash
 
-TARGETS="$(cat .gitignore)"
-rm -rv ${TARGETS}
+TARGETS="build/ dist/ *.egg-info lib/retorrent.egg-info MANIFEST"
+
+for t in "${TARGETS}" ; do
+  if [ -e "${t}" ] ; then
+    rm -rv "${t}"
+  fi
+done

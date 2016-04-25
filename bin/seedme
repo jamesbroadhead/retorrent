@@ -13,11 +13,11 @@ seedtfilepath="$HOME/seed/torrentfiles/$(basename "$tfile")"
 elif ! [ -f "$dlfilename" ] || ! [ -f "$tfile" ] ; then
     QUIT=1
     if ! [ -f "$dlfilename" ] ; then
-        echo "Can't find $dlfilename"
+        echo "Can't find $dlfilename, or it's not a file"
         QUIT=0
     fi
     if ! [ -f "$tfile" ] ; then
-        echo "Can't find $tfile"
+        echo "Can't find ${tfile}"
         QUIT=0
     fi
     if [ $QUIT -eq 0 ] ; then

@@ -6,30 +6,16 @@ export PYTHONPATH=""
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
-BASHFILES=("dolint" "dotest" "git_hooks/pre-push")
-PYTHON_BIN=()
-for i in bin/* ; do
-    head -n 1 "$i" | grep -q python
-    if [ $? -eq 0 ] ; then
-      PYTHON_BIN+=("$REPO_ROOT/bin/$(basename "$i")")
-    else
-      head -n 1 "$i" | grep -q bash
-      if [ $? -eq 0 ] ; then
-        BASHFILES+=("$i")
-      else
-        echo "Not linting: $i"
-      fi
-    fi
-done
+BASHFILES=("bin/seedme" "dolint" "dotest" "git_hooks/pre-push")
 
-yapf -i -r --style="./style.yapf" "${PYTHON_BIN[@]}" ./lib/*
+yapf -i -r --style="./style.yapf" "setup.py" ./lib/*
 A=$?
 
-pyflakes "${PYTHON_BIN[@]}" ./lib/*
+pyflakes "setup.py" ./lib/*
 B=$?
 
 pushd lib &> /dev/null
-PYTHONPATH="../tests" pylint --rcfile=../pylintrc "${PYTHON_BIN[@]}" ./* ../tests/*
+PYTHONPATH="../tests" pylint --rcfile=../pylintrc ./* ../tests/*
 C=$?
 popd &> /dev/null
 
