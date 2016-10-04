@@ -21,10 +21,9 @@ from .confparse import parse_retorrentconf
 from .debugprinter import Debugprinter
 from .filenamer import Filenamer
 from .find_tfile import tfile_from_filename
-from .optionator import optionator, eqoptionator
+from .optionator import optionator, eqoptionator, CANCEL
 
 RECALCULATE = '-'
-
 log = logging.getLogger("app")
 
 
@@ -292,7 +291,7 @@ class Retorrenter(object):
 
     def manually_set_category(self, argument, orig_paths):
         question = "Destination for " + argument
-        dest_category_name = optionator(question, self.categories.keys() + ["<cancel>"])
+        dest_category_name = optionator(question, self.categories.keys() + [CANCEL])
 
         if dest_category_name in self.categories:
             self.dest_category = dest_category_name
@@ -330,10 +329,10 @@ class Retorrenter(object):
 
             if self.is_movie() or num_interesting_files > 1:
                 dirpath_q = "What foldername should we use?"
-                dirpath_q_opts = possible_series_foldernames + ["<cancel>"]
+                dirpath_q_opts = possible_series_foldernames + [CANCEL]
             else:
                 dirpath_q = "Is this a series? If so, use what folder name?"
-                dirpath_q_opts = possible_series_foldernames + ["<cancel>"]
+                dirpath_q_opts = possible_series_foldernames + [CANCEL]
 
             dirpath_ans = self.pose_question(dirpath_q, dirpath_q_opts)
 
@@ -510,7 +509,7 @@ class Retorrenter(object):
         tfiles = sorted(tfiles, self.compare_scored_tfiles)
 
         chosen_torrentfile = optionator('For: ' + arg_name, [t['filename']
-                                                             for t in tfiles] + ['<cancel>'])
+                                                             for t in tfiles] + [CANCEL])
 
         return chosen_torrentfile
 
@@ -597,7 +596,7 @@ class Retorrenter(object):
                 print p
             print
             question = "Use these filenames or enter new term to remove"
-            options = ["filenames", "<cancel>"]
+            options = ["filenames", CANCEL]
 
         # the two methods produced differing results.
         # Print only the differences,  ask 1/2/n
@@ -615,7 +614,7 @@ class Retorrenter(object):
 
             question = ' '.join(['Filename-based and Foldername-based produced differences: ',
                                  'Select which is better, or enter new term to remove'])
-            options = ["filenames", "foldernames", "<cancel>"]
+            options = ["filenames", "foldernames", CANCEL]
 
         rename_map = {}
 
@@ -673,10 +672,10 @@ class Retorrenter(object):
         question = 'Should these be seeded?'
         if torrentfile:
             question = 'Seed using {f}?'.format(f=torrentfile)
-        do_seed = optionator(question, ['yes', 'no', '<cancel>'])
+        do_seed = optionator(question, ['yes', 'no', CANCEL])
 
         seeddir_paths = {}
-        if do_seed == "":  # this means '<cancel>'
+        if do_seed == "":  # this means CANCEL
             return
         elif do_seed == "yes":
             if not torrentfile:

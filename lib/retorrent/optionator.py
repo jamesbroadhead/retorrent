@@ -1,5 +1,7 @@
 """ retorrent.optionator """
 
+CANCEL = '<cancel>'
+
 
 # returns both the item and the index
 def boptionator(text, option_list):
@@ -32,7 +34,7 @@ def boptionator(text, option_list):
 # returns the item
 def optionator(text, option_list):
     answer = boptionator(text, option_list)[1]
-    if answer in ['<blank>', '<cancel>', '<none>']:
+    if answer in ['<blank>', CANCEL, '<none>']:
         return ''
     return answer
 
