@@ -394,7 +394,7 @@ class Retorrenter(object):
         else:
             orig_foldername = ""  # it's a file, flat in ~/torrents
             if os.path.exists(content_abspath):
-                file_path = content_abspath.decode('utf-8')
+                file_path = content_abspath
                 file_paths = [os.path.abspath(file_path)]
                 file_names = [os.path.basename(file_path)]
                 intermeds = [""] * len(file_names)
