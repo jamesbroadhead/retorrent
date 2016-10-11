@@ -7,7 +7,7 @@ from redecorators import tracelogdecorator
 from .braced import is_year
 from .optionator import booloptionator, optionator
 from .relist import replace_singleitem, replace_doubleitem
-from .restring import alphabet, conv_eng_number, conv_from_alphabet, eng_numbers
+from .restring import alphabet, conv_eng_number, conv_from_alphabet, dotjoin, eng_numbers
 
 # TODO: Find all assumptions about two-digit episode numbers + mark with ASSUME
 # TODO: Fix all ASSUMES about 2-digit epnummbers
@@ -112,7 +112,7 @@ class Episoder(object):
                             return split_fn
 
                     elif start_ident in self.identifiers['start_special']:
-                        epno = self.nice_epno_from_raw(remainder)
+                        epno = self.nice_epno_from_raw(split_fn, remainder)
                         split_fn[index] = subitem + epno
                         return split_fn
 
@@ -140,7 +140,7 @@ class Episoder(object):
                     epno = self.gen_full_epno_string(split_fn, nextitem)
                 else:
                     # 'start_special' -- only want a number, not a full s01e01 string
-                    epno = start_ident + self.nice_epno_from_raw(nextitem)
+                    epno = start_ident + self.nice_epno_from_raw(split_fn, nextitem)
                 split_fn = replace_doubleitem(split_fn, index, epno)
                 return split_fn
 
@@ -228,11 +228,11 @@ class Episoder(object):
         @param epno: a raw string representing the episode number
         @param series: if set, a formatted string representing the series number
         """
-        epno = self.nice_epno_from_raw(epno_raw)
+        epno = self.nice_epno_from_raw(split_fn, epno_raw)
 
         if len(nextitem) > 0 and self.is_raw_epno(split_fn, nextitem):
             # this is a range of episodes. horrible
-            epno += self.nice_epno_from_raw(nextitem)
+            epno += self.nice_epno_from_raw(split_fn, nextitem)
 
         if series_raw is None:
             # movies don't come in series
@@ -245,7 +245,7 @@ class Episoder(object):
             else:
                 return 's01' + 'e' + epno
 
-        series = self.nice_epno_from_raw(series_raw)
+        series = self.nice_epno_from_raw(split_fn, series_raw)
 
         if len(series) < 2:
             series = "0" + series
@@ -346,7 +346,8 @@ class Episoder(object):
         This receives a number string (eg. ep01 --> 01)
         It also now accepts e01 etc.
         """
-        if self.is_eng_number(epno) or self.is_alphabetic_part_number(epno) or epno.isdigit():
+        if self.is_eng_number(epno) or self.is_alphabetic_part_number(split_fn,
+                                                                      epno) or epno.isdigit():
             return True
 
         if epno.lower().endswith('v2'):
@@ -355,19 +356,19 @@ class Episoder(object):
             return self.is_raw_epno(split_fn, epno[1:])
         return False
 
-    def nice_epno_from_raw(self, epno):
+    def nice_epno_from_raw(self, split_fn, epno):
         if self.is_eng_number(epno):
             epno = conv_eng_number(epno)
-        elif self.is_alphabetic_part_number(epno):
+        elif self.is_alphabetic_part_number(split_fn, epno):
             epno = conv_from_alphabet(epno)
         elif epno.isdigit():
             # cool
             pass
         else:
             if epno.lower().endswith('v2'):
-                return self.nice_epno_from_raw(epno[0:-2])
+                return self.nice_epno_from_raw(split_fn, epno[0:-2])
             elif len(epno) > 0 and epno.lower()[0] == 'e':
-                return self.nice_epno_from_raw(epno[1:])
+                return self.nice_epno_from_raw(split_fn, epno[1:])
             else:
                 print '!!! Can\'t handle an epno like this: ', epno
 
@@ -394,7 +395,7 @@ class Episoder(object):
         return outstring
 
     @tracelogdecorator
-    def is_alphabetic_part_number(self, item):
+    def is_alphabetic_part_number(self, split_fn, item):
         """
         @param item: string
 
@@ -419,15 +420,16 @@ class Episoder(object):
             # TODO [later] We definitely need episode numbers.
             return False
 
-        return self.ask_if_single_letter_is_epno(item)
+        return self.ask_if_single_letter_is_epno(split_fn, item)
 
-    def ask_if_single_letter_is_epno(self, letter):
+    def ask_if_single_letter_is_epno(self, split_fn, letter):
         # nice defaults
         default_false = False
         if not (letter == 'a' or letter == 'b'):
             default_false = True
 
-        answer = self.booloptionator('Is %s an episode or part number?' % (bold(letter),),
+        answer = self.booloptionator('In: {}\nIs {} an episode or part number?'.format(
+            bold(dotjoin(*split_fn)), bold(letter)),
                                      yesno=True,
                                      default_false=default_false)
         self.treat_single_letters_as_epnos = answer
