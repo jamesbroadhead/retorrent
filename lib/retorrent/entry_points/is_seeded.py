@@ -24,7 +24,7 @@ def _main(only_unseeded, targets):
         print ' '.join(['"%s"' % (u,) for u in unseeded])
     else:
         print "Seeded:"
-        for k, v in seeded.items():
+        for k, v in sorted(seeded.items()):
             print "\t %s => %s" % (k, v)
         print "Unseeded:"
         for j in unseeded:
