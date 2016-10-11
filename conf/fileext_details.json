@@ -76,6 +76,13 @@
             "sample"
         ]
     },
+    "mpg": {
+        "filetype": "movie",
+        "goodsize": 5120,
+        "ignore_if_in_filename": [
+            "sample"
+        ]
+    },
     "ogm": {
         "filetype": "movie",
         "goodsize": 5120,

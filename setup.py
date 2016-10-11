@@ -12,8 +12,10 @@ setup(name='retorrent',
           'coreutils', 'retorrent', 'retorrent.entry_points', 'os_utils', 'redecorators'
       ],
       package_dir={'': 'lib'},
-      data_files=[('share/retorrent', ['conf/divider_symbols.conf', 'conf/fileext_details.json',
-                                       'conf/retorrentconf.py_skel'])],
+      data_files=[
+          ('/usr/share/retorrent', ['conf/divider_symbols.conf', 'conf/fileext_details.json',
+                                    'conf/retorrentconf.py_skel'])
+      ],
       scripts=['bin/seedme',],
       entry_points={
           'console_scripts': [
@@ -26,4 +28,6 @@ setup(name='retorrent',
               'symlinker =   retorrent.entry_points.symlinker:main',
               'unseed_broken = retorrent.entry_points.unseed_broken:main',
           ],
-      },)
+      },
+      include_package_data=True,
+      zip_safe=False)
