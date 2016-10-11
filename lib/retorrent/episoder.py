@@ -96,17 +96,19 @@ class Episoder(object):
                 continue
 
             elif len(item) > len(start_ident):
-                if self.is_raw_epno(remainder):
+                if self.is_raw_epno(split_fn, remainder):
 
                     if start_ident in self.identifiers['start']:
                         # check the next item before committing
-                        if self.is_raw_serno(item) and self.is_raw_epno(nextitem):
+                        if self.is_raw_serno(split_fn, item) and self.is_raw_epno(split_fn,
+                                                                                  nextitem):
                             split_fn = replace_doubleitem(
-                                split_fn, index, self.gen_full_epno_string(nextitem, remainder))
+                                split_fn, index,
+                                self.gen_full_epno_string(split_fn, nextitem, remainder))
                             return split_fn
 
                         else:
-                            split_fn[index] = self.gen_full_epno_string(remainder)
+                            split_fn[index] = self.gen_full_epno_string(split_fn, remainder)
                             return split_fn
 
                     elif start_ident in self.identifiers['start_special']:
@@ -120,20 +122,22 @@ class Episoder(object):
                 elif remainder.isalnum() and 'e' in remainder:
                     maybe_serno = remainder.split('e')[0]
                     maybe_epno = remainder.split('e')[1]
-                    if self.is_raw_serno(maybe_serno) and self.is_raw_epno(maybe_epno):
-                        split_fn[index] = self.gen_full_epno_string(maybe_epno, maybe_serno)
+                    if self.is_raw_serno(split_fn, maybe_serno) and self.is_raw_epno(split_fn,
+                                                                                     maybe_epno):
+                        split_fn[index] = self.gen_full_epno_string(split_fn, maybe_epno,
+                                                                    maybe_serno)
                         return split_fn
 
             # // eg. s04.e05
-            elif self.is_raw_serno(remainder) and self.is_raw_epno(nextitem):
+            elif self.is_raw_serno(split_fn, remainder) and self.is_raw_epno(split_fn, nextitem):
                 if start_ident in self.identifiers['start']:
-                    split_fn[index] = self.gen_full_epno_string(nextitem, remainder)
+                    split_fn[index] = self.gen_full_epno_string(split_fn, nextitem, remainder)
                     split_fn[index + 1] = ''
                     return split_fn
 
-            elif len(item) == len(subitem) and self.is_raw_epno(nextitem):
+            elif len(item) == len(subitem) and self.is_raw_epno(split_fn, nextitem):
                 if start_ident in self.identifiers['start']:
-                    epno = self.gen_full_epno_string(nextitem)
+                    epno = self.gen_full_epno_string(split_fn, nextitem)
                 else:
                     # 'start_special' -- only want a number, not a full s01e01 string
                     epno = start_ident + self.nice_epno_from_raw(nextitem)
@@ -147,20 +151,21 @@ class Episoder(object):
             # eg. 1  or 2
             if len(item) == 1:
                 # 1.01 => s01e01
-                if self.is_raw_epno(nextitem):
-                    split_fn = replace_doubleitem(split_fn, index,
-                                                  self.gen_full_epno_string(nextitem, item))
+                if self.is_raw_epno(split_fn, nextitem):
+                    split_fn = replace_doubleitem(
+                        split_fn, index, self.gen_full_epno_string(split_fn, nextitem, item))
                 else:  # 1 => s01e01
-                    split_fn[index] = self.gen_full_epno_string(item)
+                    split_fn[index] = self.gen_full_epno_string(split_fn, item)
                 return split_fn
 
             # eg. 45
             elif len(item) == 2:
-                if self.is_raw_epno(nextitem):
+                if self.is_raw_epno(split_fn, nextitem):
                     return replace_doubleitem(split_fn, index,
-                                              self.gen_full_epno_string(nextitem, item))
+                                              self.gen_full_epno_string(split_fn, nextitem, item))
                 else:
-                    return replace_singleitem(split_fn, index, self.gen_full_epno_string(item))
+                    return replace_singleitem(split_fn, index, self.gen_full_epno_string(split_fn,
+                                                                                         item))
             # eg. 302
             elif len(item) == 3:
                 die = self.get_digits_in_epno(split_fn, item)
@@ -168,9 +173,9 @@ class Episoder(object):
                     # the user indicated that the item wasn't an epno
                     return None
                 elif die == 2:
-                    split_fn[index] = self.gen_full_epno_string(item[1:], item[0])
+                    split_fn[index] = self.gen_full_epno_string(split_fn, item[1:], item[0])
                 elif die == 3:
-                    split_fn[index] = self.gen_full_epno_string(item)
+                    split_fn[index] = self.gen_full_epno_string(split_fn, item)
                 else:
                     raise Exception('ERROR! Messed up around digits_in_epno')
 
@@ -183,7 +188,7 @@ class Episoder(object):
                     # it is a year, preserve it
                     return None
                 else:
-                    split_fn[index] = self.gen_full_epno_string(item[2:], item[0:2])
+                    split_fn[index] = self.gen_full_epno_string(split_fn, item[2:], item[0:2])
                     return split_fn
 
             # it's a >5 digit number ... boring
@@ -192,28 +197,25 @@ class Episoder(object):
         logging.info('convert_if_episode_number: finished checking numerals for %r', item)
 
         # 1x1 / 1x02 / 1x001 / 1e3
-        ndn = self.convert_number_divider_number(item)
+        ndn = self.convert_number_divider_number(split_fn, item)
         if ndn is not None:
             return replace_singleitem(split_fn, index, ndn)
 
-        ## SPECIAL CASES
-
-        # catch "pilot"
+        # Special case: "pilot"
         if len(item) == 5 and item == "pilot":
             split_fn[index] = "s00e00"
             return split_fn
 
-        # eg. 1of5, 01of05
+        # Special case: 1of5, 01of05
         elif 'of' in item:
-            if self.is_raw_epno(item.split('of')[0]) and self.is_raw_epno(item.split('of')[1]):
-                split_fn[index] = self.gen_full_epno_string(item.split('of')[0])
+            if (self.is_raw_epno(split_fn, item.split('of')[0]) and
+                    self.is_raw_epno(split_fn, item.split('of')[1])):
+                split_fn[index] = self.gen_full_epno_string(split_fn, item.split('of')[0])
                 return split_fn
 
-                ## END SPECIAL CASES
-
-                # just a number - treat as the episode number of season 1
-        elif self.is_raw_epno(item):
-            split_fn[index] = self.gen_full_epno_string(item)
+        # just a number - treat as the episode number of season 1
+        elif self.is_raw_epno(split_fn, item):
+            split_fn[index] = self.gen_full_epno_string(split_fn, item)
             return split_fn
 
         logging.info('convert_if_episode_number: default fallthrough on %r', item)
@@ -221,14 +223,14 @@ class Episoder(object):
         return None
 
     @tracelogdecorator
-    def gen_full_epno_string(self, epno_raw, series_raw=None, nextitem=''):
+    def gen_full_epno_string(self, split_fn, epno_raw, series_raw=None, nextitem=''):
         """
         @param epno: a raw string representing the episode number
         @param series: if set, a formatted string representing the series number
         """
         epno = self.nice_epno_from_raw(epno_raw)
 
-        if len(nextitem) > 0 and self.is_raw_epno(nextitem):
+        if len(nextitem) > 0 and self.is_raw_epno(split_fn, nextitem):
             # this is a range of episodes. horrible
             epno += self.nice_epno_from_raw(nextitem)
 
@@ -251,7 +253,7 @@ class Episoder(object):
         return 's' + series + 'e' + epno
 
     @tracelogdecorator
-    def convert_number_divider_number(self, item):
+    def convert_number_divider_number(self, split_fn, item):
         """ <variable-length-number> + <divider symbol> + <variable_length_number> """
         if not len(item) >= 3:
             return
@@ -265,8 +267,8 @@ class Episoder(object):
                 # special-case divider=='v' as a version (not an episode-indicator)
                 # eg. 1v1, 02v2 -> s01e01, s01e02
                 if divider == 'v':
-                    return self.gen_full_epno_string(subitem)
-                item = self.gen_full_epno_string(supitem, subitem)
+                    return self.gen_full_epno_string(split_fn, subitem)
+                item = self.gen_full_epno_string(split_fn, supitem, subitem)
                 return item
         return None
 
@@ -293,10 +295,11 @@ class Episoder(object):
                 return True
         return False
 
-    def gen_n_digit_epno(self, N, epno, series="", nextitem=''):
+    def gen_n_digit_epno(self, split_fn, N, epno, series='', nextitem=''):
+        #pylint: disable=too-many-arguments
         tmp = self.digits_in_epno
         self.digits_in_epno = N
-        output = self.gen_full_epno_string(epno, series, nextitem)
+        output = self.gen_full_epno_string(split_fn, epno, series, nextitem)
         self.digits_in_epno = tmp
         return output
 
@@ -308,8 +311,8 @@ class Episoder(object):
     def ask_for_digits_in_epno(self, split_fn, item):
         question = 'In: "' + '.'.join(split_fn) + '", ' + item + ' means:'
 
-        options = {self.gen_n_digit_epno(2, item[1:3], item[0]): 2,
-                   self.gen_n_digit_epno(3, item): 3,
+        options = {self.gen_n_digit_epno(split_fn, 2, item[1:3], item[0]): 2,
+                   self.gen_n_digit_epno(split_fn, 3, item): 3,
                    'Not an episode number!': self.NOT_AN_EPNO_SENTINEL}
 
         keys = options.keys()
@@ -329,28 +332,28 @@ class Episoder(object):
             return nextitem
         return ''
 
-    def is_raw_serno(self, serno):
+    def is_raw_serno(self, split_fn, serno):
         if len(serno) > 0 and serno.lower().startswith('s'):
-            return self.is_raw_epno(serno[1:])
+            return self.is_raw_epno(split_fn, serno[1:])
         elif len(serno) > 0 and serno.lower().startswith('e'):
             return False
 
-        return self.is_raw_epno(serno)
+        return self.is_raw_epno(split_fn, serno)
 
     @tracelogdecorator
-    def is_raw_epno(self, epno):
+    def is_raw_epno(self, split_fn, epno):
         """
         This receives a number string (eg. ep01 --> 01)
         It also now accepts e01 etc.
         """
         if self.is_eng_number(epno) or self.is_alphabetic_part_number(epno) or epno.isdigit():
             return True
-        else:
-            if epno.lower().endswith('v2'):
-                return self.is_raw_epno(epno[0:-2])
-            elif len(epno) > 0 and epno.lower()[0] == 'e':
-                return self.is_raw_epno(epno[1:])
-            return False
+
+        if epno.lower().endswith('v2'):
+            return self.is_raw_epno(split_fn, epno[0:-2])
+        elif len(epno) > 0 and epno.lower()[0] == 'e':
+            return self.is_raw_epno(split_fn, epno[1:])
+        return False
 
     def nice_epno_from_raw(self, epno):
         if self.is_eng_number(epno):
