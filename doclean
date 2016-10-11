@@ -2,7 +2,7 @@
 
 TARGETS="build/ dist/ *.egg-info lib/retorrent.egg-info MANIFEST"
 
-for t in "${TARGETS}" ; do
+for t in ${TARGETS} ; do
   if [ -e "${t}" ] ; then
     rm -rv "${t}"
   fi
