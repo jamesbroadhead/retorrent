@@ -3,14 +3,14 @@
 TORRENT_DIR="${HOME}/torrents"
 SEED_DIR="$HOME/seed"
 
-# Normalised filename in torrentdir
+# Relative path to file in torrentdir
 # Legal:
 #   "a", given $TORRENT_DIR/a
 #   "$TORRENT_DIR/a", given $TORRENT_DIR/a
 # Illegal:
 #   "b", given $TORRENT_DIR/a/b
 #   "c", given $TORRENT_DIR/c does not exist
-dlfilename="$1"
+source_relative_path="$1"
 dest_path="$2"
 
 tfile="$(find_tfile "$1")"
@@ -18,13 +18,13 @@ tfile="$(find_tfile "$1")"
 seedpath="${SEED_DIR}/$1"
 seedtfilepath="${SEED_DIR}/torrentfiles/$(basename "$tfile")"
 
-(if [[ "$dlfilename" == "" ]] || [[ "$dest_path" == "" ]] || [[ "$tfile" == "" ]] ; then
+(if [[ "$source_relative_path" == "" ]] || [[ "$dest_path" == "" ]] || [[ "$tfile" == "" ]] ; then
 	echo "Usage:"
     echo "  seedme <FILE> <DEST> <TORRENTFILE>"
-elif ! [ -f "$dlfilename" ] || ! [ -f "$tfile" ] ; then
+elif ! [ -f "$source_relative_path" ] || ! [ -f "$tfile" ] ; then
     QUIT=1
-    if ! [ -f "$dlfilename" ] ; then
-        echo "Can't find $dlfilename, or it's not a file"
+    if ! [ -f "$source_relative_path" ] ; then
+        echo "Can't find $source_relative_path, or it's not a file"
         QUIT=0
     fi
     if ! [ -f "$tfile" ] ; then
@@ -36,11 +36,11 @@ elif ! [ -f "$dlfilename" ] || ! [ -f "$tfile" ] ; then
     fi
 elif [ -f "$dest_path" ] ; then
 	echo "$dest_path already exists"
-	md5dlfilename=$(md5sum "$dlfilename" | awk '{print $1}')
+	md5source_relative_path=$(md5sum "$source_relative_path" | awk '{print $1}')
 	md5dest_path=$(md5sum "$dest_path" | awk '{print $1}')
-	if [ "$md5dlfilename" == "$md5dest_path" ] ; then
+	if [ "$md5source_relative_path" == "$md5dest_path" ] ; then
 		echo "Same file - removing new version"
-		rm "$dlfilename"
+		rm "$source_relative_path"
 	  if [ -f "$seedtfilepath" ] ; then
 			rm "$tfile"
 		else
@@ -52,20 +52,20 @@ elif [ -f "$dest_path" ] ; then
 elif [ -f "$seedpath" ] ; then
 	echo "$seedpath exist"
 else
-	mv "$dlfilename" "$dest_path"
+	mv "$source_relative_path" "$dest_path"
   mv_result="$?"
 
 
   if [ ! -d "$(dirname "$seedpath")" ] ; then
 	  # probably torrents/FOO/foo.mkv -> seed/FOO/foo.mkv
     mkdir -p "$(dirname "$seedpath")"
-    rmdir "$(dirname "$dlfilename")"
+    rmdir "$(dirname "$source_relative_path")"
   fi
 
   if ! [ ${mv_result} -eq 0 ] ; then
     echo "something went wrong during the mv. bailing."
     echo "tried:"
-    echo "mv \"$dlfilename\" \"$dest_path\""
+    echo "mv \"$source_relative_path\" \"$dest_path\""
     echo "would have: "
     echo "ln -s \"$dest_path\" \"$seedpath\""
 	  echo "mv \"$tfile\" \"$seedtfilepath\""
@@ -77,7 +77,7 @@ else
   if ! [ ${ln_result} -eq 0 ] ; then
     echo "something went wrong during the ln. bailing."
     echo "tried:"
-    echo "mv \"$dlfilename\" \"$dest_path\""
+    echo "mv \"$source_relative_path\" \"$dest_path\""
     echo "ln -s \"$dest_path\" \"$seedpath\""
     echo "would have: "
 	  echo "mv \"$tfile\" \"$seedtfilepath\""
