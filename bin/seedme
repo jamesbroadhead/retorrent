@@ -1,11 +1,22 @@
 #!/bin/bash
 
+TORRENT_DIR="${HOME}/torrents"
+SEED_DIR="$HOME/seed"
+
+# Normalised filename in torrentdir
+# Legal:
+#   "a", given $TORRENT_DIR/a
+#   "$TORRENT_DIR/a", given $TORRENT_DIR/a
+# Illegal:
+#   "b", given $TORRENT_DIR/a/b
+#   "c", given $TORRENT_DIR/c does not exist
 dlfilename="$1"
 goodpath="$2"
+
 tfile="$(find_tfile "$1")"
 
-seedpath="${HOME}/seed/$1"
-seedtfilepath="$HOME/seed/torrentfiles/$(basename "$tfile")"
+seedpath="${SEED_DIR}/$1"
+seedtfilepath="${SEED_DIR}/torrentfiles/$(basename "$tfile")"
 
 (if [[ "$dlfilename" == "" ]] || [[ "$goodpath" == "" ]] || [[ "$tfile" == "" ]] ; then
 	echo "Usage:"
