@@ -10,78 +10,70 @@ SEED_DIR="$HOME/seed"
 # Illegal:
 #   "b", given $TORRENT_DIR/a/b
 #   "c", given $TORRENT_DIR/c does not exist
-source_relative_path="$1"
+input_path="$1"
 dest_path="$2"
 
-tfile="$(find_tfile "$1")"
+if [[ "${input_path}" == "" ]] || [[ "{$dest_path}" == "" ]] ; then
+	echo "Usage:"
+  echo "  seedme <FILE> <DEST>"
+  exit 1
+fi
 
-seedpath="${SEED_DIR}/$1"
+if ! [ -e "${input_path}" ]  ; then
+  echo "Can't find $input_path"
+  exit 1
+elif ! [ -f "${input_path}" ] ; then
+  echo "Not a file, can't work with this: $input_path"
+  exit 1
+elif ! [ "$(basename "$(realpath "${input_path}")")" = "${TORRENT_DIR}" ] ; then
+  echo "This script only operates on files in the top-level of ${TORRENT_DIR}"
+  exit 1
+elif [ -f "$dest_path" ] ; then
+  echo "Already exists: $dest_path"
+  exit 1
+fi
+
+# exists and is a file
+source_relative_path="$(basename "${input_path}")"
+seedpath="${SEED_DIR}/$source_relative_path"
+
+if [ -f "$seedpath" ] ; then
+	echo "$seedpath already exists"
+  exit 1
+fi
+
+tfile="$(find_tfile "${source_relative_path}")"
 seedtfilepath="${SEED_DIR}/torrentfiles/$(basename "$tfile")"
 
-(if [[ "$source_relative_path" == "" ]] || [[ "$dest_path" == "" ]] || [[ "$tfile" == "" ]] ; then
-	echo "Usage:"
-    echo "  seedme <FILE> <DEST> <TORRENTFILE>"
-elif ! [ -f "$source_relative_path" ] || ! [ -f "$tfile" ] ; then
-    QUIT=1
-    if ! [ -f "$source_relative_path" ] ; then
-        echo "Can't find $source_relative_path, or it's not a file"
-        QUIT=0
-    fi
-    if ! [ -f "$tfile" ] ; then
-        echo "Can't find ${tfile}"
-        QUIT=0
-    fi
-    if [ $QUIT -eq 0 ] ; then
-        exit 1
-    fi
-elif [ -f "$dest_path" ] ; then
-	echo "$dest_path already exists"
-	md5source_relative_path=$(md5sum "$source_relative_path" | awk '{print $1}')
-	md5dest_path=$(md5sum "$dest_path" | awk '{print $1}')
-	if [ "$md5source_relative_path" == "$md5dest_path" ] ; then
-		echo "Same file - removing new version"
-		rm "$source_relative_path"
-	  if [ -f "$seedtfilepath" ] ; then
-			rm "$tfile"
-		else
-			echo "Downloaded file isn't seeded w. this tfile (seed it!)"
-		fi
-	else
-		echo "$dest_path exists and is different"
-	fi
-elif [ -f "$seedpath" ] ; then
-	echo "$seedpath exist"
-else
-	mv "$source_relative_path" "$dest_path"
-  mv_result="$?"
+if ! [ -f "$tfile" ] ; then
+  echo "Can't find ${tfile}"
+  exit 1
+fi
 
+## async from here
 
-  if [ ! -d "$(dirname "$seedpath")" ] ; then
-	  # probably torrents/FOO/foo.mkv -> seed/FOO/foo.mkv
-    mkdir -p "$(dirname "$seedpath")"
-    rmdir "$(dirname "$source_relative_path")"
-  fi
+(mv "$source_relative_path" "$dest_path"
+mv_result="$?"
 
-  if ! [ ${mv_result} -eq 0 ] ; then
-    echo "something went wrong during the mv. bailing."
-    echo "tried:"
-    echo "mv \"$source_relative_path\" \"$dest_path\""
-    echo "would have: "
-    echo "ln -s \"$dest_path\" \"$seedpath\""
-	  echo "mv \"$tfile\" \"$seedtfilepath\""
-    exit 1
-  fi
+if ! [ ${mv_result} -eq 0 ] ; then
+  echo "something went wrong during the mv. bailing."
+  echo "tried:"
+  echo "mv \"$source_relative_path\" \"$dest_path\""
+  echo "would have: "
+  echo "ln -s \"$dest_path\" \"$seedpath\""
+  echo "mv \"$tfile\" \"$seedtfilepath\""
+  exit 1
+fi
 
-  ln -s "$dest_path" "$seedpath"
-  ln_result=$?
-  if ! [ ${ln_result} -eq 0 ] ; then
-    echo "something went wrong during the ln. bailing."
-    echo "tried:"
-    echo "mv \"$source_relative_path\" \"$dest_path\""
-    echo "ln -s \"$dest_path\" \"$seedpath\""
-    echo "would have: "
-	  echo "mv \"$tfile\" \"$seedtfilepath\""
-    exit 1
-  fi
-  mv "$tfile" "$seedtfilepath"
-fi) &
+ln -s "$dest_path" "$seedpath"
+ln_result=$?
+if ! [ ${ln_result} -eq 0 ] ; then
+  echo "something went wrong during the ln. bailing."
+  echo "tried:"
+  echo "mv \"$source_relative_path\" \"$dest_path\""
+  echo "ln -s \"$dest_path\" \"$seedpath\""
+  echo "would have: "
+  echo "mv \"$tfile\" \"$seedtfilepath\""
+  exit 1
+fi
+mv "$tfile" "$seedtfilepath") &
