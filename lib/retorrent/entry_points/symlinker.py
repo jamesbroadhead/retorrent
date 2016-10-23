@@ -10,6 +10,8 @@ Arguments:
     -s --smbsafe      Create symlinks in the smbsafe directory with Samba-safe paths
 """
 
+from __future__ import print_function
+
 import os
 from os.path import abspath, basename, dirname, expanduser, isdir, isfile, lexists
 from os.path import islink, realpath
@@ -18,20 +20,21 @@ from os.path import join as pjoin
 
 from docopt import docopt
 
-from os_utils.os_utils import mkdir_p, smbify, sym_sametarget
+from os_utils.os_utils import diskspace_used, mkdir_p, smbify, sym_sametarget
 from .. import confparse
+from ..seededlib import is_seeded
 
 debug = False
 
 
 def debugprint(string, debuglevel=1):
     """
-    debuglevel = 0 - always print
-    debuglevel = 1 - print if -d
-    debuglevel = 2 - print if -dd
+    debuglevel = 0 - always print)
+    debuglevel = 1 - print(if -d)
+    debuglevel = 2 - print(if -dd)
     """
     if debuglevel <= debug:
-        print string
+        print(string)
 
 
 # there sure are!
@@ -41,7 +44,7 @@ def _main(smbsafe=False):
 
     for_postprocessing = {}
     for _, category in categories_conf.items():
-        # print category
+        # print(category)
         category_home = category['symlink_path']
         if smbsafe:
             category_home = category['smbsafe_symlink_path']
@@ -57,28 +60,28 @@ def _main(smbsafe=False):
             if not islink(elem_path):
 
                 if isfile(elem_path):
-                    print '!! file in symlink dir: %s' % (elem_path)
+                    print('!! file in symlink dir: %s' % (elem_path))
                 elif not len(os.listdir(elem_path)):
                     os.rmdir(elem_path)
                 else:
                     for f in os.listdir(elem_path):
                         fpath = pjoin(elem_path, f)
                         if not islink(fpath):
-                            print 'Non-symlinked file detected in folder %s in %s' % (
-                                basename(fpath), elem_path)
-                            print '\t Non-symlinked folders should only contain symlinks'
+                            print('Non-symlinked file detected in folder %s in %s' %
+                                  (basename(fpath), elem_path))
+                            print('\t Non-symlinked folders should only contain symlinks')
                         elif not isfile(fpath):
                             # broken symlink
                             os.remove(fpath)
 
             else:
                 if lexists(elem_path) and not pexists(elem_path):
-                    print 'Broken symlink! Removing.', elem
+                    print('Broken symlink! Removing.', elem)
                     removed += [elem]
                     os.remove(elem_path)
 
         if category_home in category['content_paths']:
-            print 'The content home is in the list of content paths. Cannot continue.'
+            print('The content home is in the list of content paths. Cannot continue.')
             continue
 
         # /mnt/foo/video/tv, /mnt/bar/video/tv etc.
@@ -96,14 +99,14 @@ def _main(smbsafe=False):
                 # empty dir in content dir
                 if isdir(content_path) and not len(os.listdir(content_path)):
                     os.rmdir(content_path)
-                    print '%s: removed empty content dir' % (content_path,)
+                    print('%s: removed empty content dir' % (content_path,))
                     continue
 
                 # symlinks in content dir
                 elif islink(content_path):
-                    print '%s: symlink in content dir'
+                    print('%s: symlink in content dir')
                     if not pexists(content_path):
-                        print '%s: symlink was broken, removing'
+                        print('%s: symlink was broken, removing')
                         os.remove(content_path)
 
                 # content can either be movie.avi or series.name/
@@ -120,7 +123,7 @@ def _main(smbsafe=False):
 
                     os.symlink(content_abspath, symlink_path)
                     if content in removed:
-                        print 'Replaced a broken symlink', content
+                        print('Replaced a broken symlink', content)
 
                 # symlink with same name already exists
                 #     and doesn't point to same location
@@ -145,9 +148,9 @@ def _main(smbsafe=False):
                         link_contents(oldlink_realpath, symlink_path)
                         link_contents(content_abspath, symlink_path)
                     else:
-                        print 'Duplicate files, can\'t combine :('
-                        print '\t', oldlink_realpath
-                        print '\t', content_abspath
+                        print('Duplicate files, can\'t combine :(')
+                        print('\t', oldlink_realpath)
+                        print('\t', content_abspath)
 
                 # dir found in category_home.
                 #    Broken symlinks and empty dirs should be gone already
@@ -179,13 +182,13 @@ def _main(smbsafe=False):
                     if islink(f):
                         os.remove(f)
                     else:
-                        print 'ERROR! Tried to remove a file! %s' % (f)
+                        print('ERROR! Tried to remove a file! %s' % (f))
                 os.rmdir(symlink_path)
-                print '\t%s no longer sourced from multiple locations' % (symlink_path,)
+                print('\t%s no longer sourced from multiple locations' % (symlink_path,))
                 os.symlink(content_abspath, symlink_path)
             else:
                 link_contents(content_abspath, symlink_path)
-                print '\t%s: sourced from multiple locations' % (symlink_path,)
+                print('\t%s: sourced from multiple locations' % (symlink_path,))
 
 
 def link_contents(content_path, linkdir_path):
@@ -197,20 +200,43 @@ def link_contents(content_path, linkdir_path):
         if not pexists(f_sympath):
             os.symlink(f_realpath, f_sympath)
         elif pexists(f_sympath) and not sym_sametarget(f_sympath, f_realpath):
-            print 'Duplicate content found for %s in:' % (f_sympath,)
-            print '==>', realpath(f_sympath)
-            print '   ', realpath(f_realpath)
+            print_advice_on_duplicates([realpath(f_sympath), realpath(f_realpath)])
         else:
             # symlink exists, but points to same location.
             pass
 
 
 def all_symlinks_to_same_dir(d, symlinks):
-    print d
+    print(d)
     for s in symlinks:
         if not abspath(dirname(realpath(s))) == abspath(d):
             return False
     return True
+
+
+def print_advice_on_duplicates(duplicates):
+    """ a and b are paths to files which exist """
+    print('Duplicate content found:')
+    print('==>', duplicates)
+
+    seeded, unseeded = is_seeded(duplicates)
+
+    if not seeded:
+        # assume: largest file is highest quality :3
+        results = sorted([(diskspace_used(u), u) for u in unseeded], reverse=True)
+
+        print('None are seeded - recommend:')
+        print('keep: {}'.format(results[0][1]))
+        print('rm {}'.format(' '.join([r[1] for r in results])))
+
+    elif unseeded:  # there are some seeded & some unseeded
+        # rm all unseeded, repeat the above
+        print('Some are seeded, some are not - recommend:')
+        print('rm {}'.format(' '.join(unseeded)))
+        print('resolve: {}'.format(' '.join(seeded)))
+    else:
+        print('All are seeded - recommend you make your mind up')
+        print('resolve: {}'.format(' '.join(seeded)))
 
 
 def main():
