@@ -25,7 +25,18 @@ def _write_to_file(path, removeset):
         os.fsync(f)
 
 
+def _validate(item):
+    """ disallow single characters or single-digit numbers """
+
+    if len(item) == 1:
+        return False
+    return True
+
+
 def add_and_sync(removeset, item):
+    if not _validate(item):
+        return removeset
+
     removeset.add(item)
 
     write_to_file(removeset)
