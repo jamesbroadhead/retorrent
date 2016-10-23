@@ -11,14 +11,14 @@ SEED_DIR="$HOME/seed"
 #   "b", given $TORRENT_DIR/a/b
 #   "c", given $TORRENT_DIR/c does not exist
 dlfilename="$1"
-goodpath="$2"
+dest_path="$2"
 
 tfile="$(find_tfile "$1")"
 
 seedpath="${SEED_DIR}/$1"
 seedtfilepath="${SEED_DIR}/torrentfiles/$(basename "$tfile")"
 
-(if [[ "$dlfilename" == "" ]] || [[ "$goodpath" == "" ]] || [[ "$tfile" == "" ]] ; then
+(if [[ "$dlfilename" == "" ]] || [[ "$dest_path" == "" ]] || [[ "$tfile" == "" ]] ; then
 	echo "Usage:"
     echo "  seedme <FILE> <DEST> <TORRENTFILE>"
 elif ! [ -f "$dlfilename" ] || ! [ -f "$tfile" ] ; then
@@ -34,11 +34,11 @@ elif ! [ -f "$dlfilename" ] || ! [ -f "$tfile" ] ; then
     if [ $QUIT -eq 0 ] ; then
         exit 1
     fi
-elif [ -f "$goodpath" ] ; then
-	echo "$goodpath already exists"
+elif [ -f "$dest_path" ] ; then
+	echo "$dest_path already exists"
 	md5dlfilename=$(md5sum "$dlfilename" | awk '{print $1}')
-	md5goodpath=$(md5sum "$goodpath" | awk '{print $1}')
-	if [ "$md5dlfilename" == "$md5goodpath" ] ; then
+	md5dest_path=$(md5sum "$dest_path" | awk '{print $1}')
+	if [ "$md5dlfilename" == "$md5dest_path" ] ; then
 		echo "Same file - removing new version"
 		rm "$dlfilename"
 	  if [ -f "$seedtfilepath" ] ; then
@@ -47,12 +47,12 @@ elif [ -f "$goodpath" ] ; then
 			echo "Downloaded file isn't seeded w. this tfile (seed it!)"
 		fi
 	else
-		echo "$goodpath exists and is different"
+		echo "$dest_path exists and is different"
 	fi
 elif [ -f "$seedpath" ] ; then
 	echo "$seedpath exist"
 else
-	mv "$dlfilename" "$goodpath"
+	mv "$dlfilename" "$dest_path"
   mv_result="$?"
 
 
@@ -65,20 +65,20 @@ else
   if ! [ ${mv_result} -eq 0 ] ; then
     echo "something went wrong during the mv. bailing."
     echo "tried:"
-    echo "mv \"$dlfilename\" \"$goodpath\""
+    echo "mv \"$dlfilename\" \"$dest_path\""
     echo "would have: "
-    echo "ln -s \"$goodpath\" \"$seedpath\""
+    echo "ln -s \"$dest_path\" \"$seedpath\""
 	  echo "mv \"$tfile\" \"$seedtfilepath\""
     exit 1
   fi
 
-  ln -s "$goodpath" "$seedpath"
+  ln -s "$dest_path" "$seedpath"
   ln_result=$?
   if ! [ ${ln_result} -eq 0 ] ; then
     echo "something went wrong during the ln. bailing."
     echo "tried:"
-    echo "mv \"$dlfilename\" \"$goodpath\""
-    echo "ln -s \"$goodpath\" \"$seedpath\""
+    echo "mv \"$dlfilename\" \"$dest_path\""
+    echo "ln -s \"$dest_path\" \"$seedpath\""
     echo "would have: "
 	  echo "mv \"$tfile\" \"$seedtfilepath\""
     exit 1
