@@ -25,8 +25,9 @@ if ! [ -e "${input_path}" ]  ; then
 elif ! [ -f "${input_path}" ] ; then
   echo "Not a file, can't work with this: $input_path"
   exit 1
-elif ! [ "$(basename "$(realpath "${input_path}")")" = "${TORRENT_DIR}" ] ; then
+elif ! [ "$(dirname "$(realpath "${input_path}")")" = "$(realpath "${TORRENT_DIR}")" ] ; then
   echo "This script only operates on files in the top-level of ${TORRENT_DIR}"
+  echo "Checking against: $(dirname "$(realpath "${input_path}")")"
   exit 1
 elif [ -f "$dest_path" ] ; then
   echo "Already exists: $dest_path"
