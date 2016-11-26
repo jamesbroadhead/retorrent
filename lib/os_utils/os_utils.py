@@ -92,6 +92,7 @@ def device_number(path):
 
 
 def hostname():
+    """ get the hostname without using the network stack """
     return os.uname()[1]
 
 
