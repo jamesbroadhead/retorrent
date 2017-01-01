@@ -73,32 +73,32 @@ def execute_command_bundles(command_bundles):
 def parse_args():
     parser = OptionParser()
 
-    parser.add_option('-c',
-                      '--config-dir',
-                      help='Specify alternate config dir',
-                      dest='configdir',
-                      default='')
+    parser.add_option(
+        '-c', '--config-dir', help='Specify alternate config dir', dest='configdir', default='')
 
-    parser.add_option('-d',
-                      '--debug',
-                      help='Print debug messages (where implemented)',
-                      action='store_true',
-                      dest='debug',
-                      default=False)
+    parser.add_option(
+        '-d',
+        '--debug',
+        help='Print debug messages (where implemented)',
+        action='store_true',
+        dest='debug',
+        default=False)
 
-    parser.add_option('-p',
-                      '--pretend',
-                      help='Build commands, but do not run them',
-                      action='store_true',
-                      dest='pretend',
-                      default=False)
+    parser.add_option(
+        '-p',
+        '--pretend',
+        help='Build commands, but do not run them',
+        action='store_true',
+        dest='pretend',
+        default=False)
 
-    parser.add_option('-t',
-                      '--old-torrentfile-detection',
-                      help='Use old, not new torrentfile behaviour',
-                      action='store_true',
-                      dest='old_torrentfile_detection',
-                      default=False)
+    parser.add_option(
+        '-t',
+        '--old-torrentfile-detection',
+        help='Use old, not new torrentfile behaviour',
+        action='store_true',
+        dest='old_torrentfile_detection',
+        default=False)
 
     options, args = parser.parse_args()
     return options, args

@@ -138,9 +138,8 @@ class Retorrenter(object):
         self.debugprint("Dirpath before autoset: " + self.dest_dirpath)
 
         possible_series_foldernames = [
-            self.filenamer.convert_filename(
-                basename(orig_paths[0]),
-                True), self.filenamer.convert_filename(orig_foldername, True)
+            self.filenamer.convert_filename(basename(orig_paths[0]), True),
+            self.filenamer.convert_filename(orig_foldername, True)
         ]
         possible_series_foldernames = [i for i in possible_series_foldernames if i]
 
@@ -403,12 +402,14 @@ class Retorrenter(object):
         (filepaths_to_keep, intermeds_to_keep, filenames_to_keep,
          num_discarded_files) = self.get_movies_and_extras(file_paths, intermeds, file_names)
 
-        content_details = {'content_abspath': content_abspath,
-                           'orig_paths': filepaths_to_keep,
-                           'orig_foldername': orig_foldername,
-                           'orig_intermeds': intermeds_to_keep,
-                           'orig_filenames': filenames_to_keep,
-                           'num_discarded_files': num_discarded_files}
+        content_details = {
+            'content_abspath': content_abspath,
+            'orig_paths': filepaths_to_keep,
+            'orig_foldername': orig_foldername,
+            'orig_intermeds': intermeds_to_keep,
+            'orig_filenames': filenames_to_keep,
+            'num_discarded_files': num_discarded_files
+        }
 
         return content_details
 
@@ -498,9 +499,7 @@ class Retorrenter(object):
             if tfile in exclude:
                 continue
             cf = self.filenamer.convert_filename(
-                tfile.rstrip('torrent').rstrip('.'),
-                True,
-                interactive=False)
+                tfile.rstrip('torrent').rstrip('.'), True, interactive=False)
 
             score = SequenceMatcher('', str2utf8(arg_name), str2utf8(cf)).ratio()
 
@@ -612,8 +611,10 @@ class Retorrenter(object):
                 print bold('%s\t|\t%s') % (multiple[k]['relpath_from_filename'],
                                            multiple[k]['relpath_from_foldername'])
 
-            question = ' '.join(['Filename-based and Foldername-based produced differences: ',
-                                 'Select which is better, or enter new term to remove'])
+            question = ' '.join([
+                'Filename-based and Foldername-based produced differences: ',
+                'Select which is better, or enter new term to remove'
+            ])
             options = ["filenames", "foldernames", CANCEL]
 
         rename_map = {}
@@ -712,11 +713,12 @@ class Retorrenter(object):
                     commands.append('rm -Irv "%s"' % (content_abspath,))
 
         # a command bundle
-        return {'commands': commands,
-                'symlinks': [seeddir_paths_
-                             for _orig_path, seeddir_paths_ in seeddir_paths.items()],
-                'torrentfile': torrentfile,
-                'commands_run': []}
+        return {
+            'commands': commands,
+            'symlinks': [seeddir_paths_ for _orig_path, seeddir_paths_ in seeddir_paths.items()],
+            'torrentfile': torrentfile,
+            'commands_run': []
+        }
 
     def build_torrentfile_commands(self, torrentfile, content_abspath, orig_foldername, orig_paths,
                                    rename_map, orig_intermeds, orig_filenames):
@@ -734,8 +736,10 @@ class Retorrenter(object):
         }
         seeddir_paths_keys = sorted(seeddir_paths.keys())
 
-        commands.extend(['ln -s "%s" "%s"' % (rename_map[orig_path], seeddir_paths[orig_path])
-                         for orig_path in seeddir_paths_keys])
+        commands.extend([
+            'ln -s "%s" "%s"' % (rename_map[orig_path], seeddir_paths[orig_path])
+            for orig_path in seeddir_paths_keys
+        ])
 
         if torrentfile:
             print 'Using torrentfile %r' % (torrentfile,)

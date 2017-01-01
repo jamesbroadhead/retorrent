@@ -49,8 +49,10 @@ def parse_retorrentconf(extra_configdir=''):
         'torrentfilesdir': '~/torrents/torrentfiles',
     }
 
-    expand_these = ['content_root_paths', 'seeddir', 'seedtorrentfilesdir', 'smbsafe_symlink_path',
-                    'symlink_path', 'torrentfilesdir']
+    expand_these = [
+        'content_root_paths', 'seeddir', 'seedtorrentfilesdir', 'smbsafe_symlink_path',
+        'symlink_path', 'torrentfilesdir'
+    ]
 
     if not validate_config(config):
         sys.exit(1)

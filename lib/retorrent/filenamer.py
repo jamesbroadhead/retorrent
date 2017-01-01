@@ -56,9 +56,8 @@ class Filenamer(object):
         filename = self.remove_divider_symbols(filename)
 
         # remove braces from anything that isn't a checksum or a year
-        filename = remove_braces(filename,
-                                 preserve_checksum=not is_foldername,
-                                 interactive=interactive)
+        filename = remove_braces(
+            filename, preserve_checksum=not is_foldername, interactive=interactive)
 
         # Apparently, there are things called 'zero width spaces'. Remove them.
         filename = remove_zwsp(filename)

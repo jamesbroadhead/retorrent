@@ -13,6 +13,6 @@ pylint==1.3.1
 simplejson==3.6.5
 six==1.8.0
 wsgiref==0.1.2
-yapf==0.7.0
+yapf==0.14.0
 
 -e git://github.com/jamesbroadhead/torrentparse.git@03be6dd1e36ae64026bf13599f975016c67262e8#egg=torrentparse

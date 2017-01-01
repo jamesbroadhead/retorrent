@@ -15,9 +15,10 @@ from .restring import alphabet, conv_eng_number, conv_from_alphabet, dotjoin, en
 
 class Episoder(object):
     #pylint: disable=too-many-public-methods
-    identifiers = {'start': ['s', 'e', 'd', 'p', 'ep', 'cd', 'pt', 'part', 'side', 'series',
-                             'episode'],
-                   'start_special': ['op', 'ed']}
+    identifiers = {
+        'start': ['s', 'e', 'd', 'p', 'ep', 'cd', 'pt', 'part', 'side', 'series', 'episode'],
+        'start_special': ['op', 'ed']
+    }
     numbers_to_ignore = ['720', '264']
     pairs_to_ignore = [('5', '1')]  # 5.1
 
@@ -176,8 +177,8 @@ class Episoder(object):
                     return replace_doubleitem(split_fn, index,
                                               self.gen_full_epno_string(split_fn, nextitem, item))
                 else:
-                    return replace_singleitem(split_fn, index, self.gen_full_epno_string(split_fn,
-                                                                                         item))
+                    return replace_singleitem(split_fn, index,
+                                              self.gen_full_epno_string(split_fn, item))
             # eg. 302 -> may be episode 302, or s03e02
             elif len(item) == 3:
                 die = self.get_digits_in_epno(split_fn, item)
@@ -328,9 +329,11 @@ class Episoder(object):
         default_value = 2
         question = 'In: "' + '.'.join(split_fn) + '", ' + item + ' means:'
 
-        options = {self.gen_n_digit_epno(split_fn, 2, item[1:3], item[0]): 2,
-                   self.gen_n_digit_epno(split_fn, 3, item): 3,
-                   'Not an episode number!': self.NOT_AN_EPNO_SENTINEL}
+        options = {
+            self.gen_n_digit_epno(split_fn, 2, item[1:3], item[0]): 2,
+            self.gen_n_digit_epno(split_fn, 3, item): 3,
+            'Not an episode number!': self.NOT_AN_EPNO_SENTINEL
+        }
 
         keys = options.keys()
         keys.sort(reverse=True)
@@ -445,10 +448,11 @@ class Episoder(object):
         if not (letter == 'a' or letter == 'b'):
             default_false = True
 
-        answer = self.booloptionator('In: {}\nIs {} an episode or part number?'.format(
-            bold(dotjoin(*split_fn)), bold(letter)),
-                                     yesno=True,
-                                     default_false=default_false)
+        answer = self.booloptionator(
+            'In: {}\nIs {} an episode or part number?'.format(
+                bold(dotjoin(*split_fn)), bold(letter)),
+            yesno=True,
+            default_false=default_false)
         self.treat_single_letters_as_epnos = answer
 
         logging.info('%s is %s an episode number', letter, '' if answer else 'not')
@@ -461,10 +465,10 @@ class Episoder(object):
 
         if substring in eng_numbers:
             whole_item_text = ', from %s' % (whole_item,) if whole_item else ''
-            treat_as_epno = self.booloptionator('Is "%s"%s a part number?' % (substring,
-                                                                              whole_item_text),
-                                                yesno=True,
-                                                default_false=True)
+            treat_as_epno = self.booloptionator(
+                'Is "%s"%s a part number?' % (substring, whole_item_text),
+                yesno=True,
+                default_false=True)
             self.known_eng_numbers[substring] = treat_as_epno
             return treat_as_epno
         return False
