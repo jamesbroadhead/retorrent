@@ -23,6 +23,18 @@ class Episoder(object):
 
     UNSET_SENTINEL = object()
     NOT_AN_EPNO_SENTINEL = object()
+
+    # for the current item, the number of digits we expect in the episode number.
+    # this serves a number of purposes:
+    # in parsing:
+    #   used to determine if a string is a valid epno
+    #   may be set to NOT_AN_EPNO_SENTINEL if the user was posed the question
+    # in generation:
+    #   used to format the output string
+    #
+    # Valid values: (integers), UNSET_SENTINEL, NOT_AN_EPNO_SENTINEL
+    #
+    # #future: this should be refactored away to be single-use
     digits_in_epno = UNSET_SENTINEL
 
     # for folders with many files, to avoid asking multiple times
@@ -166,7 +178,7 @@ class Episoder(object):
                 else:
                     return replace_singleitem(split_fn, index, self.gen_full_epno_string(split_fn,
                                                                                          item))
-            # eg. 302
+            # eg. 302 -> may be episode 302, or s03e02
             elif len(item) == 3:
                 die = self.get_digits_in_epno(split_fn, item)
                 if die == self.NOT_AN_EPNO_SENTINEL:
@@ -309,6 +321,11 @@ class Episoder(object):
         return self.digits_in_epno
 
     def ask_for_digits_in_epno(self, split_fn, item):
+        """
+        Ask the user to define the number of digits in a valid episode number.
+        *must* return an integer, even if an answer was not forthcoming
+        """
+        default_value = 2
         question = 'In: "' + '.'.join(split_fn) + '", ' + item + ' means:'
 
         options = {self.gen_n_digit_epno(split_fn, 2, item[1:3], item[0]): 2,
@@ -322,7 +339,7 @@ class Episoder(object):
 
         if answer == '':
             print "Bad input - taking 2-digit epno"
-            return 2
+            return default_value
         return options[answer]
 
     @staticmethod
