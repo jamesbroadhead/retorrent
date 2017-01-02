@@ -124,3 +124,17 @@ class TestConvertIfEpisodeNumber(EpisoderTestMixin, unittest.TestCase):
         filename_split = ['op01']
         expected = (['op01'])
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
+
+class TestDigitsInEpno(unittest.TestCase):
+
+    def setUp(self):
+        raise Exception('incomplete!')
+
+    def test_ask_for_digits_in_epno_gets_integer(self):
+        """ returns integer """
+
+    def test_ask_for_digits_in_epno_gets_sentinel(self):
+        """ returns sentinel """
+
+    def test_get_digits_in_epno_returns_response(self):
+        """ TODO: test suite here """

@@ -29,11 +29,10 @@ class Episoder(object):
     # this serves a number of purposes:
     # in parsing:
     #   used to determine if a string is a valid epno
-    #   may be set to NOT_AN_EPNO_SENTINEL if the user was posed the question
     # in generation:
     #   used to format the output string
     #
-    # Valid values: (integers), UNSET_SENTINEL, NOT_AN_EPNO_SENTINEL
+    # Valid values: (integers), UNSET_SENTINEL,
     #
     # #future: this should be refactored away to be single-use
     digits_in_epno = UNSET_SENTINEL
@@ -317,14 +316,21 @@ class Episoder(object):
         return output
 
     def get_digits_in_epno(self, split_fn, item):
-        if self.digits_in_epno is self.UNSET_SENTINEL:
-            self.digits_in_epno = self.ask_for_digits_in_epno(split_fn, item)
-        return self.digits_in_epno
+        if self.digits_in_epno is not self.UNSET_SENTINEL:
+            return self.digits_in_epno
+
+        response = self.ask_for_digits_in_epno(split_fn, item)
+
+        # the response may be non-integral
+        if isinstance(response, int):
+            self.digits_in_epno = response
+        return response
 
     def ask_for_digits_in_epno(self, split_fn, item):
         """
         Ask the user to define the number of digits in a valid episode number.
-        *must* return an integer, even if an answer was not forthcoming
+
+        May return NOT_AN_EPNO_SENTINEL for inappropriate input
         """
         default_value = 2
         question = 'In: "' + '.'.join(split_fn) + '", ' + item + ' means:'
@@ -341,8 +347,9 @@ class Episoder(object):
         answer = self.optionator(question, keys)
 
         if answer == '':
-            print "Bad input - taking 2-digit epno"
+            print "Bad input - taking {}-digit epno".format(default_value)
             return default_value
+
         return options[answer]
 
     @staticmethod
