@@ -7,6 +7,9 @@ Usage:
 Options:
     -s --skip-targets    Delete everything except the file passed
 
+#Future: this leaves junk dirs in `seeddir`, which may be empty, or contain .nfos or similar which have been ignored by retorrent.
+    #1: Travel up paths inside `seeddir` & rm if empty
+    #2: use the same filtering logic from retorrent & rm if nothing else remains
 """
 import os
 from os.path import abspath, realpath
@@ -25,7 +28,6 @@ def _main(targets, skip_targets=False):
     config, _ = parse_retorrentconf()
     seeddir = config['seeddir']
     seed_tfilesdir = config['seedtorrentfilesdir']
-    assert seeddir is not None and seed_tfilesdir is not None
 
     # the list passed. Generally, symlinks in ~/video
     remove_targets = []
@@ -43,7 +45,11 @@ def _main(targets, skip_targets=False):
 
     files_tfiles = gen_map(seed_tfilesdir)
     #pylint: disable=unused-variable
-    tfiles = [tfile_from_filename(seedpath, files_tfiles) for videopath, seedpath in seeded.items()]
+    tfiles = [
+        tfile_from_filename(
+            seedpath, seed_tfilesdir, files_tfiles=files_tfiles)
+        for videopath, seedpath in seeded.items()
+    ]
 
     # unseeded: list of args which are not seeded
     # tfiles: list of tfiles
