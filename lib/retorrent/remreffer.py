@@ -16,7 +16,7 @@ def remref(to_delete, to_skip=None):
         pathlist.extend(add_item(item))
 
     skipping = set([p for p in pathlist if p in to_skip])
-    deleting = sorted([p for p in pathlist if not p in skipping])
+    deleting = sorted(set([p for p in pathlist if not p in skipping]))
 
     if skipping:
         print 'Skipping:'
