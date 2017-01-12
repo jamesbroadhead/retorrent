@@ -3,7 +3,7 @@
 TORRENT_DIR="${HOME}/torrents"
 SEED_DIR="$HOME/seed"
 
-# Relative path to file in torrentdir
+# input_path: Should be a path to a file in torrentdir
 # Legal:
 #   "a", given $TORRENT_DIR/a
 #   "$TORRENT_DIR/a", given $TORRENT_DIR/a
@@ -32,11 +32,19 @@ elif ! [ "$(dirname "$(realpath "${input_path}")")" = "$(realpath "${TORRENT_DIR
 elif [ -f "$dest_path" ] ; then
   echo "Already exists: $dest_path"
   exit 1
+elif ! [ -d "$(dirname "$(realpath -m "${dest_path}")")" ] ; then
+  echo "Directory to contain the destination does not exist: $(dirname "$(realpath -m "${dest_path}")")"
+  exit 1
 fi
 
-# exists and is a file
+# input_path exists and is a file
+source_absolute_path="$(readlink -f "${input_path}")"
 source_relative_path="$(basename "${input_path}")"
 seedpath="${SEED_DIR}/$source_relative_path"
+
+# can't use $(readlink -f) to resolve symlinks, as the path does not
+# exist yet
+dest_absolute_path="$(realpath -m "${dest_path}")"
 
 if [ -f "$seedpath" ] ; then
 	echo "$seedpath already exists"
@@ -53,26 +61,26 @@ fi
 
 ## async from here
 
-(mv "$source_relative_path" "$dest_path"
+(mv "$source_absolute_path" "$dest_absolute_path"
 mv_result="$?"
 
 if ! [ ${mv_result} -eq 0 ] ; then
   echo "something went wrong during the mv. bailing."
   echo "tried:"
-  echo "mv \"$source_relative_path\" \"$dest_path\""
+  echo "mv \"$source_absolute_path\" \"$dest_absolute_path\""
   echo "would have: "
-  echo "ln -s \"$dest_path\" \"$seedpath\""
+  echo "ln -s \"$dest_absolute_path\" \"$seedpath\""
   echo "mv \"$tfile\" \"$seedtfilepath\""
   exit 1
 fi
 
-ln -s "$dest_path" "$seedpath"
+ln -s "$dest_absolute_path" "$seedpath"
 ln_result=$?
 if ! [ ${ln_result} -eq 0 ] ; then
   echo "something went wrong during the ln. bailing."
   echo "tried:"
-  echo "mv \"$source_relative_path\" \"$dest_path\""
-  echo "ln -s \"$dest_path\" \"$seedpath\""
+  echo "mv \"$source_absolute_path\" \"$dest_absolute_path\""
+  echo "ln -s \"$dest_absolute_path\" \"$seedpath\""
   echo "would have: "
   echo "mv \"$tfile\" \"$seedtfilepath\""
   exit 1

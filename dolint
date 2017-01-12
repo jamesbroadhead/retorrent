@@ -10,7 +10,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 BASHFILES=("bin/seedme" "dolint" "dotest" "git_hooks/pre-push")
 
 if ! [ "$(yapf --version)" = "yapf 0.14.0" ] ; then
-  echo "Wrong yapf version! Not proceeding."
+  echo "No yapf, or wrong yapf version! Not proceeding."
   exit 1
 fi
 
