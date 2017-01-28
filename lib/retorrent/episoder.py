@@ -20,7 +20,7 @@ class Episoder(object):
         'start_special': ['op', 'ed']
     }
     numbers_to_ignore = ['720', '264']
-    pairs_to_ignore = [('5', '1')]  # 5.1
+    pairs_to_ignore = [('5', '1'), ('8', 'bit')]  # 5.1, 8-bit
 
     UNSET_SENTINEL = object()
     NOT_AN_EPNO_SENTINEL = object()
