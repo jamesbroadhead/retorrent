@@ -1,0 +1,14 @@
+
+Goal: Less code in episoder.py
+Goal: Cleaner separation of concerns
+Goal: Caching of optionator results (generically, ideally)
+Goal: Less mutating state
+
+
+WIP:
+  - mostly separated concerns. Need to clean up, figure out domain for each class
+    => the formatter should probably own the digits_in_epno:w
+
+  - need to figure out interim caching & generic caching
+
+  - EpnoFormatter.format should be a classmethod - this may be tricky (memoization may help?)

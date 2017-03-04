@@ -4,6 +4,7 @@ import unittest
 
 from mock import Mock
 
+from retorrent.digits_in_epno import DigitsInEpnoStates
 from retorrent.episoder import Episoder
 
 
@@ -92,7 +93,7 @@ class TestConvertIfEpisodeNumber(EpisoderTestMixin, unittest.TestCase):
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
 
     def test_triple_digit_with_non_epno_sentinel(self):
-        self.e.ask_for_digits_in_epno = Mock(return_value=self.e.NOT_AN_EPNO_SENTINEL)
+        self.e.ask_for_digits_in_epno = Mock(return_value=DigitsInEpnoStates.NOT_AN_EPNO_SENTINEL)
 
         filename_split = ['501']
         expected = (None)
@@ -127,13 +128,13 @@ class TestConvertIfEpisodeNumber(EpisoderTestMixin, unittest.TestCase):
 
     def test_movie_with_number_in_title(self):
         self.e.is_movie = True
-        self.e.ask_for_digits_in_epno = Mock(return_value=Episoder.NOT_AN_EPNO_SENTINEL)
+        self.e.ask_for_digits_in_epno = Mock(return_value=DigitsInEpnoStates.NOT_AN_EPNO_SENTINEL)
         filename_split = [ 'agent', '45' ]
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 1), None)
 
     def test_movie_with_number_in_title_and_a_year(self):
         self.e.is_movie = True
-        self.e.ask_for_digits_in_epno = Mock(return_value=Episoder.NOT_AN_EPNO_SENTINEL)
+        self.e.ask_for_digits_in_epno = Mock(return_value=DigitsInEpnoStates.NOT_AN_EPNO_SENTINEL)
         filename_split = [ 'agent', '45', '2015' ]
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 1), None)
 
