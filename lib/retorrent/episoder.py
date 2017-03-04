@@ -9,9 +9,6 @@ from .optionator import booloptionator, optionator
 from .relist import replace_singleitem, replace_doubleitem
 from .restring import alphabet, conv_eng_number, conv_from_alphabet, dotjoin, eng_numbers
 
-# TODO: Find all assumptions about two-digit episode numbers + mark with ASSUME
-# TODO: Fix all ASSUMES about 2-digit epnummbers
-
 
 class Episoder(object):
     #pylint: disable=too-many-public-methods
@@ -24,6 +21,8 @@ class Episoder(object):
 
     UNSET_SENTINEL = object()
     NOT_AN_EPNO_SENTINEL = object()
+
+    DIGITS_IN_EPNO_TRANSIENT_STATES = {UNSET_SENTINEL, NOT_AN_EPNO_SENTINEL}
 
     # for the current item, the number of digits we expect in the episode number.
     # this serves a number of purposes:
@@ -68,8 +67,6 @@ class Episoder(object):
     def set_movie(self, is_movie):
         self.is_movie = is_movie
 
-    # TODO: need to sort out dirs that have 01-04 or similar
-    # TODO: new episode numbering "episode 1", [01x01]
     @tracelogdecorator
     def add_series_episode_details(self, split_fn):
         for index, item in enumerate(split_fn):
@@ -161,6 +158,14 @@ class Episoder(object):
 
         if item.isdigit():
             logging.info('convert_if_episode_number: checking numerals for %r', item)
+            if self.is_movie:
+                # it's normal for movies to have a number in the title
+                # eg. Predator 2, etc
+                die = self.get_digits_in_epno(split_fn, item)
+                if die == self.NOT_AN_EPNO_SENTINEL:
+                    # the user indicated that the item wasn't an epno
+                    return None
+
             # eg. 1  or 2
             if len(item) == 1:
                 # 1.01 => s01e01
@@ -253,7 +258,6 @@ class Episoder(object):
                 # Only one file, getting here is a mistake
                 return ''
             elif self.is_movie:
-                # TODO: verify that epno is single-digit only :(
                 return 'cd' + epno
             else:
                 return 's01' + 'e' + epno
@@ -271,7 +275,6 @@ class Episoder(object):
         if not len(item) >= 3:
             return
 
-        # TODO: REEEEEGEX
         for i in range(1, len(item)):
             subitem = item[0:i]
             divider = item[i]
@@ -317,8 +320,18 @@ class Episoder(object):
         return output
 
     def get_digits_in_epno(self, split_fn, item):
+        """
+        Wrap interactive responses, persisting only if the user gave a valid answer
+
+        A better design would encapsulate all of this away into another class
+        """
         if self.digits_in_epno is self.UNSET_SENTINEL:
-            self.digits_in_epno = self.ask_for_digits_in_epno(split_fn, item)
+            die = self.ask_for_digits_in_epno(split_fn, item)
+
+            if not die in self.DIGITS_IN_EPNO_TRANSIENT_STATES:
+                self.digits_in_epno = die
+            return die
+
         return self.digits_in_epno
 
     def ask_for_digits_in_epno(self, split_fn, item):
@@ -326,13 +339,14 @@ class Episoder(object):
         Ask the user to define the number of digits in a valid episode number.
         *must* return an integer, even if an answer was not forthcoming
         """
+        # TODO: this must cache specific results for the current run to avoid repeatedly asking the same question when there's a number in the title
         default_value = 2
         question = 'In: "' + '.'.join(split_fn) + '", ' + item + ' means:'
 
         options = {
             self.gen_n_digit_epno(split_fn, 2, item[1:3], item[0]): 2,
             self.gen_n_digit_epno(split_fn, 3, item): 3,
-            'Not an episode number!': self.NOT_AN_EPNO_SENTINEL
+            'Should not be converted!': self.NOT_AN_EPNO_SENTINEL
         }
 
         keys = options.keys()
@@ -397,6 +411,7 @@ class Episoder(object):
     # Takes a string with the epno. Makes sure that it's the right length
     # eg. diference between s01e02 and s01e002 ( or ep002)
     # ASSUME: no epno > 4 digits
+    @tracelogdecorator
     def pad_episode_number(self, somestring):
         die = self.digits_in_epno
         if die == self.UNSET_SENTINEL:
@@ -437,7 +452,6 @@ class Episoder(object):
 
         if not self.interactive:
             # We're probably dealing with torrentfiles - no ep numbers usually(?)
-            # TODO [later] We definitely need episode numbers.
             return False
 
         return self.ask_if_single_letter_is_epno(split_fn, item)

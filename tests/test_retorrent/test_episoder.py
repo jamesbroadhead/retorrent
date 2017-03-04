@@ -124,3 +124,17 @@ class TestConvertIfEpisodeNumber(EpisoderTestMixin, unittest.TestCase):
         filename_split = ['op01']
         expected = (['op01'])
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
+
+    def test_movie_with_number_in_title(self):
+        self.e.is_movie = True
+        self.e.ask_for_digits_in_epno = Mock(return_value=Episoder.NOT_AN_EPNO_SENTINEL)
+        filename_split = [ 'agent', '45' ]
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 1), None)
+
+    def test_movie_with_number_in_title_and_a_year(self):
+        self.e.is_movie = True
+        self.e.ask_for_digits_in_epno = Mock(return_value=Episoder.NOT_AN_EPNO_SENTINEL)
+        filename_split = [ 'agent', '45', '2015' ]
+        self.assertEqual(self.e.convert_if_episode_number(filename_split, 1), None)
+
+
