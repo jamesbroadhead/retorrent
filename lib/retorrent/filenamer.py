@@ -14,7 +14,17 @@ from .relist import lowercase_non_checksums
 class Filenamer(object):
 
     def __init__(self, divider_list, filetype_definitions):
-
+        """
+        @param filetype_definitions dict of dicts of the form
+        {
+            "ass": {
+                "filetype": "plaintext",
+                "goodsize": 4,
+                "ignore_if_in_filename": [
+                    "spanish"
+                ]
+            }, ...
+        """
         # items to be filtered out of the pre-tokenized filename
         self.pretokenized_removeset = removeset.read_from_file(
             confparse.find_pretokenized_removelist())
@@ -78,9 +88,7 @@ class Filenamer(object):
         filename_split, epno_index = self.the_episoder.add_series_episode_details(filename_split)
 
         if is_foldername:
-            # don't want file extensions in a folder name
-            if filename_split[-1] in self.fileext_list:
-                filename_split = filename_split[:-1]
+            filename_split = self.drop_file_extension(filename_split)
 
         if not self.is_movie:
             filename_split = self.remove_following_text(filename_split, epno_index, is_foldername)
@@ -172,4 +180,9 @@ class Filenamer(object):
         for i in rmlist:
             del filename_split[i]
 
+        return filename_split
+
+    def drop_file_extension(self, filename_split):
+        if filename_split and filename_split[-1] in self.fileext_list:
+            return filename_split[:-1]
         return filename_split

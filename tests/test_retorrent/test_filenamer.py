@@ -38,3 +38,11 @@ class TestApplyRemoveSetOnFoldername(unittest.TestCase):
         filename_split = ['foo', 'bar', 'baz']
         res = Filenamer.apply_removeset(filename_split, {'baz'}, True)
         self.assertEqual(res, filename_split[0:2])
+
+class TestDropFileExtension(unittest.TestCase):
+
+    def setUp(self):
+        self.fn = Filenamer(['.', '/'], { 'mkv': {} } )
+
+    def test_returns_empty_list_on_empty_input(self):
+        self.assertEqual(self.fn.drop_file_extension([]), [])
