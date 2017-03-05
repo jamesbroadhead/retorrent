@@ -1,7 +1,14 @@
+import logging
 
-class SingleCharacterEpno(object)
+from redecorators import tracelogdecorator
+from os_utils.textcontrols import bold
+
+from ..optionator import booloptionator
+from ..restring import alphabet, dotjoin
+
+class SingleCharacterEpno(object):
     @tracelogdecorator
-    def is_alphabetic_part_number(self, split_fn, item):
+    def is_alphabetic_part_number(self, split_fn, item, is_movie, num_interesting_files):
         """
         @param item: string
 
@@ -18,7 +25,7 @@ class SingleCharacterEpno(object)
 
             return self.treat_single_letters_as_epnos
 
-        if self.is_movie and self.num_interesting_files == 1:
+        if is_movie and num_interesting_files == 1:
             return False
 
         if not self.interactive:

@@ -1,7 +1,13 @@
+from redecorators import tracelogdecorator
+
+from ..restring import eng_numbers
+from ..optionator import booloptionator
 
 class FullWordEpno(object):
 
-    # TODO this is a very similar pattern to DigitsInEpno
+    def __init__(self, known_eng_numbers):
+        self.known_eng_numbers = known_eng_numbers
+
     @tracelogdecorator
     def is_eng_number(self, substring, whole_item=''):
         if substring in self.known_eng_numbers:

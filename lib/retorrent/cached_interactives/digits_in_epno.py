@@ -1,4 +1,6 @@
-from .optionator import optionator
+from ..optionator import optionator
+
+from ..epno_formatter import EpnoFormatter
 
 
 # TODO attrs?
@@ -65,9 +67,9 @@ class DigitsInEpno(object):
         question = 'In: "' + '.'.join(split_fn) + '", ' + item + ' means:'
 
         options = {
-            EpnoFormatter.format(
-                split_fn, item[1:3], series=item[0], digits_in_epno=2): 2,
-            EpnoFormatter.format(
+            EpnoFormatter(self).format(
+                split_fn, item[1:3], series_raw=item[0], digits_in_epno=2): 2,
+            EpnoFormatter(self).format(
                 split_fn, item, digits_in_epno=3): 3,
             'Should not be converted!': DigitsInEpnoStates.NOT_AN_EPNO_SENTINEL
         }

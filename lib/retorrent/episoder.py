@@ -1,15 +1,12 @@
 """ retorrent.episoder """
 import logging
 
-from os_utils.textcontrols import bold
 from redecorators import tracelogdecorator
 
 from .braced import is_year
-from .digits_in_epno import DigitsInEpno, DigitsInEpnoStates
+from .cached_interactives.digits_in_epno import DigitsInEpno, DigitsInEpnoStates
 from .epno_formatter import EpnoFormatter
-from .optionator import booloptionator
 from .relist import replace_singleitem, replace_doubleitem
-from .restring import alphabet, dotjoin, eng_numbers
 
 
 class Episoder(object):
@@ -33,167 +30,168 @@ class Episoder(object):
 
     def __init__(self):
         self.preserve_years = set()
-        self._epno_formatter = EpnoFormatter()
-            self._digits_in_epno = DigitsInEpno()
+        self._digits_in_epno = DigitsInEpno()
+        self._epno_formatter = EpnoFormatter(self._digits_in_epno)
 
-        def __repr__(self):
-            return '<Episoder>'
+    def __repr__(self):
+        return '<Episoder>'
 
-        def set_num_interesting_files(self, num_interesting_files):
-            self.num_interesting_files = num_interesting_files
+    def set_num_interesting_files(self, num_interesting_files):
+        self.num_interesting_files = num_interesting_files
 
-        def set_movie(self, is_movie):
-            """
-            This exists to preserve caches of user responses, but change operation
-            as new information appears.
+    def set_movie(self, is_movie):
+        """
+        This exists to preserve caches of user responses, but change operation
+        as new information appears.
 
-            #future: rm this, and re-instantiate Episoder instead (or a MovieEpisoder).
-            This will require encapsulating the cached user responses from the logic
-            here.
-            """
-            self.is_movie = is_movie
+        #future: rm this, and re-instantiate Episoder instead (or a MovieEpisoder).
+        This will require encapsulating the cached user responses from the logic
+        here.
+        """
+        self.is_movie = is_movie
 
-        @tracelogdecorator
-        def add_series_episode_details(self, split_fn):
-            for index, item in enumerate(split_fn):
-                nextitem = self.nextitem_if_exists(split_fn, index)
-
-                if item in self.numbers_to_ignore or (item, nextitem) in self.pairs_to_ignore:
-                    continue
-
-                result = self.convert_if_episode_number(split_fn, index)
-                if result:
-                    return result, index
-
-            return split_fn, -1
-
-        @tracelogdecorator
-        def convert_if_episode_number(self, split_fn, index):
-            """
-            Return a copy of split_fn with episode details converted to a canonical form
-
-            WARNING: may mutate the input.
-
-            @return split_filename: if an episode number was detected, return a copy of
-                split_filename with the episode details in canonical form. If no details were
-                detected, return None
-            """
-            #pylint: disable=too-many-branches,too-many-return-statements,too-many-statements
-            item = split_fn[index]
+    @tracelogdecorator
+    def add_series_episode_details(self, split_fn):
+        for index, item in enumerate(split_fn):
             nextitem = self.nextitem_if_exists(split_fn, index)
 
-            # eg. part, episode
-            for start_ident in self.identifiers['start'] + self.identifiers['start_special']:
-                logging.info('convert_if_episode_number: checking start_ident=%r', start_ident)
-                subitem = item[0:len(start_ident)]
-                remainder = item[len(subitem):]
+            if item in self.numbers_to_ignore or (item, nextitem) in self.pairs_to_ignore:
+                continue
 
-                if not subitem == start_ident:
-                    continue
+            result = self.convert_if_episode_number(split_fn, index)
+            if result:
+                return result, index
 
-                elif len(item) > len(start_ident):
-                    if self._epno_formatter.is_raw_epno(split_fn, remainder):
+        return split_fn, -1
 
-                        if start_ident in self.identifiers['start']:
-                            # check the next item before committing
-                            if self.is_raw_serno(split_fn, item) and self._epno_formatter.is_raw_epno(split_fn,
-                                                                                      nextitem):
-                                split_fn = replace_doubleitem(
-                                    split_fn, index,
-                                    self._epno_formatter.format(split_fn, nextitem, remainder))
-                                return split_fn
+    @tracelogdecorator
+    def convert_if_episode_number(self, split_fn, index):
+        """
+        Return a copy of split_fn with episode details converted to a canonical form
 
-                            else:
-                                split_fn[index] = self._epno_formatter.format(split_fn, remainder)
-                                return split_fn
+        WARNING: may mutate the input.
 
-                        elif start_ident in self.identifiers['start_special']:
-                            epno = self._epno_formatter.format_digit(split_fn, remainder)
-                            split_fn[index] = subitem + epno
+        @return split_filename: if an episode number was detected, return a copy of
+            split_filename with the episode details in canonical form. If no details were
+            detected, return None
+        """
+        #pylint: disable=too-many-branches,too-many-return-statements,too-many-statements
+        item = split_fn[index]
+        nextitem = self.nextitem_if_exists(split_fn, index)
+
+        # eg. part, episode
+        for start_ident in self.identifiers['start'] + self.identifiers['start_special']:
+            logging.info('convert_if_episode_number: checking start_ident=%r', start_ident)
+            subitem = item[0:len(start_ident)]
+            remainder = item[len(subitem):]
+
+            if not subitem == start_ident:
+                continue
+
+            elif len(item) > len(start_ident):
+                if self.is_raw_epno(split_fn, remainder):
+
+                    if start_ident in self.identifiers['start']:
+                        # check the next item before committing
+                        if self.is_raw_serno(split_fn, item) and self.is_raw_epno(split_fn,
+                                                                                  nextitem):
+                            split_fn = replace_doubleitem(
+                                split_fn, index,
+                                self._epno_formatter.format(split_fn, nextitem, remainder))
                             return split_fn
 
                         else:
-                            raise Exception('Bad start_ident in loop: %r' % (start_ident,))
-
-                    elif remainder.isalnum() and 'e' in remainder:
-                        maybe_serno = remainder.split('e')[0]
-                        maybe_epno = remainder.split('e')[1]
-                        if self.is_raw_serno(split_fn, maybe_serno) and self._epno_formatter.is_raw_epno(split_fn,
-                                                                                         maybe_epno):
-                            split_fn[index] = self._epno_formatter.format(split_fn, maybe_epno,
-                                                                          maybe_serno)
+                            split_fn[index] = self._epno_formatter.format(split_fn, remainder)
                             return split_fn
 
-                # // eg. s04.e05
-                elif self.is_raw_serno(split_fn, remainder) and self._epno_formatter.is_raw_epno(split_fn, nextitem):
-                    if start_ident in self.identifiers['start']:
-                        split_fn[index] = self._epno_formatter.format(split_fn, nextitem, remainder)
-                        split_fn[index + 1] = ''
+                    elif start_ident in self.identifiers['start_special']:
+                        epno = self._epno_formatter.format_digit(split_fn, remainder, self.is_movie, self.num_interesting_files)
+                        split_fn[index] = subitem + epno
                         return split_fn
 
-                elif len(item) == len(subitem) and self._epno_formatter.is_raw_epno(split_fn, nextitem):
-                    if start_ident in self.identifiers['start']:
-                        epno = self._epno_formatter.format(split_fn, nextitem)
                     else:
-                        # 'start_special' -- only want a number, not a full s01e01 string
-                        epno = start_ident + self._epno_formatter.format_digit(split_fn, nextitem)
-                    split_fn = replace_doubleitem(split_fn, index, epno)
+                        raise Exception('Bad start_ident in loop: %r' % (start_ident,))
+
+                elif remainder.isalnum() and 'e' in remainder:
+                    maybe_serno = remainder.split('e')[0]
+                    maybe_epno = remainder.split('e')[1]
+                    if self.is_raw_serno(split_fn, maybe_serno) and self.is_raw_epno(split_fn,
+                                                                                     maybe_epno):
+                        split_fn[index] = self._epno_formatter.format(split_fn, maybe_epno,
+                                                                      maybe_serno)
+                        return split_fn
+
+            # // eg. s04.e05
+            elif self.is_raw_serno(split_fn, remainder) and self.is_raw_epno(split_fn, nextitem):
+                if start_ident in self.identifiers['start']:
+                    split_fn[index] = self._epno_formatter.format(split_fn, nextitem, remainder)
+                    split_fn[index + 1] = ''
                     return split_fn
 
-            logging.info('convert_if_episode_number: finished checking start_ident for %r', item)
-
-            if item.isdigit():
-                logging.info('convert_if_episode_number: checking numerals for %r', item)
-                if self.is_movie:
-                    # it's normal for movies to have a number in the title
-                    # eg. Predator 2, etc
-                    die = self._digits_in_epno.get(split_fn, item)
-                    if die == DigitsInEpnoStates.NOT_AN_EPNO_SENTINEL:
-                    # the user indicated that the item wasn't an epno
-                    return None
-
-            # eg. 1  or 2
-            if len(item) == 1:
-                # 1.01 => s01e01
-                if self._epno_formatter.is_raw_epno(split_fn, nextitem):
-                    split_fn = replace_doubleitem(
-                        split_fn, index, self._epno_formatter.format(split_fn, nextitem, item))
-                else:  # 1 => s01e01
-                    split_fn[index] = self._epno_formatter.format(split_fn, item)
+            elif len(item) == len(subitem) and self.is_raw_epno(split_fn, nextitem):
+                if start_ident in self.identifiers['start']:
+                    epno = self._epno_formatter.format(split_fn, nextitem)
+                else:
+                    # 'start_special' -- only want a number, not a full s01e01 string
+                    epno = start_ident + self._epno_formatter.format_digit(split_fn, nextitem, self.is_movie, self.num_interesting_files)
+                split_fn = replace_doubleitem(split_fn, index, epno)
                 return split_fn
 
-            # eg. 45
-            elif len(item) == 2:
-                if self._epno_formatter.is_raw_epno(split_fn, nextitem):
-                    return replace_doubleitem(split_fn, index,
-                                              self._epno_formatter.format(split_fn, nextitem, item))
-                else:
-                    return replace_singleitem(split_fn, index,
-                                              self._epno_formatter.format(split_fn, item))
-            # eg. 302 -> may be episode 302, or s03e02
-            elif len(item) == 3:
+        logging.info('convert_if_episode_number: finished checking start_ident for %r', item)
+
+        if item.isdigit():
+            logging.info('convert_if_episode_number: checking numerals for %r', item)
+            if self.is_movie:
+                # it's normal for movies to have a number in the title
+                # eg. Predator 2, etc
                 die = self._digits_in_epno.get(split_fn, item)
                 if die == DigitsInEpnoStates.NOT_AN_EPNO_SENTINEL:
                     # the user indicated that the item wasn't an epno
                     return None
-                elif die == 2:
-                    split_fn[index] = self._epno_formatter.format(split_fn, item[1:], item[0])
-                elif die == 3:
-                    split_fn[index] = self._epno_formatter.format(split_fn, item)
-                else:
-                    raise Exception('ERROR! Messed up around digits_in_epno')
 
+        # eg. 1  or 2
+        if len(item) == 1:
+            # 1.01 => s01e01
+            if self.is_raw_epno(split_fn, nextitem):
+                split_fn = replace_doubleitem(
+                    split_fn, index, self._epno_formatter.format(split_fn, nextitem, item))
+            else:  # 1 => s01e01
+                split_fn[index] = self._epno_formatter.format(split_fn, item)
+            return split_fn
+
+        # eg. 45
+        elif len(item) == 2:
+            if self.is_raw_epno(split_fn, nextitem):
+                return replace_doubleitem(split_fn, index,
+                                          self._epno_formatter.format(split_fn, nextitem, item))
+            else:
+                return replace_singleitem(split_fn, index,
+                                          self._epno_formatter.format(split_fn, item))
+        # eg. 302 -> may be episode 302, or s03e02
+        elif len(item) == 3:
+            die = self._digits_in_epno.get(split_fn, item)
+            if die == DigitsInEpnoStates.NOT_AN_EPNO_SENTINEL:
+                # the user indicated that the item wasn't an epno
+                return None
+            elif die == 2:
+                split_fn[index] = self._epno_formatter.format(split_fn, item[1:], item[0])
+            elif die == 3:
+                split_fn[index] = self._epno_formatter.format(split_fn, item)
+            else:
+                raise Exception('ERROR! Messed up around digits_in_epno')
+
+            return split_fn
+
+        # eg. 0104 == s01e04
+        elif len(item) == 4:
+            # de-unicode so that memoize works
+            if is_year(str(item), interactive=self.interactive):
+                # it is a year, preserve it
+                return None
+            else:
+                split_fn[index] = self._epno_formatter.format(split_fn, item[2:], item[0:2])
                 return split_fn
-
-            # eg. 0104 == s01e04
-            elif len(item) == 4:
-                # de-unicode so that memoize works
-                if is_year(str(item), interactive=self.interactive):
-                    # it is a year, preserve it
-                    return None
-                else:
-                    split_fn[index] = self._epno_formatter.format(split_fn, item[2:], item[0:2])
-                    return split_fn
+        else:
 
             # it's a >5 digit number ... boring
             return None
@@ -212,13 +210,13 @@ class Episoder(object):
 
         # Special case: 1of5, 01of05
         elif 'of' in item:
-            if (self._epno_formatter.is_raw_epno(split_fn, item.split('of')[0]) and
-                    self._epno_formatter.is_raw_epno(split_fn, item.split('of')[1])):
+            if (self.is_raw_epno(split_fn, item.split('of')[0]) and
+                    self.is_raw_epno(split_fn, item.split('of')[1])):
                 split_fn[index] = self._epno_formatter.format(split_fn, item.split('of')[0])
                 return split_fn
 
         # just a number - treat as the episode number of season 1
-        elif self._epno_formatter.is_raw_epno(split_fn, item):
+        elif self.is_raw_epno(split_fn, item):
             split_fn[index] = self._epno_formatter.format(split_fn, item)
             return split_fn
 
@@ -277,13 +275,16 @@ class Episoder(object):
 
     def is_raw_serno(self, split_fn, serno):
         if len(serno) > 0 and serno.lower().startswith('s'):
-            return self._epno_formatter.is_raw_epno(split_fn, serno[1:])
+            return self.is_raw_epno(split_fn, serno[1:])
         elif len(serno) > 0 and serno.lower().startswith('e'):
             return False
 
-        return self._epno_formatter.is_raw_epno(split_fn, serno)
+        return self.is_raw_epno(split_fn, serno)
 
 
+    def is_raw_epno(self, *args, **kwargs):
+        args = args + (self.is_movie, self.num_interesting_files)
+        return self._epno_formatter.is_raw_epno(*args, **kwargs)
 
     def format_epno(self, *args, **kwargs):
         return self._epno_formatter.format(*args, is_movie=self.is_movie, num_interesting_files=self.num_interesting_files, **kwargs)

@@ -1,10 +1,11 @@
-import logging
-
-
 
 from redecorators import tracelogdecorator
 
-from .restring import alphabet, conv_eng_number, conv_from_alphabet, dotjoin, eng_numbers
+from .restring import conv_eng_number, conv_from_alphabet
+
+from .cached_interactives.single_character_epno import SingleCharacterEpno
+from .cached_interactives.full_word_epno import FullWordEpno
+
 
 
 
@@ -14,24 +15,31 @@ class EpnoFormatter(object):
 
     This class holds state to cache user responses
     """
+    def __init__(self, digits_in_epno):
+        # TODO
 
+        self._digits_in_epno = digits_in_epno
+        self._single_character_epno = SingleCharacterEpno()
+        self._full_word_epno = FullWordEpno({})
+
+
+    # TODO make this a classmethod
     #pylint: disable=too-many-arguments
     @tracelogdecorator
-    @classmethod
-    def format(cls, split_fn, epno_raw, series_raw=None, nextitem='', digits_in_epno=None, is_movie=False, num_interesting_files=1):
+    def format(self, split_fn, epno_raw, series_raw=None, nextitem='', digits_in_epno=None, is_movie=False, num_interesting_files=1):
         """
         Format an episode number, and optionally a series number into a standardised
         form (s01e01 or similar)
 
-        @param epno: a raw string representing the episode number
-        @param series: if set, a formatted string representing the series number
-        @param digits_in_epno: integer, overrides cls._digits_in_epno
+        @param epno_raw: a raw string representing the episode number
+        @param series_raw: a raw string representing the series number
+        @param digits_in_epno: integer, overrides self._digits_in_epno
         """
-        epno = cls.format_digit(split_fn, epno_raw, digits_in_epno=digits_in_epno)
+        epno = self.format_digit(split_fn, epno_raw, is_movie, num_interesting_files, digits_in_epno=digits_in_epno)
 
-        if len(nextitem) > 0 and cls.is_raw_epno(split_fn, nextitem):
+        if len(nextitem) > 0 and self.is_raw_epno(split_fn, nextitem, is_movie, num_interesting_files):
             # this is a range of episodes. horrible
-            epno += cls.format_digit(split_fn, nextitem, digits_in_epno=digits_in_epno)
+            epno += self.format_digit(split_fn, nextitem, is_movie, num_interesting_files, digits_in_epno=digits_in_epno)
 
         if series_raw is None:
             # movies don't come in series
@@ -43,31 +51,31 @@ class EpnoFormatter(object):
             else:
                 return 's01' + 'e' + epno
 
-        series = cls.format_digit(split_fn, series_raw, digits_in_epno=digits_in_epno)
+        series = self.format_digit(split_fn, series_raw, is_movie, num_interesting_files, digits_in_epno=digits_in_epno)
 
         if len(series) < 2:
             series = "0" + series
 
         return 's' + series + 'e' + epno
 
-    def format_digit(self, split_fn, epno, digits_in_epno=None):
+    def format_digit(self, split_fn, epno, is_movie, num_interesting_files, digits_in_epno=None):
         """
         This formats a single field (eg, an episode number or series number.
 
         @param digits_in_epno: integer. If set, overrides self._digits_in_epno
         """
-        if self.is_eng_number(epno):
+        if self._full_word_epno.is_eng_number(epno):
             epno = conv_eng_number(epno)
-        elif self.is_alphabetic_part_number(split_fn, epno):
+        elif self._single_character_epno.is_alphabetic_part_number(split_fn, epno, is_movie, num_interesting_files):
             epno = conv_from_alphabet(epno)
         elif epno.isdigit():
             # cool
             pass
         else:
             if epno.lower().endswith('v2'):
-                return self.format_digit(split_fn, epno[0:-2], digits_in_epno=digits_in_epno)
+                return self.format_digit(split_fn, epno[0:-2], is_movie, num_interesting_files, digits_in_epno=digits_in_epno)
             elif len(epno) > 0 and epno.lower()[0] == 'e':
-                return self.format_digit(split_fn, epno[1:], digits_in_epno=digits_in_epno)
+                return self.format_digit(split_fn, epno[1:], is_movie, num_interesting_files, digits_in_epno=digits_in_epno)
             else:
                 print '!!! Can\'t handle an epno like this: ', epno
 
@@ -75,21 +83,23 @@ class EpnoFormatter(object):
 
 
     @tracelogdecorator
-    def is_raw_epno(self, split_fn, epno):
+    def is_raw_epno(self, split_fn, epno, is_movie, num_interesting_files):
         """
         This receives a number string (eg. ep01 --> True)
         It also now accepts e01 etc.
 
         @return boolean
         """
-        if self.is_eng_number(epno) or self.is_alphabetic_part_number(split_fn,
-                                                                      epno) or epno.isdigit():
+        if (self._full_word_epno.is_eng_number(epno) or
+            self._single_character_epno.is_alphabetic_part_number(
+                split_fn, epno, is_movie, num_interesting_files) or
+            epno.isdigit()):
             return True
 
         if epno.lower().endswith('v2'):
-            return self.is_raw_epno(split_fn, epno[0:-2])
+            return self.is_raw_epno(split_fn, epno[0:-2], is_movie, num_interesting_files)
         elif len(epno) > 0 and epno.lower()[0] == 'e':
-            return self.is_raw_epno(split_fn, epno[1:])
+            return self.is_raw_epno(split_fn, epno[1:], is_movie, num_interesting_files)
         return False
 
 
