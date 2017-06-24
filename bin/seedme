@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 TORRENT_DIR="${HOME}/torrents"
 SEED_DIR="$HOME/seed"
@@ -13,7 +13,7 @@ SEED_DIR="$HOME/seed"
 input_path="$1"
 dest_path="$2"
 
-if [[ "${input_path}" == "" ]] || [[ "{$dest_path}" == "" ]] ; then
+if [[ "${input_path}" == "" ]] || [[ "${dest_path}" == "" ]] ; then
 	echo "Usage:"
   echo "  seedme <FILE> <DEST>"
   exit 1
