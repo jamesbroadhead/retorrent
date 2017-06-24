@@ -37,7 +37,7 @@ def tfile_details(tfile_path):
         for filename in get_filenames(tfile_path):
             files_tfile[filename] = tfile_path
 
-    except Exception as e:
+    except Exception as _e:
         pass
 
     return files_tfile

@@ -90,7 +90,6 @@ def _main(smbsafe=False):
                 continue
 
             for content in os.listdir(content_dir):
-                content = content.decode('utf-8')
                 content_path = pjoin(content_dir, content)
                 debugprint('Examining: %s' % (content_path,), 2)
 
