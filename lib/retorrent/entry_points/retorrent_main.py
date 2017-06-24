@@ -13,6 +13,7 @@ from os.path import expanduser, isdir
 from os.path import join as pjoin
 import sys
 
+from ..confparse import Config
 from ..retorrenter import check_result, Retorrenter
 
 
@@ -33,7 +34,9 @@ def main():
 
     feature_flags = {'old_torrentfile_detection': options.old_torrentfile_detection}
 
-    r = Retorrenter(options.configdir, debug=options.debug, feature_flags=feature_flags)
+    c = Config(options.configdir)
+
+    r = Retorrenter(c, debug=options.debug, feature_flags=feature_flags)
 
     # get args (folders / files which are 100% downloaded.
     command_bundles = r.handle_args(argv)

@@ -25,6 +25,20 @@ config_paths = [abspath('./'), home_config_dir, '/usr/share/retorrent/']
 config_filename = 'retorrentconf.py'
 
 
+class Config(object):
+    """ Perhaps this should be an interface, with versions with less internal data? """
+
+    def __init__(self, extra_configdir=''):
+        self.extra_configdir = extra_configdir
+
+        self.global_conf, self.categories = parse_retorrentconf(self.extra_configdir)
+        self.filetype_definitions = parse_fileext_details(self.extra_configdir)
+        self.divider_symbols = parse_divider_symbols(self.extra_configdir)
+
+    def get_torrentfilesdir(self):
+        return self.global_conf['torrentfilesdir']
+
+
 @tracelogdecorator
 def parse_retorrentconf(extra_configdir=''):
     #pylint: disable=too-many-branches,too-many-locals
@@ -252,9 +266,3 @@ def find_removelist(extra_configdir=''):
 
 def find_pretokenized_removelist(extra_configdir=''):
     return find_configfile('pretokenized_removestrings.list', extra_configdir)
-
-
-def get_torrentfilesdir(global_conf=None):
-    if global_conf is None:
-        global_conf, _ = parse_retorrentconf()
-    return global_conf['torrentfilesdir']

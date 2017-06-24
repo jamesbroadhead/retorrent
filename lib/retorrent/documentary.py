@@ -11,7 +11,7 @@ from os.path import join as pjoin
 from docopt import docopt
 from bs4 import BeautifulSoup
 
-from retorrent.confparse import home_config_dir, get_torrentfilesdir
+from retorrent.confparse import home_config_dir, Config
 from retorrent.engname import to_storage_name
 from retorrent.find_tfile import find_tfiles
 
@@ -26,7 +26,7 @@ class EpInfo(object):
 
 def get_tfiles_map(filenames):
     files = [f for f in filenames if os.path.isfile(f)]
-    tfiles = find_tfiles(files, get_torrentfilesdir())
+    tfiles = find_tfiles(files, Config().get_torrentfilesdir())
     return {f: t for f, t in zip(files, tfiles)}
 
 

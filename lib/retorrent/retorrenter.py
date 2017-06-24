@@ -16,8 +16,6 @@ from redecorators.tracelogdecorator import tracelogdecorator
 from os_utils.os_utils import enough_space, listdir, myglob, str2utf8
 from os_utils.textcontrols import bold
 
-from .confparse import get_torrentfilesdir, parse_divider_symbols, parse_fileext_details
-from .confparse import parse_retorrentconf
 from .debugprinter import Debugprinter
 from .filenamer import Filenamer
 from .find_tfile import tfile_from_filename
@@ -39,18 +37,24 @@ class Retorrenter(object):
     # self.expected_dirs exists for the case: ./retorrent a.e01.avi a.e02.avi
     expected_dirs = []
 
-    def __init__(self, configdir='', debug=False, feature_flags=None):
-        self.configdir = configdir
-
+    def __init__(self, config_obj, debug=False, feature_flags=None):
+        '''
+        @config_obj: a confparse.Config object
+        '''
         self.debug = debug
         self.debugprinter = Debugprinter()
 
         self.feature_flags = feature_flags
         if feature_flags is None:
             self.feature_flags = {}
-        self.global_conf, self.categories = parse_retorrentconf(self.configdir)
-        self.filetype_definitions = parse_fileext_details(self.configdir)
-        self.divider_symbols = parse_divider_symbols(self.configdir)
+
+        self.config = config_obj
+
+        # DEPRECATED - use self.config instead (adding getters to it)
+        self.global_conf = self.config.global_conf
+        self.categories = self.config.categories
+        self.filetype_definitions = self.config.filetype_definitions
+        self.divider_symbols = self.config.divider_symbols
 
     def debugprint(self, txt, listol=None):
         self.debugprinter.debugprint(txt, listol)
@@ -487,7 +491,7 @@ class Retorrenter(object):
         arg_name = split_path[-1]
 
         the_torrentfiles = [
-            f for f in os.listdir(get_torrentfilesdir(self.global_conf)) if not f == '.keep'
+            f for f in os.listdir(self.config.get_torrentfilesdir()) if not f == '.keep'
         ]
         exclude = [c['torrentfile'] for c in self.commands]
 
@@ -665,7 +669,7 @@ class Retorrenter(object):
         rename_map_keys = sorted(rename_map.keys())
         commands.extend(['mv -nv "%s" "%s"' % (k, rename_map[k]) for k in rename_map_keys])
 
-        torrentfile = tfile_from_filename(content_abspath, get_torrentfilesdir(self.global_conf))
+        torrentfile = tfile_from_filename(content_abspath, self.config.get_torrentfilesdir())
 
         question = 'Should these be seeded?'
         if torrentfile:
@@ -742,7 +746,7 @@ class Retorrenter(object):
             print 'Using torrentfile %r' % (torrentfile,)
             # move torrentfile to seeddir
             commands.append('mv -nv "%s" "%s"' % (pjoin(
-                get_torrentfilesdir(self.global_conf), torrentfile),
+                self.config.get_torrentfilesdir(), torrentfile),
                                                   self.global_conf['seedtorrentfilesdir']))
 
         return commands

@@ -27,8 +27,8 @@ command -v shellcheck >/dev/null 2>&1 || { echo >&2 "I require shellcheck to lin
 shellcheck "${BASHFILES[@]}"
 C=$?
 
-for i in $A $B $C ; do
-  if ! [ $i -eq 0 ] ; then
-    exit $i
+for i in "${A}" "${B}" "${C}" ; do
+  if ! [ "${i}" -eq 0 ] ; then
+    exit "${i}"
   fi
 done

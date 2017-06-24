@@ -137,4 +137,3 @@ class TestConvertIfEpisodeNumber(EpisoderTestMixin, unittest.TestCase):
         filename_split = [ 'agent', '45', '2015' ]
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 1), None)
 
-
