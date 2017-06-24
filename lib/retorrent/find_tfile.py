@@ -4,17 +4,19 @@ from os.path import basename, isdir, isfile
 from os.path import join as pjoin
 
 from os_utils.os_utils import listdir
-from torrent_parser import TorrentFileParser as TP
+from PyTorrentInfo.torrentParser import TorrentParser as TP
 
 debug = True
 
 
-def get_filenames(tp_info):
+def get_filenames(tfile_path):
     """
     return a list of filenames inside the passed info dict.
 
     the 'files' key only exists if it's a dir.
     """
+    tp_info = TP().readFile(tfile_path)['torrent']['info']
+
     if 'files' in tp_info:
         # f['path'] is a list - check this assumption on later bugs
         return [basename(f['path'][0]) for f in tp_info['files']]
@@ -31,13 +33,11 @@ def find_tfiles(paths, tfilesdir):
 def tfile_details(tfile_path):
     files_tfile = {}
     try:
-        with open(tfile_path) as fh:
-            tp_info = TP(fh).parse()['info']
 
-        for filename in get_filenames(tp_info):
+        for filename in get_filenames(tfile_path):
             files_tfile[filename] = tfile_path
 
-    except Exception:
+    except Exception as e:
         pass
 
     return files_tfile

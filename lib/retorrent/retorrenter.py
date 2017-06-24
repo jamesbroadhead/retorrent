@@ -1,6 +1,7 @@
 """ retorrent.retorrenter """
 
 from copy import deepcopy
+from functools import cmp_to_key
 import logging
 import os
 from os.path import abspath, basename, expanduser, isdir, realpath
@@ -504,7 +505,7 @@ class Retorrenter(object):
 
             tfiles += [{'filename': tfile, 'conv_filename': cf, 'score': score}]
 
-        tfiles = sorted(tfiles, self.compare_scored_tfiles)
+        tfiles = sorted(tfiles, key=cmp_to_key(self.compare_scored_tfiles))
 
         chosen_torrentfile = optionator('For: ' + arg_name, [t['filename']
                                                              for t in tfiles] + [CANCEL])

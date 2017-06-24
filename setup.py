@@ -3,7 +3,7 @@
 from setuptools import setup
 import sys
 
-supported = (3,4)
+supported = (3, 4)
 if sys.version_info[0:2] < supported:
     out = 'This codebase only supports python>={}'.format('.'.join(supported))
     raise Exception(out)
