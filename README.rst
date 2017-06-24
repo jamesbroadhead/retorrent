@@ -2,11 +2,18 @@ Retorrent is a media management and re-seeding tool.
 
 *retorrent* is a command-line media management tool which renames newly downloaded files into a standard format, and symlinks back to ease seeding. The main goal of this project is to allow the user to rename all of their media without losing the ability to seed, with as little user-input as possible.
 
+
+== Support Status ==
+This tool is in use by me at time of writing (2017-06), but does not receive major changes/updates.
+
+The majority of the codebase comes from a time where I was still learning python and good programming practises. Mome elements of it do not work as well as they might, have limited test coverate and are in need of rearchitecting.
+Contributions are welcome, however those which do not improve test coverage will not be accepted
+
+== Description ==
 The average download requires 3-4 presses of 'Enter' for all of its files to be moved to a 'videos' folder, renamed in a standard manner, reverse symlinked to a 'seeding' directory, and provided with its .torrent files.For filenames that are 'easy' to convert, this is reduced even further (1-2 keypresses)
 
 It renames media files from their original filenames to ones that are systematic and easy to organise, into a format compatible with the default filename parsers which come with XBMC (Media Centre).
 
-The initial retorrent code comes from a time where I was still learning python, and so some elements of it do not work as well as they might. Contributions and/or advice are welcome. Contributions which do not improve test coverage  will not be accepted
 
 Some of this code comes from publically accessible code, which may not be covered by the blanket GPL, as the rest of the code in this project is. These sections are commented and attributed, please refer to the attribution for licensing details.
 

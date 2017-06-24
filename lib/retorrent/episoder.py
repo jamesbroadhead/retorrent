@@ -117,17 +117,15 @@ class Episoder(object):
                                 self.gen_full_epno_string(split_fn, nextitem, remainder))
                             return split_fn
 
-                        else:
-                            split_fn[index] = self.gen_full_epno_string(split_fn, remainder)
-                            return split_fn
+                        split_fn[index] = self.gen_full_epno_string(split_fn, remainder)
+                        return split_fn
 
                     elif start_ident in self.identifiers['start_special']:
                         epno = self.nice_epno_from_raw(split_fn, remainder)
                         split_fn[index] = subitem + epno
                         return split_fn
 
-                    else:
-                        raise Exception('Bad start_ident in loop: %r' % (start_ident,))
+                    raise Exception('Bad start_ident in loop: %r' % (start_ident,))
 
                 elif remainder.isalnum() and 'e' in remainder:
                     maybe_serno = remainder.split('e')[0]
@@ -181,9 +179,8 @@ class Episoder(object):
                 if self.is_raw_epno(split_fn, nextitem):
                     return replace_doubleitem(split_fn, index,
                                               self.gen_full_epno_string(split_fn, nextitem, item))
-                else:
-                    return replace_singleitem(split_fn, index,
-                                              self.gen_full_epno_string(split_fn, item))
+                return replace_singleitem(split_fn, index,
+                                          self.gen_full_epno_string(split_fn, item))
             # eg. 302 -> may be episode 302, or s03e02
             elif len(item) == 3:
                 die = self.get_digits_in_epno(split_fn, item)
@@ -205,9 +202,8 @@ class Episoder(object):
                 if is_year(str(item), interactive=self.interactive):
                     # it is a year, preserve it
                     return None
-                else:
-                    split_fn[index] = self.gen_full_epno_string(split_fn, item[2:], item[0:2])
-                    return split_fn
+                split_fn[index] = self.gen_full_epno_string(split_fn, item[2:], item[0:2])
+                return split_fn
 
             # it's a >5 digit number ... boring
             return None
@@ -248,7 +244,7 @@ class Episoder(object):
         """
         epno = self.nice_epno_from_raw(split_fn, epno_raw)
 
-        if len(nextitem) > 0 and self.is_raw_epno(split_fn, nextitem):
+        if nextitem and self.is_raw_epno(split_fn, nextitem):
             # this is a range of episodes. horrible
             epno += self.nice_epno_from_raw(split_fn, nextitem)
 
@@ -259,8 +255,7 @@ class Episoder(object):
                 return ''
             elif self.is_movie:
                 return 'cd' + epno
-            else:
-                return 's01' + 'e' + epno
+            return 's01' + 'e' + epno
 
         series = self.nice_epno_from_raw(split_fn, series_raw)
 
@@ -367,9 +362,9 @@ class Episoder(object):
         return ''
 
     def is_raw_serno(self, split_fn, serno):
-        if len(serno) > 0 and serno.lower().startswith('s'):
+        if serno and serno.lower().startswith('s'):
             return self.is_raw_epno(split_fn, serno[1:])
-        elif len(serno) > 0 and serno.lower().startswith('e'):
+        elif serno and serno.lower().startswith('e'):
             return False
 
         return self.is_raw_epno(split_fn, serno)
@@ -386,7 +381,7 @@ class Episoder(object):
 
         if epno.lower().endswith('v2'):
             return self.is_raw_epno(split_fn, epno[0:-2])
-        elif len(epno) > 0 and epno.lower()[0] == 'e':
+        elif epno and epno.lower()[0] == 'e':
             return self.is_raw_epno(split_fn, epno[1:])
         return False
 
@@ -401,7 +396,7 @@ class Episoder(object):
         else:
             if epno.lower().endswith('v2'):
                 return self.nice_epno_from_raw(split_fn, epno[0:-2])
-            elif len(epno) > 0 and epno.lower()[0] == 'e':
+            elif epno and epno.lower()[0] == 'e':
                 return self.nice_epno_from_raw(split_fn, epno[1:])
             else:
                 print '!!! Can\'t handle an epno like this: ', epno

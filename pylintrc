@@ -39,7 +39,9 @@ load-plugins=
 # line-too-long: let's autoformat instead
 # locally-disabled: rm warnings about #pylint:disable lines
 # missing-docstring: just leads to empty or redundant docstrings
-disable=bad-continuation,bad-whitespace,broad-except,fixme,invalid-name,line-too-long,locally-disabled,missing-docstring,star-args,too-few-public-methods
+# trailing-newlines: let's autoformat instead
+# unneeded-not: I prefer 'not x in y' over 'x not in y'
+disable=bad-continuation,bad-whitespace,broad-except,fixme,invalid-name,line-too-long,locally-disabled,missing-docstring,star-args,too-few-public-methods,trailing-newlines,unneeded-not
 
 
 [REPORTS]

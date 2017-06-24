@@ -113,7 +113,10 @@ def mkdir_p(path):
 
 
 def get_foldername(path):
-    if len(path) == 0:
+    """
+    @param path: a string, which should be a path
+    """
+    if not path:
         return ''
 
     return basename(path.strip('/'))
@@ -136,8 +139,8 @@ def diskspace_used(path, si='kiB'):
         return disk_filesize_b / (8 * 1024)
     elif si == 'B':
         return disk_filesize_b / (8)
-    else:  # kiB
-        return disk_filesize_b / (8 * 1024)
+    # kiB
+    return disk_filesize_b / (8 * 1024)
 
 
 def sym_sametarget(a, b):

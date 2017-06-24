@@ -33,8 +33,7 @@ def _main(only_unseeded, targets):
     # nothing is unseeded - is_seeded returns true
     if not unseeded:
         return 0
-    else:
-        return 1
+    return 1
 
 
 def main():

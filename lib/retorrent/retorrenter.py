@@ -131,7 +131,7 @@ class Retorrenter(object):
 
         self.filenamer.set_num_interesting_files(len(orig_paths))
 
-        if len(orig_paths) == 0:
+        if not orig_paths:
             print "No interesting files found! Skipping!"
             return
 
@@ -153,9 +153,8 @@ class Retorrenter(object):
             if not self.dest_category:
                 print "cancelled..."
                 return
-            else:
-                # recurse
-                return self.handle_content(content)
+            # recurse
+            return self.handle_content(content)
 
         # At this point, self.dest_category is set.
         self.filenamer.set_movie(self.is_movie())
@@ -337,14 +336,13 @@ class Retorrenter(object):
 
             if not dirpath_ans == RECALCULATE:
                 return pjoin(self.dest_folder, dirpath_ans)
-            else:
-                # a new removeitem has been added - regenerate psf
-                possible_series_foldernames = [
-                    self.filenamer.convert_filename(item, True)
-                    for item in possible_series_foldernames
-                ]
 
-                return self.ask_for_dest_dirpath(num_interesting_files, possible_series_foldernames)
+            # a new removeitem has been added - regenerate psf
+            possible_series_foldernames = [
+                self.filenamer.convert_filename(item, True) for item in possible_series_foldernames
+            ]
+
+            return self.ask_for_dest_dirpath(num_interesting_files, possible_series_foldernames)
 
     def pose_question(self, question, options):
         # Note: returns RECALCULATE ('-') if a recurse is needed
@@ -358,9 +356,8 @@ class Retorrenter(object):
         elif answer.startswith('-'):
             self.filenamer.add_to_removeset(answer[1:])
             return RECALCULATE
-        else:
-            self.filenamer.add_to_tmp_removeset(answer)
-            return RECALCULATE
+        self.filenamer.add_to_tmp_removeset(answer)
+        return RECALCULATE
 
     def find_files_to_keep(self, content_abspath):
         """
@@ -530,12 +527,12 @@ class Retorrenter(object):
                             And bar is a string based on the folder passed, if the arg was a
                             folder
         """
-        if len(possible_series_foldernames) > 1:
-            # Use the string generated from the foldername
-            src_foldername = possible_series_foldernames[1]
-        elif len(possible_series_foldernames) > 0:
+        if len(possible_series_foldernames) == 1:
             # Use the string generated from the first filename
             src_foldername = possible_series_foldernames[0]
+        elif len(possible_series_foldernames) > 1:
+            # Use the string generated from the foldername
+            src_foldername = possible_series_foldernames[1]
         else:
             src_foldername = ''
 

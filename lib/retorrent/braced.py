@@ -142,8 +142,7 @@ class Stack(object):
     def peek(self):
         if self.content:
             return self.content[0]
-        else:
-            return ''
+        return ''
 
     def append(self, item):
         self.content.append(item)

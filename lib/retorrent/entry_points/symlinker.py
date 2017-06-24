@@ -38,7 +38,7 @@ def debugprint(string, debuglevel=1):
 
 
 # there sure are!
-#pylint: disable=too-many-branches,too-many-locals,too-many-statements
+#pylint: disable=too-many-branches,too-many-locals,too-many-statements,too-many-nested-blocks
 def _main(smbsafe=False):
     _, categories_conf = confparse.parse_retorrentconf()
 
@@ -61,7 +61,7 @@ def _main(smbsafe=False):
 
                 if isfile(elem_path):
                     print('!! file in symlink dir: %s' % (elem_path))
-                elif not len(os.listdir(elem_path)):
+                elif not os.listdir(elem_path):
                     os.rmdir(elem_path)
                 else:
                     for f in os.listdir(elem_path):
@@ -97,7 +97,7 @@ def _main(smbsafe=False):
                 debugprint('Examining: %s' % (content_path,), 2)
 
                 # empty dir in content dir
-                if isdir(content_path) and not len(os.listdir(content_path)):
+                if isdir(content_path) and not os.listdir(content_path):
                     os.rmdir(content_path)
                     print('%s: removed empty content dir' % (content_path,))
                     continue
