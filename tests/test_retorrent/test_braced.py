@@ -39,15 +39,15 @@ class TestBraced(unittest.TestCase): # pylint: disable=too-many-public-methods
     def test_is_checksum(self):
         self.assertEqual(is_checksum('88888888'), True)
         self.assertEqual(is_checksum('halleo'), False)
-        self.assertEqual(is_checksum(u'halleo'), False)
+        self.assertEqual(is_checksum('halleo'), False)
         self.assertEqual(is_checksum('8888888'), False)
         self.assertEqual(is_checksum('888888888'), False)
         self.assertEqual(is_checksum('[88888888]'), True)
         self.assertEqual(is_checksum('(88888888)'), True)
-        self.assertEqual(is_checksum(u'88888888'), True)
-        self.assertEqual(is_checksum(u'R8888888'), False)
-        self.assertEqual(is_checksum(u'[88888888]'), True)
-        self.assertEqual(is_checksum(u'[R8888888]'), False)
+        self.assertEqual(is_checksum('88888888'), True)
+        self.assertEqual(is_checksum('R8888888'), False)
+        self.assertEqual(is_checksum('[88888888]'), True)
+        self.assertEqual(is_checksum('[R8888888]'), False)
 
 
     def test_is_year(self):

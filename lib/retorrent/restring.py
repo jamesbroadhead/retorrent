@@ -60,7 +60,7 @@ def remove_zwsp(filename):
     removes Zero Width Spaces from a string.
     Returns in UTF-8. HERE BE DRAGONS
     """
-    zwsp = u'\u200b'
+    zwsp = '\u200b'
 
     ufilename = str2utf8(filename)
 

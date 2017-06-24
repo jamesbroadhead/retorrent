@@ -13,9 +13,9 @@ def tracelogdecorator(f):
     # preserve docstring and name for doctest
     @functools.wraps(f)
     def _tracelogdecorator(*arg, **kwargs):
-        tracelogger.log(logging.INFO, "calling '%s'(%r,%r)", f.func_name, arg, kwargs)
+        tracelogger.log(logging.INFO, "calling '%s'(%r,%r)", f.__name__, arg, kwargs)
         ret = f(*arg, **kwargs)
-        tracelogger.log(logging.INFO, "called '%s'(%r,%r) got return value: %r", f.func_name, arg,
+        tracelogger.log(logging.INFO, "called '%s'(%r,%r) got return value: %r", f.__name__, arg,
                         kwargs, ret)
         return ret
 

@@ -10,8 +10,6 @@ Arguments:
     -s --smbsafe      Create symlinks in the smbsafe directory with Samba-safe paths
 """
 
-from __future__ import print_function
-
 import os
 from os.path import abspath, basename, dirname, expanduser, isdir, isfile, lexists
 from os.path import islink, realpath
@@ -43,7 +41,7 @@ def _main(smbsafe=False):
     _, categories_conf = confparse.parse_retorrentconf()
 
     for_postprocessing = {}
-    for _, category in categories_conf.items():
+    for _, category in list(categories_conf.items()):
         # print(category)
         category_home = category['symlink_path']
         if smbsafe:
@@ -162,7 +160,7 @@ def _main(smbsafe=False):
                     # the symlink exists + points at this content :D
                     debugprint('%s - OK' % (symlink_path,), 2)
 
-    for symlink_path, content_paths in for_postprocessing.iteritems():
+    for symlink_path, content_paths in for_postprocessing.items():
         debugprint('Postprocessing: %s' % (symlink_path,))
         for c in content_paths:
             link_contents(c, symlink_path)

@@ -11,7 +11,7 @@ from .optionator import booloptionator
 from .restring import dotjoin, endot
 
 braces = {'[': ']', '{': '}', '(': ')'}
-hexdigits = '0123456789abcdefABCDEF' + u'0123456789abcdefABCDEF'
+hexdigits = '0123456789abcdefABCDEF' + '0123456789abcdefABCDEF'
 
 
 @tracelogdecorator
@@ -128,7 +128,7 @@ class Stack(object):
     def __init__(self):
         pass
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.content)
 
     def push(self, item):

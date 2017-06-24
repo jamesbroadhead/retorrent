@@ -2,10 +2,9 @@
 """
 Parses retorrentconf.py and other files in ~/.retorrent
 """
-from __future__ import print_function, unicode_literals
 
 from ast import literal_eval
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 from collections import OrderedDict
 from copy import deepcopy
 from os.path import abspath, expanduser
@@ -76,7 +75,7 @@ def parse_retorrentconf(extra_configdir=''):
 
     for k in expand_these:
         v = global_conf[k]
-        if isinstance(v, basestring):
+        if isinstance(v, str):
             global_conf[k] = abspath(expanduser(v))
         elif isinstance(v, list):
             global_conf[k] = [abspath(expanduser(i)) for i in v]
@@ -197,13 +196,14 @@ def parse_fileext_details(extra_configdir=''):
     default_filetypes_goodsizes = {'movie': 5120, 'binaryfile': 100, 'plaintext': 4}
 
     # mutates parsed `content` to inject defaults. urgh.
-    for _, conf in content.items():
+    for _, conf in list(content.items()):
         if not 'filetype' in conf:
             conf['filetype'] = 'movie'
 
         if not conf['filetype'] in default_filetypes_goodsizes:
-            raise EnvironmentError('"filetype" in %r stanzas must be one of %r. Got: %r' %
-                                   (filename, default_filetypes_goodsizes.keys(), conf['filetype']))
+            raise EnvironmentError(
+                '"filetype" in %r stanzas must be one of %r. Got: %r' %
+                (filename, list(default_filetypes_goodsizes.keys()), conf['filetype']))
 
         if not 'ignore_if_in_filename' in conf:
             conf['filetype'] = ['sample']

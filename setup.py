@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 
 from setuptools import setup
+import sys
+
+supported = (3,4)
+if sys.version_info[0:2] < supported:
+    out = 'This codebase only supports python>={}'.format('.'.join(supported))
+    raise Exception(out)
 
 setup(
     name='retorrent',
-    version='0.2',
+    version='0.3',
     description='retorrent - media managment',
     author='jbo',
     author_email='jamesbroadhead@gmail.com',

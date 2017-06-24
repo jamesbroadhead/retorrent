@@ -4,7 +4,6 @@ retorrent - a media management tool
 
 Author: James Broadhead jamesbroadhead@gmail.com
 """
-from __future__ import print_function
 
 import logging
 from optparse import OptionParser

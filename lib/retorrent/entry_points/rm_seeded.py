@@ -35,10 +35,10 @@ def _main(targets, skip_targets=False):
         if os.path.exists(t):
             remove_targets.append(abspath(t))
         else:
-            print "Couldn't find %r" % (t,)
+            print("Couldn't find %r" % (t,))
 
     if not remove_targets:
-        print 'No extant targets!'
+        print('No extant targets!')
         sys.exit(1)
 
     seeded, unseeded = seededlib.is_seeded(remove_targets, seeddir=seeddir)
@@ -48,7 +48,7 @@ def _main(targets, skip_targets=False):
     tfiles = [
         tfile_from_filename(
             seedpath, seed_tfilesdir, files_tfiles=files_tfiles)
-        for videopath, seedpath in seeded.items()
+        for videopath, seedpath in list(seeded.items())
     ]
 
     # unseeded: list of args which are not seeded
@@ -56,7 +56,7 @@ def _main(targets, skip_targets=False):
     # seeded.values() : list of symlinks in ~/seed
     # seeded.keys() : list of abspath'd arguments to this (~/video/*)
     # *We are not passing realpath'd arguments* -- remref will do that
-    to_delete = unseeded + tfiles + seeded.keys() + seeded.values()
+    to_delete = unseeded + tfiles + list(seeded.keys()) + list(seeded.values())
 
     to_skip = []
     if skip_targets:
@@ -64,7 +64,7 @@ def _main(targets, skip_targets=False):
 
     res = remref(to_delete, to_skip=to_skip)
 
-    print 'Remember: if there were dirs in seed/, they will remain!'
+    print('Remember: if there were dirs in seed/, they will remain!')
 
     return res
 

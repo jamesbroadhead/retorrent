@@ -19,7 +19,7 @@ from ..find_tfile import find_tfiles
 def _main(filedir):
     tfilesdir = pjoin(filedir, 'torrentfiles')
     if not isdir(filedir) or not isdir(tfilesdir):
-        print 'dir missing!'
+        print('dir missing!')
         sys.exit(1)
 
     broken_symlinks_gen = find_broken_symlinks(filedir)

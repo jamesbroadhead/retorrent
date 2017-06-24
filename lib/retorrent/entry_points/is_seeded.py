@@ -21,14 +21,14 @@ def _main(only_unseeded, targets):
     seeded, unseeded = seededlib.is_seeded(targets)
 
     if only_unseeded:
-        print ' '.join(['"%s"' % (u,) for u in unseeded])
+        print(' '.join(['"%s"' % (u,) for u in unseeded]))
     else:
-        print "Seeded:"
+        print("Seeded:")
         for k, v in sorted(seeded.items()):
-            print "\t %s => %s" % (k, v)
-        print "Unseeded:"
+            print("\t %s => %s" % (k, v))
+        print("Unseeded:")
         for j in unseeded:
-            print "\t", j
+            print("\t", j)
 
     # nothing is unseeded - is_seeded returns true
     if not unseeded:

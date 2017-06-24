@@ -19,17 +19,17 @@ def remref(to_delete, to_skip=None):
     deleting = sorted(set([p for p in pathlist if not p in skipping]))
 
     if skipping:
-        print 'Skipping:'
+        print('Skipping:')
         for s in skipping:
-            print s
+            print(s)
 
     if not deleting:
-        print 'Nothing to delete'
+        print('Nothing to delete')
         return 0
 
-    print "Would delete:"
+    print("Would delete:")
     for p in deleting:
-        print p
+        print(p)
 
     return do_delete(deleting)
 

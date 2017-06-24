@@ -1,7 +1,5 @@
 """ retorrent.retorrenter """
 
-from __future__ import unicode_literals
-
 from copy import deepcopy
 import logging
 import os
@@ -76,14 +74,14 @@ class Retorrenter(object):
         content = []
         for a in arguments:
             if pexists(a):
-                content.append(a.decode('utf-8'))
+                content.append(a)
             else:
                 paths = myglob(a)
-                content.extend([p.decode('utf-8') for p in paths if pexists(p)])
+                content.extend([p for p in paths if pexists(p)])
 
         content.sort()
         if not content:
-            print 'No content found'
+            print('No content found')
             return []
 
         self.commands = []
@@ -97,8 +95,8 @@ class Retorrenter(object):
                     self.commands.append(commandset)
             except Exception as e:
                 # parsing one arg failed -- proceed with the rest
-                print e
-                print traceback.format_exc()
+                print(e)
+                print(traceback.format_exc())
                 log.error(e)
         return self.commands
 
@@ -121,8 +119,8 @@ class Retorrenter(object):
         ln -s <home>/<category>/<dest_dirname>/<filename> => <seeddir>/<original_dirname>/...
         """
         # pylint: disable=too-many-branches,too-many-return-statements
-        print "|\n|\n|\n|"
-        print 'For: %s' % (content,)
+        print("|\n|\n|\n|")
+        print('For: %s' % (content,))
 
         content_abspath = abspath(content)
 
@@ -136,7 +134,7 @@ class Retorrenter(object):
         self.filenamer.set_num_interesting_files(len(orig_paths))
 
         if not orig_paths:
-            print "No interesting files found! Skipping!"
+            print("No interesting files found! Skipping!")
             return
 
         self.debugprint("Dirpath before autoset: " + self.dest_dirpath)
@@ -155,7 +153,7 @@ class Retorrenter(object):
             self.manually_set_category(content, orig_paths)
 
             if not self.dest_category:
-                print "cancelled..."
+                print("cancelled...")
                 return
             # recurse
             return self.handle_content(content)
@@ -165,8 +163,8 @@ class Retorrenter(object):
 
         if self.dest_folder == '':
             # not enough space :(
-            print "!!! Can't find enough space in any of that category to proceed!"
-            print 'Free some disk space, or add another location.'
+            print("!!! Can't find enough space in any of that category to proceed!")
+            print('Free some disk space, or add another location.')
             return
 
         self.dest_folder = expanduser(self.dest_folder)
@@ -182,7 +180,7 @@ class Retorrenter(object):
                 self.dest_dirpath = self.ask_for_dest_dirpath(
                     len(orig_paths), possible_series_foldernames)
                 if not self.dest_dirpath:
-                    print "Didn't set a directory - failing"
+                    print("Didn't set a directory - failing")
                     return
         else:
             self.dest_dirpath = pjoin(self.dest_folder, orig_foldername)
@@ -200,16 +198,16 @@ class Retorrenter(object):
                 # User cancelled
                 return
         else:
-            print "Not renaming files"
+            print("Not renaming files")
 
             rename_map = {p: pjoin(self.dest_dirpath, basename(p)) for p in orig_paths}
 
         # Check for existing files, abort if found
-        already_exists = [dst for _src, dst in rename_map.items() if pexists(dst)]
+        already_exists = [dst for _src, dst in list(rename_map.items()) if pexists(dst)]
         if already_exists:
-            print 'Some paths already exist, aborting.'
+            print('Some paths already exist, aborting.')
             for ae in sorted(already_exists):
-                print '%s' % (ae,)
+                print('%s' % (ae,))
             return
 
         return self.build_command_bundle(content_details, rename_map)
@@ -229,7 +227,7 @@ class Retorrenter(object):
             # the dest category is already set from somewhere else
             categories = [(self.dest_category, self.categories[self.dest_category])]
         else:
-            categories = self.categories.items()
+            categories = list(self.categories.items())
 
         for category, details in categories:
             for cat_folder in details['content_paths']:
@@ -293,7 +291,7 @@ class Retorrenter(object):
 
     def manually_set_category(self, argument, orig_paths):
         question = "Destination for " + argument
-        dest_category_name = optionator(question, self.categories.keys() + [CANCEL])
+        dest_category_name = optionator(question, list(self.categories.keys()) + [CANCEL])
 
         if dest_category_name in self.categories:
             self.dest_category = dest_category_name
@@ -303,7 +301,7 @@ class Retorrenter(object):
         if not dest_category_name:
             return ''
         else:
-            print 'Error -- category was unrecognised!'
+            print('Error -- category was unrecognised!')
             self.manually_set_category(argument, orig_paths)
 
     @tracelogdecorator
@@ -312,7 +310,7 @@ class Retorrenter(object):
             for path in self.categories[self.dest_category]['content_paths']:
                 self.debugprint('Possible path: ' + path)
                 if not os.path.exists(path):
-                    print "Warning: Config contains a path that doesn't exist: %s" % (path,)
+                    print("Warning: Config contains a path that doesn't exist: %s" % (path,))
                 elif enough_space(orig_paths, path):
                     self.debugprint('Setting dest_folder to: ' + path)
                     self.dest_folder = path
@@ -390,7 +388,7 @@ class Retorrenter(object):
                         file_names += [os.path.basename(file_path)]
                         intermeds += [thisfile_intermed]
                     else:
-                        print "Internal error - built a path, then file didn't exist(?)"
+                        print("Internal error - built a path, then file didn't exist(?)")
         else:
             orig_foldername = ""  # it's a file, flat in ~/torrents
             if os.path.exists(content_abspath):
@@ -515,6 +513,12 @@ class Retorrenter(object):
 
     @staticmethod
     def compare_scored_tfiles(A, B):
+        """ inverted sort on score, then lexically on filename """
+
+        def cmp(a, b):
+            """ ported from https://docs.python.org/3.0/whatsnew/3.0.html#ordering-comparisons for minimal change """
+            return (a > b) - (a < b)
+
         cmp_ = cmp(B['score'], A['score'])
 
         if not cmp_ == 0:
@@ -583,34 +587,35 @@ class Retorrenter(object):
                     'relpath_from_foldername': relpath_from_foldername
                 }
 
-        mutual_output_paths = [v for k, v in mutual.items()]
+        mutual_output_paths = [v for k, v in list(mutual.items())]
         mutual_output_paths.sort()
 
         ##### USER DECIDES BETWEEN RESULTS
-        print
-        print 'Path: %s' % (self.dest_dirpath)
-        print
+        print()
+        print('Path: %s' % (self.dest_dirpath))
+        print()
         if not multiple:
             # the two methods produced the same results. Print them, ask y/n
             for p in mutual_output_paths:
-                print p
-            print
+                print(p)
+            print()
             question = "Use these filenames or enter new term to remove"
             options = ["filenames", CANCEL]
 
         # the two methods produced differing results.
         # Print only the differences,  ask 1/2/n
         else:
-            print 'Mutual:'
+            print('Mutual:')
             for p in mutual_output_paths:
-                print p
-            print ' === '
-            print 'Different:'
-            multiple_keys = multiple.keys()
+                print(p)
+            print(' === ')
+            print('Different:')
+            multiple_keys = list(multiple.keys())
             multiple_keys.sort()
             for k in multiple_keys:
-                print bold('%s\t|\t%s') % (multiple[k]['relpath_from_filename'],
-                                           multiple[k]['relpath_from_foldername'])
+                print(
+                    bold('%s\t|\t%s') % (multiple[k]['relpath_from_filename'],
+                                         multiple[k]['relpath_from_foldername']))
 
             question = ' '.join([
                 'Filename-based and Foldername-based produced differences: ',
@@ -625,26 +630,26 @@ class Retorrenter(object):
 
         if answer == "filenames":
             rename_map = deepcopy(mutual)
-            rename_map.update({p: fns['path_from_filename'] for p, fns in multiple.items()})
+            rename_map.update({p: fns['path_from_filename'] for p, fns in list(multiple.items())})
 
         elif answer == "foldernames":
             rename_map = deepcopy(mutual)
-            rename_map.update({p: fns['path_from_foldername'] for p, fns in multiple.items()})
+            rename_map.update({p: fns['path_from_foldername'] for p, fns in list(multiple.items())})
         elif answer == RECALCULATE:
             return RECALCULATE
         elif answer and len(orig_paths) == 1:
             ## TODO: Re-attach file ext (and maybe checksum) if not supplied
-            print 'You ignored our suggestion; supplying: %r' % (answer,)
+            print('You ignored our suggestion; supplying: %r' % (answer,))
             result = pjoin(self.dest_folder, self.dest_dirpath, answer)
-            print 'Result: %r' % (result,)
+            print('Result: %r' % (result,))
             rename_map = {orig_paths[0]: result}
 
         elif answer and len(orig_paths) > 1:
             # more than one file
-            print "We don't currently support manual mmvs :("
+            print("We don't currently support manual mmvs :(")
             return
         else:
-            print 'cancelled ...'
+            print('cancelled ...')
             return
 
         return rename_map
@@ -716,7 +721,8 @@ class Retorrenter(object):
         # a command bundle
         return {
             'commands': commands,
-            'symlinks': [seeddir_paths_ for _orig_path, seeddir_paths_ in seeddir_paths.items()],
+            'symlinks':
+            [seeddir_paths_ for _orig_path, seeddir_paths_ in list(seeddir_paths.items())],
             'torrentfile': torrentfile,
             'commands_run': []
         }
@@ -743,10 +749,10 @@ class Retorrenter(object):
         ])
 
         if torrentfile:
-            print 'Using torrentfile %r' % (torrentfile,)
+            print('Using torrentfile %r' % (torrentfile,))
             # move torrentfile to seeddir
-            commands.append('mv -nv "%s" "%s"' % (pjoin(
-                self.config.get_torrentfilesdir(), torrentfile),
+            commands.append('mv -nv "%s" "%s"' % (pjoin(self.config.get_torrentfilesdir(),
+                                                        torrentfile),
                                                   self.global_conf['seedtorrentfilesdir']))
 
         return commands
@@ -757,18 +763,18 @@ def check_result(command_bundle, failed):
     broken_syms = [s for s in command_bundle.get('symlinks', []) if not pexists(s)]
 
     if failed or broken_syms:
-        print "Broken symlinks - fix them then start the torrentfile"
-        print
+        print("Broken symlinks - fix them then start the torrentfile")
+        print()
         for b in broken_syms:
-            print "Broken: \t", b
+            print("Broken: \t", b)
 
-        print
-        print 'Commands: (those run are #-prefixed)'
+        print()
+        print('Commands: (those run are #-prefixed)')
         for command in command_bundle['commands']:
             if command in command_bundle['commands_run']:
-                print '# %s' % (command,)
+                print('# %s' % (command,))
             else:
-                print command
+                print(command)
 
         return False
     return True

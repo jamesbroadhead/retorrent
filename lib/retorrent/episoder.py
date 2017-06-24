@@ -344,13 +344,13 @@ class Episoder(object):
             'Should not be converted!': self.NOT_AN_EPNO_SENTINEL
         }
 
-        keys = options.keys()
+        keys = list(options.keys())
         keys.sort(reverse=True)
 
         answer = self.optionator(question, keys)
 
         if answer == '':
-            print "Bad input - taking 2-digit epno"
+            print("Bad input - taking 2-digit epno")
             return default_value
         return options[answer]
 
@@ -399,7 +399,7 @@ class Episoder(object):
             elif epno and epno.lower()[0] == 'e':
                 return self.nice_epno_from_raw(split_fn, epno[1:])
             else:
-                print '!!! Can\'t handle an epno like this: ', epno
+                print('!!! Can\'t handle an epno like this: ', epno)
 
         return self.pad_episode_number(epno)
 

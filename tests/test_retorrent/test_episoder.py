@@ -42,53 +42,53 @@ class TestConvertIfEpisodeNumber(EpisoderTestMixin, unittest.TestCase):
         self.e.is_movie = True
         self.e.num_interesting_files = 1
 
-        filename_split = [u'able', u'baker', u'charlie', u'1989', u'1', u'mkv']
+        filename_split = ['able', 'baker', 'charlie', '1989', '1', 'mkv']
 
         expected = None
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 1), expected)
 
     def test_episode_conversion_with_literal_episode(self):
-        filename_split = [u'the', u'alpha', u'episode', u'3', u'mkv']
-        expected = ([u'the', u'alpha', u's01e03', 'mkv'])
+        filename_split = ['the', 'alpha', 'episode', '3', 'mkv']
+        expected = (['the', 'alpha', 's01e03', 'mkv'])
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 2), expected)
 
     def test_episode_conversion_with_literal_pilot(self):
-        filename_split = [u'the', u'alpha', u'pilot', u'mkv']
-        expected = ([u'the', u'alpha', u's00e00', 'mkv'])
+        filename_split = ['the', 'alpha', 'pilot', 'mkv']
+        expected = (['the', 'alpha', 's00e00', 'mkv'])
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 2), expected)
 
     def test_convert_for_single_digit(self):
-        filename_split = [u'5']
-        expected = ([u's01e05'])
+        filename_split = ['5']
+        expected = (['s01e05'])
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
 
     def test_convert_for_single_digit_doubleitem(self):
-        filename_split = [u'1', u'03']
-        expected = ([u's01e03'])
+        filename_split = ['1', '03']
+        expected = (['s01e03'])
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
 
     def test_convert_for_number_divider_number(self):
-        filename_split = [u'9x03']
-        expected = ([u's09e03'])
+        filename_split = ['9x03']
+        expected = (['s09e03'])
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
 
     def test_episodenumber_with_version(self):
-        filename_split = [u'03v2']
-        expected = ([u's01e03'])
+        filename_split = ['03v2']
+        expected = (['s01e03'])
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
 
     def test_triple_digit_with_2_digit_epno(self):
         self.e.ask_for_digits_in_epno = Mock(return_value=2)
 
         filename_split = ['501']
-        expected = ([u's05e01'])
+        expected = (['s05e01'])
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
 
     def test_triple_digit_with_3_digit_epno(self):
         self.e.ask_for_digits_in_epno = Mock(return_value=3)
 
         filename_split = ['501']
-        expected = ([u's01e501'])
+        expected = (['s01e501'])
         self.assertEqual(self.e.convert_if_episode_number(filename_split, 0), expected)
 
     def test_triple_digit_with_non_epno_sentinel(self):

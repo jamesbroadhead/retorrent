@@ -36,7 +36,7 @@ def is_seeded(args, seeddir=default_seeddir):
 def is_seeded_singleitem(path, seed_filepaths):
     the_path = realpath(path)
 
-    for derefd_symlink, symlink in seed_filepaths.items():
+    for derefd_symlink, symlink in list(seed_filepaths.items()):
         if the_path == derefd_symlink:
             return symlink
 

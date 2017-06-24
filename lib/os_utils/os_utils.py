@@ -3,8 +3,6 @@
 Monolithic module containing most of this package's functionality.
 """
 
-from __future__ import unicode_literals
-
 import ctypes
 import errno
 import platform
@@ -123,10 +121,10 @@ def get_foldername(path):
 
 
 def str2utf8(string):
-    if isinstance(string, unicode):
+    if isinstance(string, str):
         u = string
     else:
-        u = unicode(string, 'utf-8', errors='ignore')
+        u = str(string, 'utf-8', errors='ignore')
     return u
 
 
@@ -182,4 +180,4 @@ def listdir(dir_name):
     """ Ensure that a unicode path is always passed to the 'os' module so that the return value
     is also unicode
     """
-    return os.listdir(unicode(expanduser(dir_name)))
+    return os.listdir(str(expanduser(dir_name)))
