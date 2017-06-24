@@ -25,6 +25,7 @@ def _main(targets, tfilesdir, out=sys.stdout):
 
     output = ' '.join(results)
     out.writelines([output])
+    out.write('\n')
 
 
 def main():

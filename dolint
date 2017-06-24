@@ -17,20 +17,17 @@ fi
 yapf -i -r --style="./style.yapf" "setup.py" ./lib/*
 A=$?
 
-pyflakes "setup.py" ./lib/*
-B=$?
-
 pushd lib &> /dev/null
 PYTHONPATH="../tests" pylint --rcfile=../pylintrc ./* ../tests/*
-C=$?
+B=$?
 popd &> /dev/null
 
 command -v shellcheck >/dev/null 2>&1 || { echo >&2 "I require shellcheck to lint bash files but it's not installed.  Aborting."; exit 1; }
 
 shellcheck "${BASHFILES[@]}"
-D=$?
+C=$?
 
-for i in $A $B $C $D ; do
+for i in $A $B $C ; do
   if ! [ $i -eq 0 ] ; then
     exit $i
   fi

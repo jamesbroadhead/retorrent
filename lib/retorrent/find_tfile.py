@@ -4,9 +4,22 @@ from os.path import basename, isdir, isfile
 from os.path import join as pjoin
 
 from os_utils.os_utils import listdir
-from torrentparse.torrentparse import TorrentParser as TP
+from torrent_parser import TorrentFileParser as TP
 
 debug = True
+
+
+def get_filenames(tp_info):
+    """
+    return a list of filenames inside the passed info dict.
+
+    the 'files' key only exists if it's a dir.
+    """
+    if 'files' in tp_info:
+        # f['path'] is a list - check this assumption on later bugs
+        return [basename(f['path'][0]) for f in tp_info['files']]
+
+    return [tp_info.get('name')]
 
 
 def find_tfiles(paths, tfilesdir):
@@ -18,15 +31,15 @@ def find_tfiles(paths, tfilesdir):
 def tfile_details(tfile_path):
     files_tfile = {}
     try:
-        files_sizes = {
-            k.decode('utf-8'): v
-            for k, v in TP(tfile_path, liberal=True).get_files_details()
-        }
+        with open(tfile_path) as fh:
+            tp_info = TP(fh).parse()['info']
 
-        for filename, _ in files_sizes.items():
+        for filename in get_filenames(tp_info):
             files_tfile[filename] = tfile_path
+
     except Exception:
         pass
+
     return files_tfile
 
 
