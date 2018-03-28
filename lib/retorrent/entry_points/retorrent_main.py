@@ -70,7 +70,7 @@ def execute_command_bundles(command_bundles):
             break
     if command_bundles:
         os.system('symlinker')
-
+        os.system('symlinker -s')
 
 def parse_args():
     parser = OptionParser()
