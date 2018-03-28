@@ -141,7 +141,8 @@ def write_default_config():
 
     if pexists(skelfile):
         if not pexists(pjoin(confdir, skelfilename)):
-            print('Creating a skeleton $HOME/.retorrent/' + config_filename + ' please configure it to your system')
+            print('Creating a skeleton $HOME/.retorrent/' + config_filename +
+                  ' please configure it to your system')
             mkdir_p(confdir)
             shutil.copyfile(skelfile, pjoin(confdir, config_filename))
         else:
