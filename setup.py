@@ -5,7 +5,7 @@ import sys
 
 supported = (3, 4)
 if sys.version_info[0:2] < supported:
-    out = 'This codebase only supports python>={}'.format('.'.join(supported))
+    out = 'This codebase only supports python >= {}.{}'.format(*supported)
     raise Exception(out)
 
 setup(
