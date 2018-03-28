@@ -136,15 +136,14 @@ def parse_retorrentconf(extra_configdir=''):
 
 def write_default_config():
     confdir = expanduser('~/.retorrent')
-    skelfile = '/usr/share/retorrent/' + config_filename + '_skel'
+    skelfilename = config_filename + '_skel'
+    skelfile = '/usr/share/retorrent/' + skelfilename
 
     if pexists(skelfile):
-        if not pexists(pjoin(confdir, config_filename + '_skel')):
-            print('Creating a skeleton $HOME/.retorrent/retorrent.conf, ' +
-                  'please configure it to your system')
+        if not pexists(pjoin(confdir, skelfilename)):
+            print('Creating a skeleton $HOME/.retorrent/' + config_filename + ' please configure it to your system')
             mkdir_p(confdir)
-            shutil.copyfile('/usr/share/retorrent/retorrent.conf_skel',
-                            expanduser('~/.retorrent/retorrent.conf_skel'))
+            shutil.copyfile(skelfile, pjoin(confdir, config_filename))
         else:
             print('Please configure the retorrent.conf_skel in ${HOME}/.retorrent ' +
                   'and rename it to ' + config_filename)
