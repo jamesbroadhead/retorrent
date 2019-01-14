@@ -1,5 +1,6 @@
 build/
 dist/
+src/
 *.egg-info
 .hypothesis
 lib/retorrent.egg-info
