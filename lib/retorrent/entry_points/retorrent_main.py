@@ -10,9 +10,11 @@ from optparse import OptionParser
 import os
 from os.path import expanduser, isdir
 from os.path import join as pjoin
+from os.path import exists as pexists
+
 import sys
 
-from ..confparse import Config
+from ..confparse import Config, home_config_dir
 from ..retorrenter import check_result, Retorrenter
 
 
@@ -69,9 +71,9 @@ def execute_command_bundles(command_bundles):
         if not check_result(bundle, failed) or failed:
             break
     if command_bundles:
-        os.system('symlinker')
-        os.system('symlinker -s')
-
+        post_hook_path = pjoin(home_config_dir, 'post-hook')
+        if pexists(post_hook_path):
+            os.system(post_hook_path)
 
 def parse_args():
     parser = OptionParser()
