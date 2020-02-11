@@ -12,7 +12,7 @@ import sys
 
 from docopt import docopt
 
-from coreutils import find_broken_symlinks
+from jboutils.find import find_broken_symlinks
 from ..find_tfile import find_tfiles
 
 

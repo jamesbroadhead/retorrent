@@ -18,3 +18,5 @@ wrapt==1.10.10
 yapf==0.14.0
 
 -e git://github.com/jamesbroadhead/PyTorrentInfo.git@5bc39b1b6a33ed52c7444e6ed6c6de0b55528a63#egg=PyTorrentInfo
+
+-e git://github.com/jamesbroadhead/jboutils.git@473c146d5631874e0e74a5808841ba24cac69dc2#egg=jboutils
