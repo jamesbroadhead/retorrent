@@ -24,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'find_tfile =  retorrent.entry_points.find_tfile:main',
+            'fix_seed =  retorrent.entry_points.fix_seed:main',
             'is_seeded =   retorrent.entry_points.is_seeded:main',
             'print_tfile = retorrent.entry_points.print_tfile:main',
             'remreffer =   retorrent.entry_points.remreffer:main',
