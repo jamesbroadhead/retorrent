@@ -85,7 +85,7 @@ def relink(path_to_symlink, content_root_paths, symlink_path, seeddir, files_tfi
         delete_old_seed_entry(path_to_symlink, seeddir, files_tfiles)
 
 
-def main():
+def _main():
     conf, _ = parse_retorrentconf()
 
     content_root_paths = conf['content_root_paths']
@@ -102,8 +102,7 @@ def main():
     print('This script has bugs!')
     print('It seems to do "relinking", then it deletes the symlink it just made!')
     print('Script was edited in 2020-06 which may have fixed it, but please run with care...')
-    sys.exit(1)
-    main()
+    _main()
 
 
 if __name__ == '__main__':
